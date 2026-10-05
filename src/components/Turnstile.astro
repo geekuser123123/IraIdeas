@@ -1,0 +1,16 @@
+---
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+
+{
+  siteKey && (
+    <>
+      <div class="cf-turnstile" data-sitekey={siteKey} data-theme="light" data-size="flexible" />
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+    </>
+  )
+}
+<!-- Hidden from people; bots that fill it in are discarded. -->
+<div class="hp" aria-hidden="true">
+  <label>Company website <input type="text" name="company_website" tabindex="-1" autocomplete="off" /></label>
+</div>

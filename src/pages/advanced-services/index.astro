@@ -1,0 +1,190 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import DraftFlag from '../../components/DraftFlag.astro';
+import { CATEGORIES, CATEGORY_SLUGS } from '../../data/categories';
+import { visible, formatPrice } from '../../lib/content';
+
+const services = (await visible('services')).sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name));
+const usedCategories = CATEGORY_SLUGS.filter((c) => services.some((s) => s.data.category === c));
+---
+
+<Base
+  title="Advanced Services"
+  description="Specialized services for retirement planning, trusts, ownership structures, and complex transactions from IRA Ideas, with attorney Tim Berry."
+>
+  <PageHero
+    eyebrow="IRA Ideas Advanced Services"
+    title="Advanced questions deserve more than a general answer."
+    lead="Explore specialized services for retirement planning, trusts, ownership structures, and complex transactions. Start with a service you recognize, or tell us what you are trying to accomplish."
+  >
+    <div class="btn-row">
+      <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+      <a class="btn btn--secondary" href="#directory">Browse Services</a>
+    </div>
+  </PageHero>
+
+  <section class="section" id="directory" tabindex="-1">
+    <div class="container">
+      <div class="section-head">
+        <h2>Service directory</h2>
+      </div>
+      {
+        services.length > 0 ? (
+          <>
+            <div class="filters" data-filters hidden>
+              <div class="filters__cats" role="group" aria-label="Filter by category">
+                <button type="button" class="chip" data-category="all" aria-pressed="true">
+                  All services
+                </button>
+                {usedCategories.map((c) => (
+                  <button type="button" class="chip" data-category={c} aria-pressed="false">
+                    {CATEGORIES[c].label}
+                  </button>
+                ))}
+              </div>
+              <div class="filters__search">
+                <label for="service-search" class="visually-hidden">
+                  Search services
+                </label>
+                <input id="service-search" type="search" placeholder="Search services" autocomplete="off" />
+              </div>
+            </div>
+            <p class="muted small" data-results aria-live="polite" />
+            <ul class="service-list grid grid--3" role="list">
+              {services.map((s) => (
+                <li
+                  class="card service-card"
+                  data-category={s.data.category}
+                  data-search={`${s.data.name} ${s.data.subtitle} ${s.data.summary} ${CATEGORIES[s.data.category].label}`.toLowerCase()}
+                >
+                  <DraftFlag state={s.data.publication} />
+                  <p class="eyebrow">{CATEGORIES[s.data.category].label}</p>
+                  <h3>{s.data.name}</h3>
+                  <p class="service-card__subtitle">{s.data.subtitle}</p>
+                  <p>{s.data.summary}</p>
+                  {s.data.fee.display !== 'none' && s.data.fee.amount != null && (
+                    <p class="small muted">
+                      {s.data.fee.display === 'starting' ? 'Starting at ' : 'Fee: '}
+                      {formatPrice(s.data.fee.amount)}
+                    </p>
+                  )}
+                  <a class="btn btn--secondary" href={`/advanced-services/${s.id}`} aria-label={`View service: ${s.data.name}`}>
+                    View Service
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p class="no-results" data-empty hidden>
+              No services match your search. <a href="/start">Tell us what you are working on</a> and our team will identify the right next step.
+            </p>
+          </>
+        ) : (
+          <div class="card reading">
+            <p>
+              Detailed service descriptions are being prepared for publication. In the meantime, tell us what you are working on and our
+              team will identify the appropriate next step.
+            </p>
+            <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section theme-paper">
+    <div class="container two-col">
+      <div>
+        <h2>You do not need to diagnose the issue yourself.</h2>
+        <p>
+          Tell us what you want to accomplish and what is already in place. Our team will review the information and identify whether a
+          consultation, assessment, or defined project is the appropriate next step.
+        </p>
+        <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+      </div>
+      <div>
+        <h2>Clear scope. Agreed fees.</h2>
+        <p>
+          The work required depends on the situation. Before paid work begins, the proposed engagement will identify the responsible
+          provider, the work included, and the fee.
+        </p>
+        <a href="/how-we-work">See how we work</a>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    heading="Bring us the situation. We will help identify the next step."
+    copy="Tell our team what you are considering, what is already in place, and any deadline."
+    note="Any proposed paid work will have a defined scope and fee before it begins."
+  />
+</Base>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('[data-filters]');
+  if (wrap) {
+    wrap.hidden = false;
+    const chips = [...wrap.querySelectorAll<HTMLButtonElement>('[data-category]')];
+    const search = wrap.querySelector<HTMLInputElement>('#service-search')!;
+    const cards = [...document.querySelectorAll<HTMLElement>('.service-card')];
+    const results = document.querySelector<HTMLElement>('[data-results]')!;
+    const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+    const params = new URLSearchParams(location.search);
+    let category = params.get('category') || 'all';
+    if (!chips.some((c) => c.dataset.category === category)) category = 'all';
+
+    const apply = () => {
+      const q = search.value.trim().toLowerCase();
+      let shown = 0;
+      for (const card of cards) {
+        const match = (category === 'all' || card.dataset.category === category) && (!q || card.dataset.search!.includes(q));
+        card.hidden = !match;
+        if (match) shown++;
+      }
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.category === category)));
+      results.textContent = `Showing ${shown} of ${cards.length} services`;
+      empty.hidden = shown > 0;
+    };
+    chips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        category = chip.dataset.category!;
+        const url = new URL(location.href);
+        if (category === 'all') url.searchParams.delete('category');
+        else url.searchParams.set('category', category);
+        history.replaceState(null, '', url);
+        apply();
+      }),
+    );
+    search.addEventListener('input', apply);
+    apply();
+  }
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .filters__cats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filters__search { flex: 1 1 260px; max-width: 360px; }
+  .chip {
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--stone);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .chip[aria-pressed='true'] { background: var(--charcoal); border-color: var(--charcoal); color: var(--warm-white); }
+  .service-list { list-style: none; padding: 0; margin: 0; }
+  .service-list li + li { margin-top: 0; }
+  .service-card[hidden] { display: none; }
+  .service-card h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.45rem; margin-bottom: 4px; }
+  .service-card__subtitle { color: var(--gold-deep); font-weight: 500; }
+  .two-col { display: grid; gap: 56px; }
+  @media (min-width: 900px) {
+    .two-col { grid-template-columns: 1fr 1fr; gap: 80px; }
+  }
+  .no-results { margin-top: 24px; }
+</style>

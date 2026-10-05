@@ -1,0 +1,82 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import TimPhoto from '../../components/TimPhoto.astro';
+import { visible, listedEvents, isUpcoming } from '../../lib/content';
+
+const tim = (await getEntry('people', 'tim-berry'))!;
+const { Content } = await render(tim);
+const hasBio = Boolean(tim.body && tim.body.replace(/<!--[\s\S]*?-->/g, '').trim());
+const resources = (await visible('resources')).filter((r) => r.data.author.id === 'tim-berry');
+const events = (await listedEvents()).filter((e) => isUpcoming(e) && e.data.instructor.id === 'tim-berry');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Tim Berry',
+  jobTitle: 'Attorney',
+  image: new URL('/images/tim/tim-berry-suit-768.webp', Astro.site).href,
+  worksFor: { '@type': 'Organization', name: 'IRA Ideas', url: Astro.site?.href },
+};
+---
+
+<Base title="Tim Berry, Attorney" description="Tim Berry is the attorney behind IRA Ideas, with nearly 30 years of retirement-plan experience." jsonLd={jsonLd}>
+  <section class="profile-hero theme-dark">
+    <div class="container profile-hero__grid">
+      <div>
+        <p class="eyebrow">IRA Ideas</p>
+        <h1>Tim Berry</h1>
+        <p class="profile-role">Attorney</p>
+        <p class="lead">Nearly 30 years of retirement-plan experience, at the center of IRA Ideas advanced services, conferences, and education.</p>
+      </div>
+      <div class="profile-hero__photo"><TimPhoto eager caption={false} sizes="(min-width: 900px) 380px, 70vw" /></div>
+    </div>
+  </section>
+
+  <div class="container section">
+    <div class="reading">
+      {hasBio && <div class="prose"><Content /></div>}
+      {
+        tim.data.credentials.length > 0 && (
+          <section class="block">
+            <h2>Credentials</h2>
+            <ul>{tim.data.credentials.map((c) => <li>{c}</li>)}</ul>
+          </section>
+        )
+      }
+      {
+        resources.length > 0 && (
+          <section class="block">
+            <h2>Educational resources</h2>
+            <ul>{resources.map((r) => <li><a href={`/learn/${r.id}`}>{r.data.title}</a></li>)}</ul>
+          </section>
+        )
+      }
+      {
+        events.length > 0 && (
+          <section class="block">
+            <h2>Upcoming events</h2>
+            <ul>{events.map((e) => <li><a href={`/conferences/${e.id}`}>{e.data.title}</a></li>)}</ul>
+          </section>
+        )
+      }
+      <section class="block card engage">
+        <h2>Discuss a potential engagement</h2>
+        <p>To discuss a potential engagement, start with the IRA Ideas team.</p>
+        <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .profile-hero { padding: clamp(48px, 7vw, 88px) 0; }
+  .profile-hero__grid { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .profile-hero__grid { grid-template-columns: 1fr 380px; gap: 64px; }
+  }
+  .profile-hero__photo { max-width: 380px; }
+  .profile-role { font-size: 0.9rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-top: -8px; }
+  .block + .block, .prose + .block { margin-top: 48px; }
+  .engage h2 { font-size: 1.8rem; }
+</style>

@@ -1,0 +1,337 @@
+---
+import Base from '../layouts/Base.astro';
+import TimPhoto from '../components/TimPhoto.astro';
+import EventCard from '../components/EventCard.astro';
+import SignupForm from '../components/SignupForm.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { CATEGORIES, CATEGORY_SLUGS } from '../data/categories';
+import { site } from '../data/site';
+import { visible, listedEvents, isUpcoming } from '../lib/content';
+import { getEntry } from 'astro:content';
+
+const services = await visible('services');
+const countByCategory = Object.fromEntries(CATEGORY_SLUGS.map((c) => [c, services.filter((s) => s.data.category === c).length]));
+
+const upcoming = (await listedEvents()).filter(isUpcoming);
+const featured = upcoming.find((e) => e.data.featured) ?? upcoming[0];
+
+const resources = (await visible('resources')).sort((a, b) => b.data.publishedDate.localeCompare(a.data.publishedDate)).slice(0, 3);
+const resourceAuthors = await Promise.all(resources.map((r) => getEntry(r.data.author)));
+const learningAvailable = resources.length > 0;
+
+const proof = (await visible('testimonials')).filter((t) => t.data.placements.includes('home'));
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: site.brand,
+    description: site.descriptor,
+    url: Astro.site?.href,
+    founder: { '@type': 'Person', name: 'Tim Berry', jobTitle: 'Attorney', url: new URL('/about/tim-berry', Astro.site).href },
+  },
+];
+---
+
+<Base
+  title="Home"
+  description="Advanced planning for retirement accounts, trusts, ownership structures, and complex transactions, built on nearly 30 years of retirement-plan experience with attorney Tim Berry."
+  jsonLd={jsonLd}
+>
+  <!-- 1. Hero -->
+  <section class="hero theme-dark">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">Advanced Retirement &amp; Tax Strategies</p>
+        <h1>Before your next major move, know your options.</h1>
+        <p class="lead">
+          Advanced planning for retirement accounts, trusts, ownership structures, and complex transactions. Work with our team on your
+          situation, join a focused planning event, or deepen your understanding through advanced education.
+        </p>
+        <div class="hero__authority-row">
+          <img
+            class="hero__avatar"
+            src="/images/tim/tim-berry-suit-400.webp"
+            width="400"
+            height="417"
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+          />
+          <p class="hero__authority">{site.authority}</p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+          <a class="btn btn--secondary" href="/conferences">Explore Conferences</a>
+        </div>
+      </div>
+      <div class="hero__photo">
+        <TimPhoto eager sizes="(min-width: 1024px) 420px, (min-width: 768px) 40vw, 70vw" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Three ways to work with IRA Ideas -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Three ways to work with IRA Ideas</p>
+        <h2>Choose your next step.</h2>
+      </div>
+      <div class="offerings">
+        <article class="card offering offering--primary theme-dark">
+          <p class="eyebrow">Primary offering</p>
+          <h3>Advanced Services</h3>
+          <p>
+            Bring us a significant planning decision, proposed transaction, or issue that needs a closer look. We will review the request
+            and identify the appropriate next step.
+          </p>
+          <a class="btn btn--primary" href="/advanced-services">Explore Advanced Services</a>
+        </article>
+        <article class="card offering">
+          <h3>Conferences</h3>
+          <p>Join focused events built around advanced concepts, practical discussion, and clearly defined learning or planning objectives.</p>
+          <a class="btn btn--secondary" href="/conferences">Explore Conferences</a>
+        </article>
+        <article class="card offering">
+          <h3>Advanced Learning</h3>
+          <p>Build a deeper understanding of the strategies, structures, and questions behind important financial decisions.</p>
+          {
+            learningAvailable ? (
+              <a class="btn btn--secondary" href="/learn">Explore Learning</a>
+            ) : (
+              <a class="btn btn--secondary" href="/learn#learning-signup">Get Learning Updates</a>
+            )
+          }
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Situation-based entry points -->
+  <section class="section theme-paper situations">
+    <div class="container">
+      <div class="section-head">
+        <h2>What are you working through?</h2>
+        <p class="lead">You do not need to know the name of the strategy. Start with the decision in front of you.</p>
+      </div>
+      <div class="grid grid--4">
+        {
+          CATEGORY_SLUGS.map((slug) => {
+            const has = countByCategory[slug] > 0;
+            return (
+              <a class="situation" href={has ? `/advanced-services?category=${slug}#directory` : `/start?subject=${slug}`}>
+                <h3>{CATEGORIES[slug].label}</h3>
+                <p>{CATEGORIES[slug].description}</p>
+                <span class="situation__cta">
+                  {has ? 'View related services' : 'Discuss this with the team'}&nbsp;<span aria-hidden="true">&rarr;</span>
+                </span>
+              </a>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Tim and the team -->
+  <section class="section">
+    <div class="container split">
+      <div class="split__media">
+        <TimPhoto variant="shirt" sizes="(min-width: 1024px) 400px, 80vw" />
+      </div>
+      <div class="split__copy reading">
+        <hr class="rule" />
+        <h2>Deep experience. A team to move the work forward.</h2>
+        <p>IRA Ideas brings attorney Tim Berry's retirement-plan experience together with a coordinated approach to education and specialized services.</p>
+        <p>Tim's expertise is central to the work. Our team helps organize the information, communication, and next steps around each engagement.</p>
+        <a class="btn btn--secondary" href="/about/tim-berry">Meet Tim Berry</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Experience through change -->
+  <section class="section section--tight theme-darker">
+    <div class="container">
+      <div class="reading">
+        <h2>Advanced planning does not stand still.</h2>
+        <p class="lead">
+          Retirement planning has evolved throughout the nearly 30 years behind our work. Our approach is to examine the rules, the
+          structure, and the facts that matter to the decision in front of you.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Proof: shown only when approved proof exists -->
+  {
+    proof.length > 0 && (
+      <section class="section theme-paper">
+        <div class="container">
+          <div class="section-head">
+            <h2>See what thoughtful review looks like.</h2>
+          </div>
+          <div class="grid grid--2">
+            {proof.map((t) => (
+              <figure class="card proof">
+                <blockquote>
+                  <p>{t.data.quote}</p>
+                </blockquote>
+                <figcaption class="muted">{t.data.attribution}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 7. Featured conference -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">IRA Ideas Conferences</p>
+        <h2>Go deeper in the room.</h2>
+        <p class="lead">
+          Explore IRA Ideas events designed for focused learning, meaningful discussion, and a clearer understanding of the questions
+          that matter to you.
+        </p>
+      </div>
+      {
+        featured ? (
+          <EventCard event={featured} feature />
+        ) : (
+          <div class="card no-event">
+            <h3>Be first to hear about the next event.</h3>
+            <p>Join the priority list for upcoming IRA Ideas conferences, workshops, and private planning sessions.</p>
+            <SignupForm list="priority" id="home-priority" />
+          </div>
+        )
+      }
+      <div class="cant-wait">
+        <p>Have a planning need that cannot wait for an event?</p>
+        <a class="btn btn--secondary" href="/start">Discuss My Situation</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Learning preview -->
+  <section class="section theme-paper">
+    <div class="container">
+      {
+        learningAvailable ? (
+          <>
+            <div class="section-head">
+              <p class="eyebrow">IRA Ideas Advanced Learning</p>
+              <h2>Understand more before you decide.</h2>
+            </div>
+            <div class="grid grid--3">
+              {resources.map((r, i) => (
+                <article class="card">
+                  <p class="eyebrow">
+                    {CATEGORIES[r.data.topic].label} &middot; {r.data.format}
+                  </p>
+                  <h3>
+                    <a href={`/learn/${r.id}`}>{r.data.title}</a>
+                  </h3>
+                  <p class="muted small">
+                    {resourceAuthors[i]?.data.name}
+                    {r.data.duration && <> &middot; {r.data.duration}</>}
+                  </p>
+                </article>
+              ))}
+            </div>
+            <div class="btn-row learn-more">
+              <a class="btn btn--secondary" href="/learn">Explore Learning</a>
+            </div>
+          </>
+        ) : (
+          <div class="reading">
+            <p class="eyebrow">IRA Ideas Advanced Learning</p>
+            <h2>Free advanced learning is on the way.</h2>
+            <p class="lead">Join the IRA Ideas learning list for new educational resources and announcements as they are released.</p>
+            <SignupForm list="learning" id="home-learning" />
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- 9. Final action -->
+  <CtaBand
+    heading="Bring us the situation. We will help identify the next step."
+    copy="Tell our team what you are considering, what is already in place, and any deadline. We will review the request and explain how the work could proceed."
+    note="Any proposed paid work will have a defined scope and fee before it begins."
+  />
+</Base>
+
+<style>
+  .hero { padding: clamp(48px, 7vw, 88px) 0 clamp(56px, 7vw, 96px); }
+  .hero__grid { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 768px) {
+    .hero__grid { grid-template-columns: 1.35fr 1fr; gap: 56px; }
+  }
+  .hero__copy .lead { max-width: 620px; }
+  .hero__authority {
+    border-left: 2px solid var(--gold);
+    padding-left: 16px;
+    color: var(--warm-white);
+    font-weight: 500;
+    max-width: 560px;
+  }
+  .hero__photo { max-width: 420px; width: 100%; justify-self: center; }
+  .hero__authority-row { display: flex; align-items: center; gap: 16px; margin: 28px 0 32px; }
+  .hero__authority-row .hero__authority { margin: 0; }
+  /* Mobile: a compact portrait keeps Tim visible on the first screen without pushing the buttons down. */
+  .hero__avatar {
+    display: none;
+    width: 72px;
+    height: 72px;
+    flex: none;
+    object-fit: cover;
+    object-position: 50% 8%;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: radial-gradient(circle at 50% 35%, rgba(205, 176, 122, 0.45), #2a2926 70%);
+  }
+  @media (max-width: 767px) {
+    .hero__avatar { display: block; }
+    .hero__photo { max-width: 300px; justify-self: start; }
+  }
+
+  .offerings { display: grid; gap: 24px; }
+  @media (min-width: 900px) {
+    .offerings { grid-template-columns: 1.3fr 1fr 1fr; }
+  }
+  .offering--primary { background: var(--charcoal); border-color: var(--charcoal); border-top: 4px solid var(--gold); }
+  .offering--primary h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.9rem; }
+  .offering h3 { font-size: 1.4rem; }
+
+  .situation {
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+    background: var(--warm-white);
+    border: 1px solid var(--stone);
+    border-top: 3px solid var(--gold);
+    border-radius: var(--radius);
+    color: var(--ink);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .situation:hover { background: #fff; border-color: var(--gold); color: var(--ink); }
+  .situation p { color: var(--warm-gray); }
+  .situation__cta { margin-top: auto; font-weight: 500; color: var(--gold-deep); }
+
+  .split { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .split { grid-template-columns: 400px 1fr; gap: 72px; }
+  }
+  .split__media { max-width: 400px; }
+
+  .no-event { max-width: 760px; }
+  .cant-wait { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; margin-top: 40px; }
+  .cant-wait p { margin: 0; font-weight: 500; }
+  .learn-more { margin-top: 32px; }
+  .proof blockquote { margin: 0 0 16px; font-family: var(--font-heading); font-size: 1.2rem; }
+</style>

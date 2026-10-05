@@ -1,0 +1,127 @@
+---
+import Logo from './Logo.astro';
+import { site } from '../data/site';
+
+const nav = [
+  { label: 'Advanced Services', href: '/advanced-services' },
+  { label: 'Conferences', href: '/conferences' },
+  { label: 'Advanced Learning', href: '/learn' },
+  { label: 'About', href: '/about' },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<!-- Not sticky, so it can never cover form fields on small screens. -->
+<header class="site-header theme-darker">
+  <div class="container site-header__inner">
+    <Logo />
+    <nav class="site-nav" aria-label="Main">
+      <ul id="site-nav-list" class="site-nav__list">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="site-header__actions">
+      <a class="btn btn--primary site-header__cta" href={site.primaryCta.href}>{site.primaryCta.label}</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav-list">
+        <span class="menu-toggle__bars" aria-hidden="true"></span>
+        <span class="menu-toggle__label">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const list = document.getElementById('site-nav-list');
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    list?.classList.toggle('is-open', !open);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      toggle.setAttribute('aria-expanded', 'false');
+      list?.classList.remove('is-open');
+      toggle.focus();
+    }
+  });
+</script>
+
+<style>
+  .site-header { border-bottom: 1px solid var(--line-dark); position: relative; z-index: 20; }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 84px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .site-nav__list { list-style: none; margin: 0; padding: 0; display: flex; gap: 32px; }
+  .site-nav__list li + li { margin-top: 0; }
+  .site-nav a {
+    color: var(--warm-white);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.98rem;
+    padding: 8px 0;
+    border-bottom: 2px solid transparent;
+  }
+  .site-nav a:hover { color: var(--gold-bright); }
+  .site-nav a[aria-current='page'] { border-bottom-color: var(--gold); }
+  .site-header__actions { display: flex; align-items: center; gap: 12px; }
+  .menu-toggle { display: none; }
+
+  @media (max-width: 1023px) {
+    .site-header__inner { flex-wrap: wrap; }
+    .menu-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 14px;
+      background: transparent;
+      color: var(--warm-white);
+      border: 1px solid var(--line-dark);
+      border-radius: var(--radius);
+      font: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .menu-toggle__bars, .menu-toggle__bars::before, .menu-toggle__bars::after {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      position: relative;
+    }
+    .menu-toggle__bars::before, .menu-toggle__bars::after { content: ''; position: absolute; left: 0; }
+    .menu-toggle__bars::before { top: -6px; }
+    .menu-toggle__bars::after { top: 6px; }
+    .site-nav { order: 3; width: 100%; }
+    :global(.js) .site-nav__list { display: none; }
+    .site-nav__list { flex-direction: column; gap: 0; padding: 8px 0 12px; border-top: 1px solid var(--line-dark); }
+    .site-nav__list.is-open { display: flex; }
+    .site-nav a { display: block; padding: 14px 0; border-bottom: 1px solid var(--line-dark); }
+    .site-nav a[aria-current='page'] { color: var(--gold-bright); border-bottom-color: var(--line-dark); }
+  }
+  @media (max-width: 560px) {
+    .site-header__cta { padding: 10px 14px; font-size: 0.9rem; }
+    .menu-toggle__label { display: none; }
+  }
+  @media (max-width: 380px) {
+    .site-header__inner { row-gap: 12px; }
+    .site-header__actions { width: 100%; }
+    .site-header__cta { flex: 1; }
+  }
+</style>

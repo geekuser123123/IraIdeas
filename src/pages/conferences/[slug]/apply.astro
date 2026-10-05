@@ -1,0 +1,189 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Turnstile from '../../../components/Turnstile.astro';
+import DraftFlag from '../../../components/DraftFlag.astro';
+import { visible, formatDates, formatPrice, FORMAT_LABELS, STATUS_LABELS } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const events = await visible('events');
+  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
+}
+
+const { event } = Astro.props;
+const d = event.data;
+const kind = d.status === 'applications-open' ? 'application' : d.status === 'registration-open' ? 'registration' : null;
+const dates = formatDates(d.startDate, d.endDate, d.timezone);
+const title = kind === 'registration' ? `Register: ${d.title}` : `Apply: ${d.title}`;
+---
+
+<Base title={title} description={`${kind === 'registration' ? 'Register for' : 'Apply to attend'} ${d.title}, ${dates}.`} noindex>
+  <section class="apply-hero theme-dark">
+    <div class="container">
+      <nav aria-label="Breadcrumb" class="crumbs small">
+        <a href="/conferences">Conferences</a> <span aria-hidden="true">/</span> <a href={`/conferences/${event.id}`}>{d.title}</a>
+      </nav>
+      <DraftFlag state={d.publication} />
+      <p class="eyebrow">{FORMAT_LABELS[d.format]}</p>
+      <h1>{kind === 'registration' ? 'Register' : 'Apply to attend'}: {d.title}</h1>
+      <dl class="facts">
+        <div><dt>Dates</dt><dd>{dates}</dd></div>
+        <div><dt>Price</dt><dd>{formatPrice(d.price)}</dd></div>
+        <div><dt>Status</dt><dd>{STATUS_LABELS[d.status]}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {
+        kind ? (
+          <div class="apply-grid">
+            <form id="event-form" class="apply-form" action="/api/event-application" method="post" data-event={event.id}>
+              <input type="hidden" name="event_slug" value={event.id} />
+              <div class="form-alert" role="alert" tabindex="-1" hidden />
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="name">Name</label>
+                  <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
+                  <p class="field-error" data-error-for="name" />
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
+                  <p class="field-error" data-error-for="email" />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="phone">
+                    Phone <span class="optional">(optional)</span>
+                  </label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
+                  <p class="field-error" data-error-for="phone" />
+                </div>
+                <div class="field">
+                  <label for="region">
+                    State or country <span class="optional">(optional)</span>
+                  </label>
+                  <input id="region" name="region" type="text" autocomplete="address-level1" maxlength="80" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="participant_role">Your role</label>
+                <select id="participant_role" name="participant_role" required>
+                  <option value="">Select one</option>
+                  <option value="business-owner">Business owner</option>
+                  <option value="investor">Investor</option>
+                  <option value="advisor">Financial professional or advisor</option>
+                  <option value="attorney-cpa">Attorney or CPA</option>
+                  <option value="other">Other</option>
+                </select>
+                <p class="field-error" data-error-for="participant_role" />
+              </div>
+
+              <div class="field">
+                <label for="reason">
+                  Why would you like to attend?{kind === 'registration' && <span class="optional"> (optional)</span>}
+                </label>
+                <textarea id="reason" name="reason" maxlength="600" rows="4" required={kind === 'application'} />
+                <p class="field-error" data-error-for="reason" />
+              </div>
+
+              <div class="field">
+                <label for="interests">
+                  General planning interests <span class="optional">(optional)</span>
+                </label>
+                <span class="hint" id="interests-hint">
+                  Topics only. Please do not include financial records or account details.
+                </span>
+                <textarea id="interests" name="interests" maxlength="400" rows="3" aria-describedby="interests-hint" />
+              </div>
+
+              <fieldset class="field">
+                <legend class="visually-hidden">Acknowledgments</legend>
+                <label class="choice">
+                  <input type="checkbox" name="price_acknowledged" required />I understand the published participation price of{' '}
+                  {formatPrice(d.price)}.
+                </label>
+                <p class="field-error" data-error-for="price_acknowledged" />
+                <label class="choice">
+                  <input type="checkbox" name="marketing_email_optin" />
+                  Send me IRA Ideas educational and event emails. <span class="optional">(optional)</span>
+                </label>
+              </fieldset>
+
+              <Turnstile />
+
+              <p class="notice">
+                {kind === 'application'
+                  ? 'Submitting an application does not confirm a place. Our team will review it, and your place is confirmed only after acceptance and the required payment.'
+                  : 'After you submit, you will continue to secure payment. Your place is confirmed only after payment is verified.'}
+              </p>
+              <button type="submit" class="btn btn--primary">
+                {kind === 'application' ? 'Submit Application' : 'Continue to Payment'}
+              </button>
+            </form>
+
+            <aside class="card apply-aside">
+              <h2 class="h3">How admission works</h2>
+              {kind === 'application' ? (
+                <ol>
+                  <li>Submit your application</li>
+                  <li>Team review</li>
+                  <li>Acceptance</li>
+                  <li>Required payment</li>
+                  <li>Confirmed participation</li>
+                </ol>
+              ) : (
+                <ol>
+                  <li>Registration</li>
+                  <li>Required payment</li>
+                  <li>Confirmed participation</li>
+                </ol>
+              )}
+            </aside>
+          </div>
+        ) : (
+          <div class="reading card">
+            <h2>This event is not accepting {d.status === 'sold-out' ? 'registrations' : 'applications'} right now.</h2>
+            <p>
+              Current status: <strong>{STATUS_LABELS[d.status]}</strong>.
+            </p>
+            <a class="btn btn--primary" href={`/conferences/${event.id}#priority-list`}>
+              Join the Priority List
+            </a>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { enhanceForm } from '../../../lib/forms';
+  const form = document.getElementById('event-form') as HTMLFormElement | null;
+  if (form) {
+    enhanceForm(form, { successEvent: 'event_application_submitted', eventProps: () => ({ event_slug: form.dataset.event }) });
+  }
+</script>
+
+<style>
+  .apply-hero { padding: clamp(40px, 6vw, 72px) 0; }
+  .crumbs { margin-bottom: 20px; color: var(--gray-on-dark); }
+  .facts { display: flex; flex-wrap: wrap; gap: 16px 40px; margin: 24px 0 0; }
+  .facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-on-dark); }
+  .facts dd { margin: 2px 0 0; font-weight: 500; }
+  .apply-grid { display: grid; gap: 40px; }
+  @media (min-width: 1000px) {
+    .apply-grid { grid-template-columns: minmax(0, 720px) 300px; justify-content: space-between; }
+  }
+  .apply-form { background: var(--paper); border: 1px solid var(--stone); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
+  .field-row { display: grid; gap: 0 20px; }
+  @media (min-width: 640px) {
+    .field-row { grid-template-columns: 1fr 1fr; }
+  }
+  .apply-aside { align-self: start; }
+  .apply-aside .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.25rem; }
+</style>

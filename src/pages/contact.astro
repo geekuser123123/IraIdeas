@@ -1,0 +1,109 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Turnstile from '../components/Turnstile.astro';
+import { site } from '../data/site';
+
+const ext = site.external;
+---
+
+<Base title="Contact" description="Contact the IRA Ideas team. Find the right route for service requests, conference questions, and general inquiries.">
+  <PageHero eyebrow="Contact" title="Contact the IRA Ideas team." lead="Choose the route that fits your question so it reaches the right place." />
+
+  <section class="section">
+    <div class="container">
+      <div class="routes">
+        <article class="card route route--primary">
+          <h2 class="h3">Advanced planning or specialized services</h2>
+          <p>Share the decision, transaction, or concern you would like reviewed.</p>
+          <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+        </article>
+        <article class="card route">
+          <h2 class="h3">Conference questions</h2>
+          <p>Each event page lists its details, terms, and next steps.</p>
+          <a class="btn btn--secondary" href="/conferences">View Conferences</a>
+        </article>
+        {
+          ext.existingEngagementSupport && (
+            <article class="card route">
+              <h2 class="h3">Existing engagement</h2>
+              <p>Current clients can reach support through the client destination.</p>
+              <a class="btn btn--secondary" href={ext.existingEngagementSupport} rel="noopener">Client Support</a>
+            </article>
+          )
+        }
+        {
+          ext.taxAcademy && (
+            <article class="card route">
+              <h2 class="h3">Routine plan renewals and administration</h2>
+              <p>Renewals and routine administration are handled separately.</p>
+              <a class="btn btn--secondary" href={ext.taxAcademy} rel="noopener">Renewals and Administration</a>
+            </article>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section theme-paper">
+    <div class="container contact-grid">
+      <div>
+        <h2>General business inquiry</h2>
+        <p>For media, partnership, or other business questions. For a planning question, please use <a href="/start">Discuss My Situation</a> instead.</p>
+        {
+          (site.contact.email || site.contact.phone) && (
+            <ul class="contact-details">
+              {site.contact.email && <li><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>}
+              {site.contact.phone && <li><a href={`tel:${site.contact.phone.replace(/[^0-9+]/g, '')}`}>{site.contact.phone}</a></li>}
+            </ul>
+          )
+        }
+      </div>
+      <form id="contact-form" class="contact-form" action="/api/contact" method="post">
+        <div class="form-alert" role="alert" tabindex="-1" hidden></div>
+        <div class="field">
+          <label for="c-name">Name</label>
+          <input id="c-name" name="name" type="text" autocomplete="name" required maxlength="120" />
+          <p class="field-error" data-error-for="name"></p>
+        </div>
+        <div class="field">
+          <label for="c-email">Email</label>
+          <input id="c-email" name="email" type="email" autocomplete="email" required maxlength="254" />
+          <p class="field-error" data-error-for="email"></p>
+        </div>
+        <div class="field">
+          <label for="c-org">Organization <span class="optional">(optional)</span></label>
+          <input id="c-org" name="organization" type="text" autocomplete="organization" maxlength="120" />
+        </div>
+        <div class="field">
+          <label for="c-message">Message</label>
+          <textarea id="c-message" name="message" required maxlength="1000" rows="4"></textarea>
+          <p class="field-error" data-error-for="message"></p>
+        </div>
+        <Turnstile />
+        <p class="notice">Please do not include confidential documents or sensitive account information.</p>
+        <button type="submit" class="btn btn--primary">Send Message</button>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { enhanceForm } from '../lib/forms';
+  enhanceForm(document.getElementById('contact-form') as HTMLFormElement, { successEvent: 'general_contact_submitted' });
+</script>
+
+<style>
+  .routes { display: grid; gap: 24px; }
+  @media (min-width: 900px) {
+    .routes { grid-template-columns: repeat(2, 1fr); }
+  }
+  .route .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.3rem; }
+  .route--primary { border-top: 4px solid var(--gold); }
+  .contact-grid { display: grid; gap: 40px; }
+  @media (min-width: 900px) {
+    .contact-grid { grid-template-columns: 1fr 1.2fr; gap: 72px; }
+  }
+  .contact-form { background: #fff; border: 1px solid var(--stone); border-radius: var(--radius); padding: clamp(20px, 4vw, 36px); }
+  .contact-details { list-style: none; padding: 0; }
+</style>

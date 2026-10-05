@@ -1,0 +1,287 @@
+---
+import Base from '../layouts/Base.astro';
+import Turnstile from '../components/Turnstile.astro';
+import { CATEGORIES, CATEGORY_SLUGS } from '../data/categories';
+import { visible } from '../lib/content';
+
+const services = (await visible('services')).sort((a, b) => a.data.name.localeCompare(b.data.name));
+---
+
+<Base
+  title="Discuss My Situation"
+  description="Tell the IRA Ideas team about the decision, transaction, or concern you would like reviewed. You do not need to know which service applies."
+>
+  <section class="start-hero theme-dark">
+    <div class="container">
+      <div class="reading">
+        <p class="eyebrow">Discuss My Situation</p>
+        <h1>Tell us what you are working on.</h1>
+        <p class="lead">Share the decision, transaction, or concern you would like reviewed. You do not need to know which service applies.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section start-body">
+    <div class="container start-grid">
+      <form id="inquiry-form" class="inquiry" action="/api/inquiry" method="post">
+        <div class="progress" data-progress hidden>
+          <p class="progress__label" aria-live="polite"><span data-step-label>Step 1 of 2: Your situation</span></p>
+          <div class="progress__bar" aria-hidden="true"><span data-step-bar></span></div>
+        </div>
+
+        <div class="form-alert" role="alert" tabindex="-1" hidden></div>
+
+        <fieldset class="step" data-step="1">
+          <legend class="step__legend">Your situation</legend>
+
+          <div class="field">
+            <label for="subject">Service or subject</label>
+            <select id="subject" name="subject" required>
+              <option value="not-sure">Not sure</option>
+              {
+                services.length > 0 && (
+                  <optgroup label="Services">
+                    {services.map((s) => (
+                      <option value={s.id}>{s.data.name}</option>
+                    ))}
+                  </optgroup>
+                )
+              }
+              <optgroup label="General subjects">
+                {CATEGORY_SLUGS.map((c) => <option value={c}>{CATEGORIES[c].label}</option>)}
+              </optgroup>
+            </select>
+            <p class="field-error" data-error-for="subject"></p>
+          </div>
+
+          <div class="field">
+            <label for="goal">What are you trying to accomplish?</label>
+            <span class="hint" id="goal-hint">A few sentences is enough. Please do not include account numbers or confidential details.</span>
+            <textarea id="goal" name="goal" required maxlength="600" rows="4" aria-describedby="goal-hint"></textarea>
+            <p class="field-error" data-error-for="goal"></p>
+          </div>
+
+          <div class="field">
+            <label for="in_place">What is already in place? <span class="optional">(optional)</span></label>
+            <span class="hint" id="inplace-hint">For example, the general type of account, trust, or arrangement involved.</span>
+            <textarea id="in_place" name="in_place" maxlength="600" rows="3" aria-describedby="inplace-hint"></textarea>
+            <p class="field-error" data-error-for="in_place"></p>
+          </div>
+
+          <fieldset class="field">
+            <legend>Timing</legend>
+            <label class="choice"><input type="radio" name="timing" value="exploring" required /> Exploring options</label>
+            <label class="choice"><input type="radio" name="timing" value="upcoming" /> Upcoming decision</label>
+            <label class="choice"><input type="radio" name="timing" value="deadline" /> Specific deadline</label>
+            <p class="field-error" data-error-for="timing"></p>
+          </fieldset>
+
+          <div class="field" data-deadline>
+            <label for="deadline">Deadline date</label>
+            <input id="deadline" name="deadline" type="date" />
+            <p class="field-error" data-error-for="deadline"></p>
+          </div>
+
+          <div class="field">
+            <label for="amount_range">Approximate amount involved <span class="optional">(optional)</span></label>
+            <select id="amount_range" name="amount_range">
+              <option value="">Select a range</option>
+              <option value="under-250k">Under $250,000</option>
+              <option value="250k-1m">$250,000 to $1 million</option>
+              <option value="1m-5m">$1 million to $5 million</option>
+              <option value="over-5m">Over $5 million</option>
+              <option value="prefer-not">Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="step__nav" data-js-only hidden>
+            <button type="button" class="btn btn--primary" data-next>Continue</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="step" data-step="2">
+          <legend class="step__legend">About you</legend>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
+              <p class="field-error" data-error-for="name"></p>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
+              <p class="field-error" data-error-for="email"></p>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="region">State or country</label>
+              <input id="region" name="region" type="text" autocomplete="address-level1" required maxlength="80" />
+              <p class="field-error" data-error-for="region"></p>
+            </div>
+            <div class="field">
+              <label for="phone">Phone <span class="optional" data-phone-optional>(optional)</span></label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
+              <p class="field-error" data-error-for="phone"></p>
+            </div>
+          </div>
+
+          <fieldset class="field">
+            <legend>I am contacting you for</legend>
+            <label class="choice"><input type="radio" name="contacting_for" value="myself" required /> Myself</label>
+            <label class="choice"><input type="radio" name="contacting_for" value="business" /> My business</label>
+            <label class="choice"><input type="radio" name="contacting_for" value="client" /> A client</label>
+            <p class="field-error" data-error-for="contacting_for"></p>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>Preferred response</legend>
+            <label class="choice"><input type="radio" name="preferred_response" value="email" required checked /> Email</label>
+            <label class="choice"><input type="radio" name="preferred_response" value="phone" /> Phone</label>
+            <p class="field-error" data-error-for="preferred_response"></p>
+          </fieldset>
+
+          <fieldset class="field optins">
+            <legend>Optional updates <span class="optional">(separate from your request)</span></legend>
+            <label class="choice"><input type="checkbox" name="marketing_email_optin" /> Send me IRA Ideas educational and event emails.</label>
+            <label class="choice"><input type="checkbox" name="sms_optin" /> Send me IRA Ideas text messages. Message and data rates may apply.</label>
+          </fieldset>
+
+          <Turnstile />
+
+          <p class="notice">
+            Submitting a request does not establish an attorney-client relationship. Please do not include confidential documents or sensitive
+            account information. The team will provide instructions if additional information is needed.
+          </p>
+
+          <div class="step__nav">
+            <button type="button" class="btn btn--secondary" data-back data-js-only hidden>Back</button>
+            <button type="submit" class="btn btn--primary">Send My Request</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <aside class="start-aside">
+        <div class="card">
+          <h2 class="h3">What happens next</h2>
+          <ol>
+            <li>The team reviews your request.</li>
+            <li>We contact you about the appropriate next step, which may be a request for more detail or a proposed paid consultation or engagement.</li>
+            <li>Any paid work has a defined scope and fee before it begins.</li>
+          </ol>
+          <p class="small muted">A request is not an appointment. <a href="/how-we-work">See how we work</a>.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { enhanceForm } from '../lib/forms';
+
+  const form = document.getElementById('inquiry-form') as HTMLFormElement;
+  const subject = form.querySelector<HTMLSelectElement>('#subject')!;
+  const steps = [...form.querySelectorAll<HTMLFieldSetElement>('[data-step]')];
+  const progress = form.querySelector<HTMLElement>('[data-progress]')!;
+  const label = form.querySelector<HTMLElement>('[data-step-label]')!;
+  const bar = form.querySelector<HTMLElement>('[data-step-bar]')!;
+  const deadlineField = form.querySelector<HTMLElement>('[data-deadline]')!;
+  const deadline = form.querySelector<HTMLInputElement>('#deadline')!;
+  const phone = form.querySelector<HTMLInputElement>('#phone')!;
+  const phoneOptional = form.querySelector<HTMLElement>('[data-phone-optional]')!;
+
+  // Preselect the service or subject from the link, while leaving it changeable.
+  const params = new URLSearchParams(location.search);
+  const wanted = params.get('service') || params.get('subject');
+  if (wanted && [...subject.options].some((o) => o.value === wanted)) subject.value = wanted;
+
+  // Two steps with a visible progress indicator. Without JavaScript, both show.
+  const titles = ['Your situation', 'About you'];
+  let current = 0;
+  const show = (i: number, focus = true) => {
+    current = i;
+    steps.forEach((s, n) => (s.hidden = n !== i));
+    label.textContent = `Step ${i + 1} of ${steps.length}: ${titles[i]}`;
+    bar.style.width = `${((i + 1) / steps.length) * 100}%`;
+    if (focus) {
+      progress.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      steps[i].querySelector<HTMLElement>('input:not([type=hidden]), select, textarea')?.focus({ preventScroll: true });
+    }
+  };
+  form.querySelectorAll<HTMLElement>('[data-js-only]').forEach((el) => (el.hidden = false));
+  progress.hidden = false;
+  show(0, false);
+
+  const validStep = (i: number) => {
+    for (const el of steps[i].querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')) {
+      if (!el.checkValidity()) {
+        el.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  };
+  form.querySelector('[data-next]')!.addEventListener('click', () => validStep(0) && show(1));
+  form.querySelector('[data-back]')!.addEventListener('click', () => show(0));
+
+  // Server errors: return to whichever step holds the first problem field.
+  form.addEventListener('form:errors', (e) => {
+    const first = (e as CustomEvent).detail.first as HTMLElement | null;
+    const idx = first ? steps.findIndex((s) => s.contains(first)) : -1;
+    if (idx >= 0 && idx !== current) show(idx, false);
+  });
+
+  // Conditional fields.
+  const syncTiming = () => {
+    const isDeadline = (form.querySelector('input[name=timing]:checked') as HTMLInputElement | null)?.value === 'deadline';
+    deadlineField.hidden = !isDeadline;
+    deadline.required = isDeadline;
+  };
+  const syncPhone = () => {
+    const wantsPhone = (form.querySelector('input[name=preferred_response]:checked') as HTMLInputElement | null)?.value === 'phone';
+    const wantsSms = (form.querySelector('input[name=sms_optin]') as HTMLInputElement).checked;
+    phone.required = wantsPhone || wantsSms;
+    phoneOptional.hidden = phone.required;
+  };
+  form.addEventListener('change', () => {
+    syncTiming();
+    syncPhone();
+  });
+  syncTiming();
+  syncPhone();
+
+  enhanceForm(form, {
+    startEvent: 'service_inquiry_started',
+    successEvent: 'service_inquiry_submitted',
+    eventProps: () => ({ service: subject.value }),
+  });
+</script>
+
+<style>
+  .start-hero { padding: clamp(48px, 7vw, 80px) 0; }
+  .start-body { padding-top: 56px; }
+  .start-grid { display: grid; gap: 48px; }
+  @media (min-width: 1000px) {
+    .start-grid { grid-template-columns: minmax(0, 720px) 320px; gap: 72px; justify-content: space-between; }
+  }
+  .inquiry { background: var(--paper); border: 1px solid var(--stone); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
+  .step[hidden] { display: none; }
+  .step__legend { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 24px; padding: 0; }
+  .step__nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+  .step__nav[hidden], [data-js-only][hidden] { display: none; }
+  .field-row { display: grid; gap: 0 20px; }
+  @media (min-width: 640px) {
+    .field-row { grid-template-columns: 1fr 1fr; }
+  }
+  [data-deadline][hidden] { display: none; }
+  .progress { margin-bottom: 28px; scroll-margin-top: 16px; }
+  .progress[hidden] { display: none; }
+  .progress__label { font-weight: 500; margin-bottom: 8px; }
+  .progress__bar { height: 4px; background: var(--stone); border-radius: 2px; overflow: hidden; }
+  .progress__bar span { display: block; height: 100%; width: 50%; background: var(--gold-deep); transition: width 0.2s ease; }
+  .optins { margin-top: 8px; }
+  .start-aside .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.3rem; }
+  .start-aside ol { padding-left: 1.2em; }
+</style>

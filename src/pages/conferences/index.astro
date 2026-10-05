@@ -1,0 +1,118 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import EventCard from '../../components/EventCard.astro';
+import SignupForm from '../../components/SignupForm.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { listedEvents, isUpcoming, FORMAT_LABELS } from '../../lib/content';
+
+const events = await listedEvents();
+const upcoming = events.filter(isUpcoming);
+const past = events.filter((e) => e.data.status === 'completed').reverse();
+
+// Only describe formats that are actively offered (have a listed upcoming event).
+const FORMAT_COPY = {
+  live: 'Broader educational events.',
+  workshop: 'Focused, smaller-group advanced education.',
+  'private-session': 'A limited-participant experience with event-specific preparation and discussion.',
+} as const;
+const activeFormats = (Object.keys(FORMAT_COPY) as (keyof typeof FORMAT_COPY)[]).filter((f) => upcoming.some((e) => e.data.format === f));
+---
+
+<Base
+  title="Conferences"
+  description="IRA Ideas conferences, advanced workshops, and private planning sessions for business owners, investors, and the professionals who advise them."
+>
+  <PageHero
+    eyebrow="IRA Ideas Conferences"
+    title="Advanced ideas. Focused rooms. Practical discussion."
+    lead="Explore IRA Ideas conferences and planning experiences for business owners, investors, and the professionals who advise them."
+  >
+    <div class="btn-row"><a class="btn btn--primary" href="#events">View Upcoming Events</a></div>
+  </PageHero>
+
+  <section class="section" id="events" tabindex="-1">
+    <div class="container">
+      {
+        upcoming.length > 0 ? (
+          <>
+            <div class="section-head">
+              <h2>Upcoming events</h2>
+            </div>
+            <div class="event-list">
+              {upcoming.map((e) => (
+                <EventCard event={e} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div class="reading" id="priority-list">
+            <h2>Be first to hear about the next event.</h2>
+            <p class="lead">Join the priority list for upcoming IRA Ideas conferences, workshops, and private planning sessions.</p>
+            <SignupForm list="priority" id="conferences-priority" />
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    activeFormats.length > 0 && (
+      <section class="section theme-paper">
+        <div class="container">
+          <div class="section-head">
+            <h2>Event formats</h2>
+          </div>
+          <div class:list={['grid', activeFormats.length === 3 ? 'grid--3' : 'grid--2']}>
+            {activeFormats.map((f) => (
+              <article class="card">
+                <h3>{FORMAT_LABELS[f]}</h3>
+                <p>{FORMAT_COPY[f]}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    upcoming.length > 0 && (
+      <section class="section section--tight">
+        <div class="container">
+          <div class="reading" id="priority-list">
+            <h2>Hear about future events.</h2>
+            <p>Join the priority list for upcoming IRA Ideas conferences, workshops, and private planning sessions.</p>
+            <SignupForm list="priority" id="conferences-priority" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    past.length > 0 && (
+      <section class="section theme-paper">
+        <div class="container">
+          <div class="section-head">
+            <h2>Past events</h2>
+          </div>
+          <div class="event-list">
+            {past.map((e) => (
+              <EventCard event={e} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <CtaBand heading="Have a planning need that cannot wait for an event?" copy="Tell our team what you are considering and we will identify the appropriate next step." />
+</Base>
+
+<style>
+  .event-list { display: grid; gap: 24px; }
+  @media (min-width: 1000px) {
+    .event-list { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DraftFlag from '../../components/DraftFlag.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { CATEGORIES } from '../../data/categories';
+import { visible, formatDay } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const resources = await visible('resources');
+  return resources.map((resource) => ({ params: { slug: resource.id }, props: { resource } }));
+}
+
+const { resource } = Astro.props;
+const d = resource.data;
+const author = await getEntry(d.author);
+const reviewer = d.reviewer ? await getEntry(d.reviewer) : undefined;
+const { Content } = await render(resource);
+const subject = d.relatedService ? `service=${d.relatedService.id}` : `subject=${d.topic}`;
+
+const jsonLd = d.video
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: d.title,
+      description: d.description,
+      uploadDate: d.publishedDate,
+      embedUrl: d.video.embedUrl,
+      thumbnailUrl: new URL('/images/tim/tim-berry-suit-768.webp', Astro.site).href,
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: d.title,
+      description: d.description,
+      datePublished: d.publishedDate,
+      dateModified: d.reviewedDate ?? d.publishedDate,
+      author: author ? { '@type': 'Person', name: author.data.name } : undefined,
+      publisher: { '@type': 'Organization', name: 'IRA Ideas' },
+    };
+---
+
+<Base title={d.title} description={d.description} noindex={d.publication !== 'published'} jsonLd={jsonLd}>
+  <article>
+    <header class="resource-hero theme-dark">
+      <div class="container">
+        <div class="reading">
+          <nav aria-label="Breadcrumb" class="crumbs small"><a href="/learn">Advanced Learning</a> <span aria-hidden="true">/</span> {CATEGORIES[d.topic].label}</nav>
+          <DraftFlag state={d.publication} />
+          <p class="eyebrow">{d.format}{d.duration && <> &middot; {d.duration}</>}</p>
+          <h1>{d.title}</h1>
+          <p class="lead">{d.description}</p>
+          <dl class="meta small">
+            <div><dt>For</dt><dd>{d.audience}</dd></div>
+            {author && <div><dt>By</dt><dd>{author.data.name}, {author.data.role}</dd></div>}
+            {reviewer && <div><dt>Reviewed by</dt><dd>{reviewer.data.name}</dd></div>}
+            <div><dt>Published</dt><dd><time datetime={d.publishedDate}>{formatDay(d.publishedDate)}</time></dd></div>
+            {d.reviewedDate && <div><dt>Last reviewed</dt><dd><time datetime={d.reviewedDate}>{formatDay(d.reviewedDate)}</time></dd></div>}
+          </dl>
+        </div>
+      </div>
+    </header>
+
+    <div class="container section">
+      {d.video && (
+        <div class="video reading" data-video={d.video.embedUrl}>
+          <button type="button" class="video__play btn btn--primary">Play video</button>
+          <noscript><a href={d.video.embedUrl}>Watch the video</a></noscript>
+        </div>
+      )}
+      <div class="prose"><Content /></div>
+      {d.transcript && (
+        <details class="transcript reading">
+          <summary>Read the transcript</summary>
+          <div set:html={d.transcript.split(/\n{2,}/).map((p) => `<p>${p.replace(/</g, '&lt;')}</p>`).join('')} />
+        </details>
+      )}
+    </div>
+  </article>
+
+  <CtaBand heading="Working through a situation involving this topic?" copy="Tell our team what you are considering and we will identify the appropriate next step." href={`/start?${subject}`} />
+</Base>
+
+<script>
+  // Load the video player only when requested.
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((wrap) => {
+    wrap.querySelector('button')?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = wrap.dataset.video!;
+      iframe.title = 'Video player';
+      iframe.allow = 'fullscreen; picture-in-picture';
+      iframe.loading = 'lazy';
+      wrap.replaceChildren(iframe);
+    });
+  });
+</script>
+
+<style>
+  .resource-hero { padding: clamp(48px, 7vw, 80px) 0; }
+  .crumbs { margin-bottom: 20px; color: var(--gray-on-dark); }
+  .meta { display: flex; flex-wrap: wrap; gap: 12px 32px; margin: 24px 0 0; }
+  .meta dt { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; color: var(--gray-on-dark); }
+  .meta dd { margin: 0; }
+  .video { aspect-ratio: 16 / 9; background: var(--charcoal); display: grid; place-items: center; margin-bottom: 40px; border-radius: var(--radius); overflow: hidden; }
+  .video :global(iframe) { width: 100%; height: 100%; border: 0; }
+  .transcript { margin-top: 40px; border-top: 1px solid var(--stone); padding-top: 16px; }
+  .transcript summary { cursor: pointer; font-weight: 500; }
+</style>

@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "iraideas",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    // Only API routes run the Worker; every page is served directly as static HTML.
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "iraideas",
+      // Replace with the ID printed by `wrangler d1 create iraideas`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true },
+  "vars": {
+    "EMAIL_FROM": "",
+    "TEAM_NOTIFY_EMAIL": ""
+  }
+  // Secrets (set with `wrangler secret put NAME`, never committed):
+  //   TURNSTILE_SECRET, CRM_WEBHOOK_URL, CRM_WEBHOOK_SECRET,
+  //   RESEND_API_KEY, STRIPE_WEBHOOK_SECRET, IP_HASH_SALT
+}

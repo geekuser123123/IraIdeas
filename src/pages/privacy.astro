@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+// LAUNCH BLOCKER: replace with the professionally approved privacy notice.
+// It must match the actual forms, tracking, embedded media, and third-party services in use.
+const approved = false;
+---
+
+<Base title="Privacy Notice" description="How IRA Ideas handles information submitted through this website." noindex={!approved}>
+  <PageHero eyebrow="Legal" title="Privacy Notice" />
+  <section class="section">
+    <div class="container">
+      <div class="prose">
+        <p data-pending-legal>The privacy notice is being finalized and will be published here.</p>
+        <p>Questions can be sent through the <a href="/contact">contact page</a>.</p>
+      </div>
+    </div>
+  </section>
+</Base>

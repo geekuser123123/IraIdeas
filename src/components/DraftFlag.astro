@@ -1,0 +1,6 @@
+---
+interface Props { state: string }
+const { state } = Astro.props;
+---
+
+{state !== 'published' && <p class="draft-flag" role="note">Staging preview: this entry is in <strong>{state}</strong> and is not published on the live site.</p>}

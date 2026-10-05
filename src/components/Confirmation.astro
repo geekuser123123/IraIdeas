@@ -1,0 +1,19 @@
+---
+interface Props { eyebrow?: string }
+const { eyebrow = 'Confirmation' } = Astro.props;
+---
+
+<section class="section confirmation">
+  <div class="container">
+    <div class="reading card confirmation__card">
+      <p class="eyebrow">{eyebrow}</p>
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .confirmation { min-height: 55vh; }
+  .confirmation__card { border-top: 4px solid var(--gold); padding: clamp(28px, 5vw, 56px); }
+  .confirmation__card :global(.btn-row) { margin-top: 28px; }
+</style>

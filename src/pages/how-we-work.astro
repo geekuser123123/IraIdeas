@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+const steps = [
+  { title: 'Tell us what you are working on', copy: 'Share your objective, the general situation, and any deadline.' },
+  {
+    title: 'The team reviews the request',
+    copy: 'We review the information and determine whether more detail, a paid consultation, an assessment, or a defined project is appropriate.',
+  },
+  {
+    title: 'Understand the proposed work',
+    copy: 'The proposal identifies the responsible provider, deliverables, exclusions, fee, and relevant responsibilities.',
+  },
+  {
+    title: 'Approve and fund the engagement',
+    copy: 'Required agreements and payment are completed before the applicable paid work or appointment begins.',
+  },
+  {
+    title: 'Move forward with an organized next step',
+    copy: 'The assigned professional handles the agreed work, supported by coordinated communication and follow-through.',
+  },
+];
+
+const types = [
+  { title: 'Paid consultation or assessment', copy: 'A defined question or evaluation.' },
+  { title: 'Defined project', copy: 'An agreed objective, deliverables, fee, and completion point.' },
+  { title: 'Continuing support', copy: 'Ongoing work provided under its own scope, access terms, and review period.' },
+];
+---
+
+<Base title="How We Work" description="How IRA Ideas handles advanced planning requests: inquiry, review, a defined proposal, engagement, and organized delivery.">
+  <PageHero
+    eyebrow="How We Work"
+    title="A clear process for complex work."
+    lead="Start with the situation. We organize the information, review the fit, and define the next step before paid work begins."
+  >
+    <div class="btn-row"><a class="btn btn--primary" href="/start">Discuss My Situation</a></div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><h2>The process</h2></div>
+      <ol class="process" role="list">
+        {
+          steps.map((s, i) => (
+            <li class="process__step">
+              <span class="process__num" aria-hidden="true">{i + 1}</span>
+              <div>
+                <h3>
+                  <span class="visually-hidden">Step {i + 1}: </span>
+                  {s.title}
+                </h3>
+                <p>{s.copy}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section theme-paper">
+    <div class="container">
+      <div class="section-head">
+        <h2>Types of engagement</h2>
+        <p class="lead">The proposed work is matched to what the situation requires.</p>
+      </div>
+      <div class="grid grid--3">
+        {
+          types.map((t) => (
+            <article class="card">
+              <h3>{t.title}</h3>
+              <p>{t.copy}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="reading">
+        <h2>A request is not an appointment.</h2>
+        <p>
+          Submitting a request starts a review by the IRA Ideas team. Approved paid appointments are scheduled privately after the
+          applicable approval and payment requirements are met.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    heading="Bring us the situation. We will help identify the next step."
+    copy="Tell our team what you are considering, what is already in place, and any deadline."
+    note="Any proposed paid work will have a defined scope and fee before it begins."
+  />
+</Base>
+
+<style>
+  .process { list-style: none; padding: 0; margin: 0; max-width: 820px; }
+  .process__step { display: grid; grid-template-columns: 56px 1fr; gap: 20px; padding: 28px 0; border-top: 1px solid var(--stone); }
+  .process__step:last-child { border-bottom: 1px solid var(--stone); }
+  .process li + li { margin-top: 0; }
+  .process__num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--gold-deep);
+  }
+  .process__step p { margin: 0; color: var(--warm-gray); }
+</style>

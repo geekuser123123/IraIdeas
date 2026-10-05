@@ -1,0 +1,73 @@
+---
+import Turnstile from './Turnstile.astro';
+
+interface Props { list: 'learning' | 'priority'; id?: string; button?: string }
+const { list, id = `${list}-signup`, button = list === 'learning' ? 'Get Learning Updates' : 'Join the Priority List' } = Astro.props;
+---
+
+<form class="signup-form" id={id} action="/api/signup" method="post" data-list={list} novalidate={false}>
+  <input type="hidden" name="list" value={list} />
+  <div class="form-alert" role="alert" tabindex="-1" hidden></div>
+  {
+    list === 'learning' ? (
+      <div class="signup-form__fields">
+        <div class="field">
+          <label for={`${id}-first`}>First name <span class="optional">(optional)</span></label>
+          <input id={`${id}-first`} name="first_name" type="text" autocomplete="given-name" maxlength="120" />
+          <p class="field-error" data-error-for="first_name" />
+        </div>
+        <div class="field">
+          <label for={`${id}-email`}>Email</label>
+          <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" />
+          <p class="field-error" data-error-for="email" />
+        </div>
+      </div>
+    ) : (
+      <div class="signup-form__fields">
+        <div class="field">
+          <label for={`${id}-name`}>Name</label>
+          <input id={`${id}-name`} name="name" type="text" autocomplete="name" required maxlength="120" />
+          <p class="field-error" data-error-for="name" />
+        </div>
+        <div class="field">
+          <label for={`${id}-email`}>Email</label>
+          <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" />
+          <p class="field-error" data-error-for="email" />
+        </div>
+        <div class="field">
+          <label for={`${id}-format`}>Event format of interest <span class="optional">(optional)</span></label>
+          <select id={`${id}-format`} name="format_interest">
+            <option value="">No preference</option>
+            <option value="live">Broader educational events</option>
+            <option value="workshop">Advanced workshops</option>
+            <option value="private-session">Private planning sessions</option>
+          </select>
+        </div>
+      </div>
+    )
+  }
+  <Turnstile />
+  {list === 'priority' && <p class="small muted">Joining the priority list does not reserve a seat or guarantee admission.</p>}
+  <button class="btn btn--primary" type="submit">{button}</button>
+</form>
+
+<script>
+  import { enhanceForm } from '../lib/forms';
+  document.querySelectorAll<HTMLFormElement>('.signup-form').forEach((form) => {
+    const list = form.dataset.list!;
+    enhanceForm(form, {
+      successEvent: list === 'priority' ? 'priority_list_signup' : 'learning_signup',
+      eventProps: (f) => ({ list, format: (f.elements.namedItem('format_interest') as HTMLSelectElement | null)?.value || undefined }),
+    });
+  });
+</script>
+
+<style>
+  .signup-form { max-width: 640px; }
+  @media (min-width: 640px) {
+    .signup-form__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    .signup-form__fields .field:nth-child(3) { grid-column: 1 / -1; }
+  }
+  :global(.theme-dark) .signup-form label { color: var(--warm-white); }
+  :global(.theme-dark) .signup-form .optional { color: var(--gray-on-dark); }
+</style>

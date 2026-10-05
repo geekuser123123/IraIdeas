@@ -1,0 +1,18 @@
+{
+  "brand": "IRA Ideas",
+  "descriptor": "Advanced Retirement & Tax Strategies",
+  "authority": "Built on nearly 30 years of retirement-plan experience with attorney Tim Berry.",
+  "primaryCta": { "label": "Discuss My Situation", "href": "/start" },
+  "contact": {
+    "email": null,
+    "phone": null,
+    "address": null
+  },
+  "external": {
+    "clientLogin": null,
+    "existingEngagementSupport": null,
+    "taxAcademy": null
+  },
+  "legalEntityName": null,
+  "footerDisclosure": null
+}

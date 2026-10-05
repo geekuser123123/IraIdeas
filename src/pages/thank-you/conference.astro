@@ -1,0 +1,41 @@
+---
+import Base from '../../layouts/Base.astro';
+import Confirmation from '../../components/Confirmation.astro';
+---
+
+<Base title="Conference Confirmation" description="Your IRA Ideas conference submission has been received." noindex>
+  <Confirmation eyebrow="IRA Ideas Conferences">
+    <div data-type="application">
+      <h1>Your application has been received.</h1>
+      <p>
+        Our team will review it and contact you about the next step. Your place is not confirmed until the required acceptance and
+        payment steps are complete.
+      </p>
+    </div>
+    <div data-type="registration" hidden>
+      <h1>Your registration details have been received.</h1>
+      <p>
+        Your place is confirmed only after your payment has been verified and any other admission conditions for the event are met. You
+        will receive a confirmation email from the team at that point.
+      </p>
+    </div>
+    <div data-type="priority" hidden>
+      <h1>You have joined the priority list.</h1>
+      <p>
+        You have joined the priority list for future IRA Ideas events. We will contact you when relevant event information becomes
+        available. This does not reserve a seat.
+      </p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn--secondary" href="/conferences">Back to Conferences</a>
+      <a class="btn btn--secondary" href="/start">Discuss My Situation</a>
+    </div>
+  </Confirmation>
+</Base>
+
+<script>
+  const type = new URLSearchParams(location.search).get('type');
+  if (type && document.querySelector(`[data-type="${CSS.escape(type)}"]`)) {
+    document.querySelectorAll<HTMLElement>('[data-type]').forEach((el) => (el.hidden = el.dataset.type !== type));
+  }
+</script>

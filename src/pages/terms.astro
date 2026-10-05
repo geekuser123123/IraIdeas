@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+// LAUNCH BLOCKER: replace with the professionally approved terms of use.
+// It must match the actual forms, tracking, embedded media, and third-party services in use.
+const approved = false;
+---
+
+<Base title="Terms of Use" description="Terms of use for the IRA Ideas website." noindex={!approved}>
+  <PageHero eyebrow="Legal" title="Terms of Use" />
+  <section class="section">
+    <div class="container">
+      <div class="prose">
+        <p data-pending-legal>The terms of use is being finalized and will be published here.</p>
+        <p>Questions can be sent through the <a href="/contact">contact page</a>.</p>
+      </div>
+    </div>
+  </section>
+</Base>

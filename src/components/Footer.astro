@@ -1,0 +1,84 @@
+---
+import Logo from './Logo.astro';
+import { site } from '../data/site';
+
+const year = new Date().getFullYear();
+const ext = site.external;
+---
+
+<footer class="site-footer theme-darker">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <Logo />
+        <p class="muted small">{site.authority}</p>
+        <a class="btn btn--primary" href={site.primaryCta.href}>{site.primaryCta.label}</a>
+      </div>
+      <nav aria-label="Offerings" class="site-footer__col">
+        <h2 class="site-footer__heading">Offerings</h2>
+        <ul>
+          <li><a href="/advanced-services">Advanced Services</a></li>
+          <li><a href="/conferences">Conferences</a></li>
+          <li><a href="/learn">Advanced Learning</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Company" class="site-footer__col">
+        <h2 class="site-footer__heading">IRA Ideas</h2>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/about/tim-berry">Tim Berry</a></li>
+          <li><a href="/how-we-work">How We Work</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="site-footer__col">
+        <h2 class="site-footer__heading">Contact</h2>
+        <ul>
+          {site.contact.email && <li><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>}
+          {site.contact.phone && <li><a href={`tel:${site.contact.phone.replace(/[^0-9+]/g, '')}`}>{site.contact.phone}</a></li>}
+          {site.contact.address && <li class="muted">{site.contact.address}</li>}
+          <li><a href="/contact">Contact the team</a></li>
+          {ext.taxAcademy && <li><a href={ext.taxAcademy} rel="noopener">Plan renewals and administration</a></li>}
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      {site.footerDisclosure && <p class="small muted">{site.footerDisclosure}</p>}
+      <div class="site-footer__legal">
+        <p class="small muted">&copy; {year} {site.legalEntityName ?? site.brand}. All rights reserved.</p>
+        <ul class="small">
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          {ext.clientLogin && <li><a href={ext.clientLogin} rel="noopener">Client Login</a></li>}
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { padding: 72px 0 32px; }
+  .site-footer__top { display: grid; gap: 40px; }
+  @media (min-width: 900px) {
+    .site-footer__top { grid-template-columns: 2fr 1fr 1fr 1.2fr; }
+  }
+  .site-footer__brand p { margin: 20px 0 24px; max-width: 360px; }
+  .site-footer__heading {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .site-footer ul { list-style: none; padding: 0; margin: 0; }
+  .site-footer li + li { margin-top: 10px; }
+  .site-footer a:not(.btn) { color: var(--warm-white) !important; text-decoration: none; }
+  .site-footer a:not(.btn):hover { color: var(--gold-bright) !important; text-decoration: underline; }
+  .site-footer__bottom { border-top: 1px solid var(--line-dark); margin-top: 56px; padding-top: 24px; }
+  .site-footer__legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  .site-footer__legal p { margin: 0; }
+  .site-footer__legal ul { display: flex; gap: 24px; }
+  .site-footer__legal li + li { margin-top: 0; }
+</style>

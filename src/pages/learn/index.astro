@@ -1,0 +1,125 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import SignupForm from '../../components/SignupForm.astro';
+import DraftFlag from '../../components/DraftFlag.astro';
+import { CATEGORIES, CATEGORY_SLUGS } from '../../data/categories';
+import { visible } from '../../lib/content';
+
+const resources = (await visible('resources')).sort((a, b) => b.data.publishedDate.localeCompare(a.data.publishedDate));
+const authors = await Promise.all(resources.map((r) => getEntry(r.data.author)));
+const courses = await visible('courses');
+const topics = CATEGORY_SLUGS.filter((c) => resources.some((r) => r.data.topic === c));
+const formats = [...new Set(resources.map((r) => r.data.format))];
+---
+
+<Base
+  title="Advanced Learning"
+  description="Advanced education on the concepts, structures, and questions behind retirement and tax planning, from attorney Tim Berry and IRA Ideas."
+>
+  <PageHero
+    eyebrow="IRA Ideas Advanced Learning"
+    title="Advanced education for better-informed decisions."
+    lead="Explore the concepts, structures, and questions behind advanced retirement and tax planning. Learn from attorney Tim Berry and other approved contributors as the IRA Ideas library grows."
+  />
+
+  {
+    resources.length > 0 || courses.length > 0 ? (
+      <section class="section">
+        <div class="container">
+          {courses.length > 0 && (
+            <div class="block">
+              <h2>Courses</h2>
+              <div class="grid grid--3">
+                {courses.map((c) => (
+                  <article class="card">
+                    <DraftFlag state={c.data.publication} />
+                    {c.data.entirelyFree && <span class="badge free">Free</span>}
+                    <h3><a href={`/learn/courses/${c.id}`}>{c.data.title}</a></h3>
+                    <p>{c.data.description}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+          {resources.length > 0 && (
+            <div class="block">
+              <h2>Resources</h2>
+              <div class="filters" data-filters hidden>
+                <label>
+                  <span class="visually-hidden">Topic</span>
+                  <select data-filter="topic">
+                    <option value="">All topics</option>
+                    {topics.map((t) => <option value={t}>{CATEGORIES[t].label}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span class="visually-hidden">Format</span>
+                  <select data-filter="format">
+                    <option value="">All formats</option>
+                    {formats.map((f) => <option value={f}>{f[0].toUpperCase() + f.slice(1)}</option>)}
+                  </select>
+                </label>
+              </div>
+              <ul class="grid grid--3 resource-list" role="list">
+                {resources.map((r, i) => (
+                  <li class="card" data-topic={r.data.topic} data-format={r.data.format}>
+                    <DraftFlag state={r.data.publication} />
+                    <p class="eyebrow">{CATEGORIES[r.data.topic].label} &middot; {r.data.format}</p>
+                    <h3><a href={`/learn/${r.id}`}>{r.data.title}</a></h3>
+                    <p>{r.data.description}</p>
+                    <p class="small muted">{authors[i]?.data.name}{r.data.duration && <> &middot; {r.data.duration}</>}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    ) : (
+      <section class="section">
+        <div class="container">
+          <div class="reading">
+            <h2>Free advanced learning is on the way.</h2>
+            <p class="lead">Join the IRA Ideas learning list for new educational resources and announcements as they are released.</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section theme-paper" id="learning-signup" tabindex="-1">
+    <div class="container">
+      <div class="reading">
+        <h2>Get new advanced learning from IRA Ideas.</h2>
+        <p>Receive new educational resources and learning announcements as they are released.</p>
+        <SignupForm list="learning" id="learn-signup" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('[data-filters]');
+  if (wrap) {
+    wrap.hidden = false;
+    const selects = [...wrap.querySelectorAll<HTMLSelectElement>('[data-filter]')];
+    const items = [...document.querySelectorAll<HTMLElement>('.resource-list > li')];
+    const apply = () => {
+      const f = Object.fromEntries(selects.map((s) => [s.dataset.filter!, s.value]));
+      items.forEach((li) => (li.hidden = Boolean((f.topic && li.dataset.topic !== f.topic) || (f.format && li.dataset.format !== f.format))));
+    };
+    selects.forEach((s) => s.addEventListener('change', apply));
+  }
+</script>
+
+<style>
+  .block + .block { margin-top: 64px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+  .filters select { width: auto; min-width: 220px; }
+  .resource-list { list-style: none; padding: 0; }
+  .resource-list li + li { margin-top: 0; }
+  .resource-list li[hidden] { display: none; }
+  .free { color: var(--success); align-self: flex-start; margin-bottom: 12px; }
+</style>

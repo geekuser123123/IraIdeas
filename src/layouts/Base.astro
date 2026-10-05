@@ -1,0 +1,67 @@
+---
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title: string; // unique page title, without the brand suffix
+  description: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  ogImage?: string;
+}
+
+const { title, description, noindex = false, jsonLd, ogImage = '/images/tim/tim-berry-suit-768.webp' } = Astro.props;
+const fullTitle = Astro.url.pathname === '/' ? `${site.brand} | ${site.descriptor}` : `${title} | ${site.brand}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const gaId = import.meta.env.PUBLIC_GA_ID;
+const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#1c1c1e" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.brand} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
+    {ldList.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    {
+      gaId && (
+        <>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+          <script is:inline define:vars={{ gaId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('js', new Date());
+            // Page paths only: query strings are stripped so no form data reaches analytics.
+            gtag('config', gaId, { page_location: location.origin + location.pathname, allow_google_signals: false });
+          </script>
+        </>
+      )
+    }
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

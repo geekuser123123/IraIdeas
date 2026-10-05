@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import Confirmation from '../../components/Confirmation.astro';
+---
+
+<Base title="Request Received" description="Your IRA Ideas service request has been received." noindex>
+  <Confirmation eyebrow="Request received">
+    <h1>Your request has been received.</h1>
+    <p>
+      Our team will review the information you submitted and contact you about the appropriate next step. This may include a request for
+      more information or a proposed paid consultation or engagement.
+    </p>
+    <p><strong>No appointment has been scheduled.</strong></p>
+    <div class="btn-row">
+      <a class="btn btn--secondary" href="/how-we-work">See How We Work</a>
+      <a class="btn btn--secondary" href="/conferences">Explore Conferences</a>
+    </div>
+  </Confirmation>
+</Base>

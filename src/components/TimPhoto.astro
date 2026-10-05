@@ -1,0 +1,64 @@
+---
+interface Props {
+  variant?: 'suit' | 'shirt';
+  eager?: boolean;
+  caption?: boolean;
+  sizes?: string;
+}
+const { variant = 'suit', eager = false, caption = true, sizes = '(min-width: 1024px) 460px, 80vw' } = Astro.props;
+const photos = {
+  suit: { widths: [400, 600, 768], w: 768, h: 800, alt: 'Tim Berry, attorney, in a dark suit with arms crossed' },
+  shirt: { widths: [400, 600, 861], w: 861, h: 1024, alt: 'Tim Berry, attorney, in a striped shirt with arms crossed' },
+};
+const p = photos[variant];
+const src = (w: number) => `/images/tim/tim-berry-${variant}-${w}.webp`;
+---
+
+<figure class="tim-photo">
+  <div class="tim-photo__frame">
+    <img
+      src={src(p.widths[1])}
+      srcset={p.widths.map((w) => `${src(w)} ${w}w`).join(', ')}
+      sizes={sizes}
+      width={p.w}
+      height={p.h}
+      alt={p.alt}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+      decoding="async"
+    />
+  </div>
+  {
+    caption && (
+      <figcaption class="tim-photo__caption">
+        <span class="tim-photo__name">Tim Berry</span>
+        <span class="tim-photo__role">Attorney</span>
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .tim-photo { margin: 0; }
+  .tim-photo__frame {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 38%, rgba(205, 176, 122, 0.38), transparent 70%),
+      linear-gradient(180deg, #3a3833 0%, #2a2926 100%);
+    border-bottom: 3px solid var(--gold);
+  }
+  .tim-photo__frame img { width: 100%; height: auto; margin: 0 auto; padding-top: 24px; }
+  .tim-photo__caption { display: flex; flex-direction: column; padding-top: 14px; line-height: 1.3; }
+  .tim-photo__name { font-family: var(--font-heading); font-size: 1.3rem; }
+  .tim-photo__role {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-top: 4px;
+  }
+  :global(.theme-dark) .tim-photo__role, :global(.theme-darker) .tim-photo__role { color: var(--gold); }
+</style>

@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /thank-you/
+Disallow: /data/
+Disallow: /api/
+
+Sitemap: https://iraideas.com/sitemap-index.xml

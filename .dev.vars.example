@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local `wrangler dev`. Production values are Worker secrets.
+TURNSTILE_SECRET=
+CRM_WEBHOOK_URL=
+CRM_WEBHOOK_SECRET=
+RESEND_API_KEY=
+STRIPE_WEBHOOK_SECRET=
+IP_HASH_SALT=change-me

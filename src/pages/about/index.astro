@@ -1,0 +1,112 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import TimPhoto from '../../components/TimPhoto.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { visible } from '../../lib/content';
+
+// Only real, approved team members appear. Nothing is shown until they are added.
+const team = (await visible('people')).filter((p) => p.id !== 'tim-berry').sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base
+  title="About IRA Ideas"
+  description="IRA Ideas brings together specialized services, focused conferences, and advanced education, built on attorney Tim Berry's nearly 30 years of retirement-plan experience."
+>
+  <PageHero eyebrow="About IRA Ideas" title="Advanced thinking. Organized around your next move.">
+    <p class="lead">
+      IRA Ideas brings together specialized services, focused conferences, and advanced education for people working through significant
+      retirement and tax-planning questions.
+    </p>
+    <p class="lead">
+      Attorney Tim Berry's nearly 30 years of retirement-plan experience are central to the brand. Our team helps turn that expertise into
+      an organized experience, from the first inquiry through the agreed next steps.
+    </p>
+    <div class="btn-row"><a class="btn btn--primary" href="/start">Discuss My Situation</a></div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><h2>Three ways to work with IRA Ideas</h2></div>
+      <div class="grid grid--3">
+        <article class="card">
+          <h3>Advanced Services</h3>
+          <p>Specialized review and defined work for significant planning decisions, specialized structures, complex transactions, and specific problems.</p>
+          <a class="card-link" href="/advanced-services">Explore Advanced Services</a>
+        </article>
+        <article class="card">
+          <h3>Conferences</h3>
+          <p>Focused educational events, advanced workshops, and private planning experiences.</p>
+          <a class="card-link" href="/conferences">Explore Conferences</a>
+        </article>
+        <article class="card">
+          <h3>Advanced Learning</h3>
+          <p>Educational resources on the strategies, structures, and questions behind important financial decisions.</p>
+          <a class="card-link" href="/learn">Explore Learning</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section theme-paper">
+    <div class="container split">
+      <div class="split__media"><TimPhoto variant="shirt" sizes="(min-width: 900px) 360px, 80vw" /></div>
+      <div class="reading">
+        <hr class="rule" />
+        <h2>Tim's role</h2>
+        <p>
+          IRA Ideas brings attorney Tim Berry's retirement-plan experience together with a coordinated approach to education and
+          specialized services. Tim's expertise is central to the work.
+        </p>
+        <p>
+          Our team helps organize the information, communication, and next steps around each engagement, so requests start with the IRA
+          Ideas team rather than a personal calendar.
+        </p>
+        <a class="btn btn--secondary" href="/about/tim-berry">Meet Tim Berry</a>
+      </div>
+    </div>
+  </section>
+
+  {
+    team.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head"><h2>The team</h2></div>
+          <div class="grid grid--3">
+            {team.map((p) => (
+              <article class="card">
+                {p.data.photo && <img src={`${p.data.photo}-600.webp`} alt={p.data.photoAlt ?? p.data.name} width="600" height="600" loading="lazy" />}
+                <h3>{p.data.name}</h3>
+                <p class="muted">{p.data.role}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section">
+    <div class="container">
+      <div class="reading">
+        <h2>How the work proceeds</h2>
+        <p>
+          Every engagement starts with the situation. The team reviews the request, identifies the appropriate next step, and defines the
+          scope and fee before paid work begins.
+        </p>
+        <a href="/how-we-work">See how we work</a>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand heading="Bring us the situation. We will help identify the next step." note="Any proposed paid work will have a defined scope and fee before it begins." />
+</Base>
+
+<style>
+  .split { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .split { grid-template-columns: 360px 1fr; gap: 72px; }
+  }
+  .split__media { max-width: 360px; }
+  .card-link { font-weight: 500; }
+</style>

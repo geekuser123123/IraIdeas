@@ -1,0 +1,23 @@
+---
+import { site } from '../data/site';
+interface Props { heading: string; copy?: string; href?: string; label?: string; note?: string }
+const { heading, copy, href = site.primaryCta.href, label = site.primaryCta.label, note } = Astro.props;
+---
+
+<section class="section cta-band theme-dark">
+  <div class="container">
+    <div class="cta-band__inner">
+      <hr class="rule" />
+      <h2>{heading}</h2>
+      {copy && <p class="lead">{copy}</p>}
+      <div class="btn-row"><a class="btn btn--primary" href={href}>{label}</a></div>
+      {note && <p class="small muted cta-band__note">{note}</p>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band__inner { max-width: 760px; }
+  .cta-band .btn-row { margin-top: 28px; }
+  .cta-band__note { margin-top: 20px; }
+</style>

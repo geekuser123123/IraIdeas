@@ -1,0 +1,21 @@
+---
+interface Props { eyebrow?: string; title: string; lead?: string }
+const { eyebrow, title, lead } = Astro.props;
+---
+
+<section class="page-hero theme-dark">
+  <div class="container">
+    <div class="page-hero__copy">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .page-hero { padding: clamp(56px, 8vw, 96px) 0; border-bottom: 1px solid var(--line-dark); }
+  .page-hero__copy { max-width: 780px; }
+  .page-hero :global(.btn-row) { margin-top: 32px; }
+</style>

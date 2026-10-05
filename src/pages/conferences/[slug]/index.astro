@@ -1,0 +1,187 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import TimPhoto from '../../../components/TimPhoto.astro';
+import SignupForm from '../../../components/SignupForm.astro';
+import DraftFlag from '../../../components/DraftFlag.astro';
+import { visible, eventAction, formatDates, formatPrice, formatDay, FORMAT_LABELS, STATUS_LABELS } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const events = await visible('events');
+  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
+}
+
+const { event } = Astro.props;
+const d = event.data;
+const instructor = await getEntry(d.instructor);
+const isTim = d.instructor.id === 'tim-berry';
+const action = eventAction(event);
+const dates = formatDates(d.startDate, d.endDate, d.timezone);
+const showPriority = d.status === 'announced' || d.status === 'sold-out';
+const notice = (d.status === 'postponed' || d.status === 'canceled') && d.statusNotice;
+
+// Structured data only for real, published, listed events.
+const eventStatus = { postponed: 'EventPostponed', canceled: 'EventCancelled' } as Record<string, string>;
+const jsonLd =
+  d.publication === 'published' && !d.unlisted
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        name: d.title,
+        description: d.summary,
+        startDate: d.startDate,
+        endDate: d.endDate ?? d.startDate,
+        eventStatus: `https://schema.org/${eventStatus[d.status] ?? 'EventScheduled'}`,
+        eventAttendanceMode: `https://schema.org/${d.delivery === 'virtual' ? 'OnlineEventAttendanceMode' : d.delivery === 'hybrid' ? 'MixedEventAttendanceMode' : 'OfflineEventAttendanceMode'}`,
+        location: d.delivery === 'virtual' ? { '@type': 'VirtualLocation', url: Astro.url.href } : { '@type': 'Place', name: d.logistics.venue ?? d.location, address: d.location },
+        organizer: { '@type': 'Organization', name: 'IRA Ideas', url: Astro.site?.href },
+        performer: instructor ? { '@type': 'Person', name: instructor.data.name } : undefined,
+        ...(d.price != null && ['applications-open', 'registration-open'].includes(d.status)
+          ? { offers: { '@type': 'Offer', price: d.price, priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: Astro.url.href } }
+          : {}),
+      }
+    : undefined;
+---
+
+<Base title={d.title} description={d.summary} noindex={d.unlisted || d.publication !== 'published'} jsonLd={jsonLd}>
+  <section class="event-hero theme-dark">
+    <div class="container event-hero__grid">
+      <div>
+        <nav aria-label="Breadcrumb" class="crumbs small"><a href="/conferences">Conferences</a> <span aria-hidden="true">/</span> {FORMAT_LABELS[d.format]}</nav>
+        <DraftFlag state={d.publication} />
+        <p class="eyebrow">{FORMAT_LABELS[d.format]}</p>
+        <h1>{d.title}</h1>
+        <p class="lead">{d.summary}</p>
+        <dl class="facts">
+          <div><dt>Dates</dt><dd>{dates}</dd></div>
+          <div><dt>Location</dt><dd>{d.location}</dd></div>
+          <div><dt>Instructor</dt><dd>{instructor ? `${instructor.data.name}, ${instructor.data.role}` : 'To be announced'}</dd></div>
+          <div><dt>Price</dt><dd>{formatPrice(d.price)}</dd></div>
+          <div><dt>Availability</dt><dd>{STATUS_LABELS[d.status]}{d.capacity && <span class="muted"> &middot; {d.capacity}</span>}</dd></div>
+        </dl>
+        {notice && <p class="status-notice" role="note">{notice}</p>}
+        {action && <div class="btn-row"><a class="btn btn--primary" href={action.href}>{action.label}</a></div>}
+      </div>
+      {isTim && <div class="event-hero__photo"><TimPhoto eager sizes="(min-width: 900px) 340px, 60vw" /></div>}
+    </div>
+  </section>
+
+  <div class="container"><div class="event-body">
+    {d.audience.length > 0 && (
+      <section>
+        <h2>Who the event is for</h2>
+        <ul class="checklist">{d.audience.map((x) => <li>{x}</li>)}</ul>
+      </section>
+    )}
+    {d.topics.length > 0 && (
+      <section>
+        <h2>What participants will work through</h2>
+        <ul>{d.topics.map((x) => <li>{x}</li>)}</ul>
+      </section>
+    )}
+    {d.inclusions.length > 0 && (
+      <section>
+        <h2>What is included</h2>
+        <ul class="checklist">{d.inclusions.map((x) => <li>{x}</li>)}</ul>
+      </section>
+    )}
+    {(d.experience.preparation || d.experience.event || d.experience.followUp) && (
+      <section>
+        <h2>How the experience works</h2>
+        <div class="phases">
+          {d.experience.preparation && <div class="card"><h3>Preparation</h3><p>{d.experience.preparation}</p></div>}
+          {d.experience.event && <div class="card"><h3>The event</h3><p>{d.experience.event}</p></div>}
+          {d.experience.followUp && <div class="card"><h3>Follow-up</h3><p>{d.experience.followUp}</p></div>}
+        </div>
+      </section>
+    )}
+    {instructor && (
+      <section>
+        <h2>Instructor</h2>
+        <p><strong>{instructor.data.name}</strong>, {instructor.data.role}</p>
+        <p><a href={isTim ? '/about/tim-berry' : '/about'}>Read the full professional biography</a></p>
+      </section>
+    )}
+    {(d.schedule.length > 0 || Object.values(d.logistics).some(Boolean)) && (
+      <section>
+        <h2>Schedule and logistics</h2>
+        <p><strong>Dates:</strong> {dates} (Central Time unless noted)</p>
+        {d.schedule.length > 0 && (
+          <table class="schedule">
+            <thead><tr><th scope="col">Day</th><th scope="col">Time</th><th scope="col">Session</th></tr></thead>
+            <tbody>{d.schedule.map((s) => <tr><td>{s.day}</td><td>{s.time}</td><td>{s.detail}</td></tr>)}</tbody>
+          </table>
+        )}
+        <dl class="logistics">
+          {d.logistics.venue && <><dt>Venue</dt><dd>{d.logistics.venue}</dd></>}
+          {d.logistics.arrival && <><dt>Arrival</dt><dd>{d.logistics.arrival}</dd></>}
+          {d.logistics.accommodation && <><dt>Accommodation</dt><dd>{d.logistics.accommodation}</dd></>}
+          {d.logistics.bring && <><dt>What to bring</dt><dd>{d.logistics.bring}</dd></>}
+        </dl>
+      </section>
+    )}
+    <section>
+      <h2>Participation price</h2>
+      <p class="price">{formatPrice(d.price)}</p>
+      {d.installments && (
+        <ul>
+          <li>Deposit: {formatPrice(d.installments.deposit)}</li>
+          <li>Remaining balance: {formatPrice(d.installments.balance)}, due {formatDay(d.installments.balanceDue)}</li>
+          <li>{d.installments.conditions}</li>
+        </ul>
+      )}
+      {d.guestPolicy && <p class="muted">{d.guestPolicy}</p>}
+    </section>
+    {d.terms.length > 0 && (
+      <section>
+        <h2>Terms and questions</h2>
+        <div class="faqs">
+          {d.terms.map((t) => <details><summary>{t.question}</summary><p>{t.answer}</p></details>)}
+        </div>
+      </section>
+    )}
+  </div></div>
+
+  <section class="section theme-dark">
+    <div class="container">
+      <div class="reading">
+        {showPriority ? (
+          <div id="priority-list">
+            <h2>{d.status === 'sold-out' ? 'This event is sold out.' : 'Be first to hear when this event opens.'}</h2>
+            <p class="lead">Join the priority list and we will contact you when relevant event information becomes available.</p>
+            <SignupForm list="priority" id="event-priority" />
+          </div>
+        ) : notice ? (
+          <><h2>Event update</h2><p class="lead">{notice}</p></>
+        ) : action ? (
+          <><h2>{d.title}</h2><p class="lead">{dates} &middot; {d.location} &middot; {formatPrice(d.price)}</p><div class="btn-row"><a class="btn btn--primary" href={action.href}>{action.label}</a></div></>
+        ) : null}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .event-hero { padding: clamp(48px, 7vw, 88px) 0; }
+  .event-hero__grid { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) { .event-hero__grid { grid-template-columns: 1fr 340px; gap: 64px; } }
+  .event-hero__photo { max-width: 340px; }
+  .crumbs { margin-bottom: 24px; color: var(--gray-on-dark); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; margin: 28px 0; }
+  .facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-on-dark); }
+  .facts dd { margin: 2px 0 0; font-weight: 500; }
+  .status-notice { border-left: 3px solid var(--gold); padding-left: 14px; }
+  .event-body { padding: var(--space-section) 0; max-width: var(--reading); }
+  .event-body section + section { margin-top: 56px; }
+  .phases { display: grid; gap: 16px; }
+  @media (min-width: 700px) { .phases { grid-template-columns: repeat(3, 1fr); } }
+  .schedule { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.95rem; }
+  .schedule th, .schedule td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--stone); vertical-align: top; }
+  .logistics dt { font-weight: 500; margin-top: 12px; }
+  .logistics dd { margin: 0; }
+  .price { font-family: var(--font-heading); font-size: 2rem; margin-bottom: 12px; }
+  .faqs details { border-top: 1px solid var(--stone); padding: 16px 0; }
+  .faqs details:last-child { border-bottom: 1px solid var(--stone); }
+  .faqs summary { cursor: pointer; font-weight: 500; }
+  .faqs details p { margin: 12px 0 0; }
+</style>
