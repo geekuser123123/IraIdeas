@@ -3,6 +3,11 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
+// Read .env the same way Astro does, so a local PUBLIC_SHOW_DRAFTS=true is respected.
+try {
+  process.loadEnvFile('.env');
+} catch {}
+
 const DIST = 'dist';
 const showDrafts = process.env.PUBLIC_SHOW_DRAFTS === 'true';
 const files = [];
