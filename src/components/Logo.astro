@@ -1,52 +1,50 @@
 ---
 import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { site } from '../data/site';
 
 interface Props { tone?: 'light' | 'dark' }
 const { tone = 'light' } = Astro.props;
 
-// The "iRA" lightbulb mark. Drop the file at public/images/logo/ira-mark.png
-// (transparent background) and it is used automatically on the next build.
-const MARK = '/images/logo/ira-mark.png';
-const hasMark = existsSync(new URL(`../../public${MARK}`, import.meta.url));
+// The "iRA" lightbulb mark (transparent WebP, trimmed). Falls back to a text
+// mark if the file is ever removed.
+const MARK = '/images/logo/ira-mark.webp';
+const hasMark = existsSync(join(process.cwd(), 'public', MARK));
 ---
 
 <a href="/" class:list={['logo', `logo--${tone}`]} aria-label={`${site.brand} home`}>
-  {hasMark ? <img class="logo__mark" src={MARK} alt="" width="180" height="72" /> : <span class="logo__mark-text" aria-hidden="true">iRA</span>}
-  <span class="logo__words">
-    <span class="logo__ideas">Ideas</span>
-    <span class="logo__descriptor">{site.descriptor}</span>
-  </span>
+  {
+    hasMark ? (
+      <img class="logo__mark" src={MARK} alt="" width="395" height="138" />
+    ) : (
+      <span class="logo__mark-text" aria-hidden="true">
+        iRA <span class="logo__ideas">Ideas</span>
+      </span>
+    )
+  }
+  <span class="logo__descriptor">Advanced Retirement<br />&amp; Tax Strategies</span>
 </a>
 
 <style>
-  .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; line-height: 1; }
-  .logo__mark { height: 46px; width: auto; }
-  .logo__mark-text {
-    font-family: var(--font-heading);
+  .logo { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; line-height: 1; }
+  /* The image already contains "IDEAS LLC" in white, so it needs a dark background. */
+  .logo__mark { height: 48px; width: auto; }
+  .logo__mark-text { font-family: var(--font-heading); font-weight: 700; font-style: italic; font-size: 2.2rem; color: var(--gold); }
+  .logo__ideas { font-style: normal; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
+  .logo__descriptor {
+    font-size: 0.62rem;
     font-weight: 700;
-    font-style: italic;
-    font-size: 2.3rem;
-    letter-spacing: -0.03em;
-    color: var(--gold);
-  }
-  .logo__words { display: flex; flex-direction: column; gap: 5px; }
-  .logo__ideas {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 1.35rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
+    line-height: 1.5;
     text-transform: uppercase;
+    padding-left: 14px;
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
   }
-  .logo__descriptor { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }
-  .logo--light .logo__ideas { color: #fff; }
   .logo--light .logo__descriptor { color: var(--gold); }
-  .logo--dark .logo__ideas { color: var(--ink); }
-  .logo--dark .logo__descriptor { color: var(--gold-deep); }
+  .logo--dark .logo__descriptor { color: var(--gold-deep); border-left-color: var(--line); }
   @media (max-width: 420px) {
-    .logo__mark { height: 38px; }
-    .logo__mark-text { font-size: 1.9rem; }
-    .logo__ideas { font-size: 1.1rem; }
-    .logo__descriptor { font-size: 0.52rem; letter-spacing: 0.08em; }
+    .logo { gap: 10px; }
+    .logo__mark { height: 40px; }
+    .logo__descriptor { font-size: 0.54rem; letter-spacing: 0.08em; padding-left: 10px; }
   }
 </style>
