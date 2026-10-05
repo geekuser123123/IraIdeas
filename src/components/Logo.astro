@@ -22,7 +22,6 @@ const hasMark = existsSync(join(process.cwd(), 'public', MARK));
       </span>
     )
   }
-  <span class="logo__descriptor">Advanced Retirement<br />&amp; Tax Strategies</span>
 </a>
 
 <style>
@@ -31,20 +30,8 @@ const hasMark = existsSync(join(process.cwd(), 'public', MARK));
   .logo__mark { height: 48px; width: auto; }
   .logo__mark-text { font-family: var(--font-heading); font-weight: 700; font-style: italic; font-size: 2.2rem; color: var(--gold); }
   .logo__ideas { font-style: normal; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
-  .logo__descriptor {
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    line-height: 1.5;
-    text-transform: uppercase;
-    padding-left: 14px;
-    border-left: 1px solid rgba(255, 255, 255, 0.25);
-  }
-  .logo--light .logo__descriptor { color: var(--gold); }
-  .logo--dark .logo__descriptor { color: var(--gold-deep); border-left-color: var(--line); }
   @media (max-width: 420px) {
     .logo { gap: 10px; }
     .logo__mark { height: 40px; }
-    .logo__descriptor { font-size: 0.54rem; letter-spacing: 0.08em; padding-left: 10px; }
   }
 </style>
