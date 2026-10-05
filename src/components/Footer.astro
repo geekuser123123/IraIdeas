@@ -6,7 +6,7 @@ const year = new Date().getFullYear();
 const ext = site.external;
 ---
 
-<footer class="site-footer theme-darker">
+<footer class="site-footer theme-darker rounded-top">
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__brand">
@@ -57,7 +57,8 @@ const ext = site.external;
 </footer>
 
 <style>
-  .site-footer { padding: 72px 0 32px; }
+  /* Pulls up over the previous section so the rounded corners show its color. */
+  .site-footer { padding: 72px 0 32px; margin-top: calc(-1 * var(--radius-lg)); position: relative; }
   .site-footer__top { display: grid; gap: 40px; }
   @media (min-width: 900px) {
     .site-footer__top { grid-template-columns: 2fr 1fr 1fr 1.2fr; }
@@ -74,7 +75,7 @@ const ext = site.external;
   }
   .site-footer ul { list-style: none; padding: 0; margin: 0; }
   .site-footer li + li { margin-top: 10px; }
-  .site-footer a:not(.btn) { color: var(--warm-white) !important; text-decoration: none; }
+  .site-footer a:not(.btn) { color: var(--light) !important; text-decoration: none; }
   .site-footer a:not(.btn):hover { color: var(--gold-bright) !important; text-decoration: underline; }
   .site-footer__bottom { border-top: 1px solid var(--line-dark); margin-top: 56px; padding-top: 24px; }
   .site-footer__legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }

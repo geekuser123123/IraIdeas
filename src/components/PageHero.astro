@@ -15,7 +15,13 @@ const { eyebrow, title, lead } = Astro.props;
 </section>
 
 <style>
-  .page-hero { padding: clamp(56px, 8vw, 96px) 0; border-bottom: 1px solid var(--line-dark); }
+  .page-hero {
+    padding: clamp(56px, 8vw, 96px) 0;
+    background:
+      radial-gradient(ellipse 50% 80% at 85% 30%, rgba(255, 255, 255, 0.06), transparent 70%),
+      linear-gradient(160deg, #0f504e 0%, var(--teal) 55%, var(--teal-deep) 100%);
+  }
+  .page-hero h1 { color: #fff; }
   .page-hero__copy { max-width: 780px; }
   .page-hero :global(.btn-row) { margin-top: 32px; }
 </style>

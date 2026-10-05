@@ -266,9 +266,9 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
   @media (min-width: 1000px) {
     .start-grid { grid-template-columns: minmax(0, 720px) 320px; gap: 72px; justify-content: space-between; }
   }
-  .inquiry { background: var(--paper); border: 1px solid var(--stone); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
+  .inquiry { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
   .step[hidden] { display: none; }
-  .step__legend { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 24px; padding: 0; }
+  .step__legend { font-family: var(--font-heading); font-weight: 700; font-size: 1.7rem; margin-bottom: 24px; padding: 0; }
   .step__nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
   .step__nav[hidden], [data-js-only][hidden] { display: none; }
   .field-row { display: grid; gap: 0 20px; }
@@ -279,7 +279,7 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
   .progress { margin-bottom: 28px; scroll-margin-top: 16px; }
   .progress[hidden] { display: none; }
   .progress__label { font-weight: 500; margin-bottom: 8px; }
-  .progress__bar { height: 4px; background: var(--stone); border-radius: 2px; overflow: hidden; }
+  .progress__bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
   .progress__bar span { display: block; height: 100%; width: 50%; background: var(--gold-deep); transition: width 0.2s ease; }
   .optins { margin-top: 8px; }
   .start-aside .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.3rem; }

@@ -1,14 +1,23 @@
 ---
 import { site } from '../data/site';
-interface Props { heading: string; copy?: string; href?: string; label?: string; note?: string }
-const { heading, copy, href = site.primaryCta.href, label = site.primaryCta.label, note } = Astro.props;
+interface Props {
+  heading: string;
+  accent?: string; // optional second line, shown in gold
+  copy?: string;
+  href?: string;
+  label?: string;
+  note?: string;
+}
+const { heading, accent, copy, href = site.primaryCta.href, label = site.primaryCta.label, note } = Astro.props;
 ---
 
-<section class="section cta-band theme-dark">
+<section class="section cta-band theme-light">
   <div class="container">
-    <div class="cta-band__inner">
-      <hr class="rule" />
-      <h2>{heading}</h2>
+    <div class="cta-band__panel theme-darker rounded-panel">
+      <h2>
+        {heading}
+        {accent && <span class="accent cta-band__accent">{accent}</span>}
+      </h2>
       {copy && <p class="lead">{copy}</p>}
       <div class="btn-row"><a class="btn btn--primary" href={href}>{label}</a></div>
       {note && <p class="small muted cta-band__note">{note}</p>}
@@ -17,7 +26,17 @@ const { heading, copy, href = site.primaryCta.href, label = site.primaryCta.labe
 </section>
 
 <style>
-  .cta-band__inner { max-width: 760px; }
-  .cta-band .btn-row { margin-top: 28px; }
-  .cta-band__note { margin-top: 20px; }
+  .cta-band { padding-bottom: calc(var(--space-section) + var(--radius-lg)); }
+  .cta-band__panel {
+    text-align: center;
+    padding: clamp(40px, 7vw, 80px) clamp(20px, 6vw, 96px);
+    background:
+      radial-gradient(ellipse 60% 80% at 50% 0%, rgba(12, 67, 66, 0.9), transparent 70%),
+      var(--navy);
+  }
+  .cta-band h2 { max-width: 820px; margin-left: auto; margin-right: auto; font-size: clamp(1.9rem, 4vw, 3rem); }
+  .cta-band__accent { display: block; }
+  .cta-band .lead { max-width: 680px; margin: 0 auto; }
+  .cta-band .btn-row { margin-top: 32px; justify-content: center; }
+  .cta-band__note { margin: 20px 0 0; }
 </style>

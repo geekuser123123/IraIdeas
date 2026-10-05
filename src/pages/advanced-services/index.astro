@@ -169,18 +169,18 @@ const usedCategories = CATEGORY_SLUGS.filter((c) => services.some((s) => s.data.
     min-height: 44px;
     padding: 8px 16px;
     border-radius: 999px;
-    border: 1px solid var(--stone);
+    border: 1px solid var(--line);
     background: var(--paper);
     color: var(--ink);
     font: inherit;
     font-size: 0.95rem;
     cursor: pointer;
   }
-  .chip[aria-pressed='true'] { background: var(--charcoal); border-color: var(--charcoal); color: var(--warm-white); }
+  .chip[aria-pressed='true'] { background: var(--teal); border-color: var(--teal); color: var(--light); }
   .service-list { list-style: none; padding: 0; margin: 0; }
   .service-list li + li { margin-top: 0; }
   .service-card[hidden] { display: none; }
-  .service-card h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.45rem; margin-bottom: 4px; }
+  .service-card h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.45rem; margin-bottom: 4px; }
   .service-card__subtitle { color: var(--gold-deep); font-weight: 500; }
   .two-col { display: grid; gap: 56px; }
   @media (min-width: 900px) {

@@ -171,15 +171,15 @@ const title = kind === 'registration' ? `Register: ${d.title}` : `Apply: ${d.tit
 
 <style>
   .apply-hero { padding: clamp(40px, 6vw, 72px) 0; }
-  .crumbs { margin-bottom: 20px; color: var(--gray-on-dark); }
+  .crumbs { margin-bottom: 20px; color: var(--mist); }
   .facts { display: flex; flex-wrap: wrap; gap: 16px 40px; margin: 24px 0 0; }
-  .facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-on-dark); }
+  .facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mist); }
   .facts dd { margin: 2px 0 0; font-weight: 500; }
   .apply-grid { display: grid; gap: 40px; }
   @media (min-width: 1000px) {
     .apply-grid { grid-template-columns: minmax(0, 720px) 300px; justify-content: space-between; }
   }
-  .apply-form { background: var(--paper); border: 1px solid var(--stone); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
+  .apply-form { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
   .field-row { display: grid; gap: 0 20px; }
   @media (min-width: 640px) {
     .field-row { grid-template-columns: 1fr 1fr; }

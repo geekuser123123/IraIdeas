@@ -13,7 +13,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 ---
 
 <!-- Not sticky, so it can never cover form fields on small screens. -->
-<header class="site-header theme-darker">
+<header class="site-header">
   <div class="container site-header__inner">
     <Logo />
     <nav class="site-nav" aria-label="Main">
@@ -57,7 +57,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 </script>
 
 <style>
-  .site-header { border-bottom: 1px solid var(--line-dark); position: relative; z-index: 20; }
+  .site-header { background: var(--teal-deep); color: #fff; position: relative; z-index: 20; }
   .site-header__inner {
     display: flex;
     align-items: center;
@@ -70,15 +70,17 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
   .site-nav__list { list-style: none; margin: 0; padding: 0; display: flex; gap: 32px; }
   .site-nav__list li + li { margin-top: 0; }
   .site-nav a {
-    color: var(--warm-white);
+    color: #fff;
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.98rem;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     padding: 8px 0;
     border-bottom: 2px solid transparent;
   }
-  .site-nav a:hover { color: var(--gold-bright); }
-  .site-nav a[aria-current='page'] { border-bottom-color: var(--gold); }
+  .site-nav a:hover, .site-nav a[aria-current='page'] { color: var(--gold); }
+  .site-header__cta { text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.06em; }
   .site-header__actions { display: flex; align-items: center; gap: 12px; }
   .menu-toggle { display: none; }
 
@@ -91,7 +93,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
       min-height: 48px;
       padding: 0 14px;
       background: transparent;
-      color: var(--warm-white);
+      color: var(--light);
       border: 1px solid var(--line-dark);
       border-radius: var(--radius);
       font: inherit;
