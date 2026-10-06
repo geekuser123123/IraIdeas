@@ -1,78 +1,91 @@
 ---
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
+import PhotoHero from '../../components/PhotoHero.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import DraftFlag from '../../components/DraftFlag.astro';
+import Icon from '../../components/Icon.astro';
 import { CATEGORIES, CATEGORY_SLUGS } from '../../data/categories';
 import { visible, formatPrice } from '../../lib/content';
 
 const services = (await visible('services')).sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name));
-const usedCategories = CATEGORY_SLUGS.filter((c) => services.some((s) => s.data.category === c));
+
+const steps = [
+  { icon: 'chat', title: 'Tell us about your situation', copy: 'Share your objective, what is already in place, and any deadline.' },
+  { icon: 'document', title: 'Review the proposed engagement', copy: 'The proposal identifies the responsible provider, the work included, and the fee.' },
+  { icon: 'handshake', title: 'Approve before work begins', copy: 'Paid work begins only after the scope and fee are agreed.' },
+] as const;
 ---
 
 <Base
   title="Advanced Services"
   description="Specialized services for retirement planning, trusts, ownership structures, and complex transactions from IRA Ideas, with attorney Tim Berry."
 >
-  <PageHero
-    eyebrow="IRA Ideas Advanced Services"
+  <PhotoHero
+    eyebrow="Advanced Services"
     title="Advanced questions deserve more than a general answer."
     lead="Explore specialized services for retirement planning, trusts, ownership structures, and complex transactions. Start with a service you recognize, or tell us what you are trying to accomplish."
   >
-    <div class="btn-row">
+    <Fragment slot="actions">
       <a class="btn btn--primary" href="/start">Discuss My Situation</a>
       <a class="btn btn--secondary" href="#directory">Browse Services</a>
-    </div>
-  </PageHero>
+    </Fragment>
+  </PhotoHero>
 
+  <!-- Directory -->
   <section class="section" id="directory" tabindex="-1">
     <div class="container">
       <div class="section-head">
-        <h2>Service directory</h2>
+        <h2 class="directory__title">Explore Advanced Services</h2>
+        <p class="lead">Start with a service you recognize, or browse by topic.</p>
       </div>
       {
         services.length > 0 ? (
           <>
             <div class="filters" data-filters hidden>
-              <div class="filters__cats" role="group" aria-label="Filter by category">
+              <label class="search">
+                <span class="visually-hidden">Search services</span>
+                <Icon name="search" size={20} class="search__icon" />
+                <input id="service-search" type="search" placeholder="Search services by keyword" autocomplete="off" />
+              </label>
+              <div class="chips" role="group" aria-label="Filter by topic">
                 <button type="button" class="chip" data-category="all" aria-pressed="true">
-                  All services
+                  All
                 </button>
-                {usedCategories.map((c) => (
+                {CATEGORY_SLUGS.map((c) => (
                   <button type="button" class="chip" data-category={c} aria-pressed="false">
-                    {CATEGORIES[c].label}
+                    {CATEGORIES[c].short}
                   </button>
                 ))}
               </div>
-              <div class="filters__search">
-                <label for="service-search" class="visually-hidden">
-                  Search services
-                </label>
-                <input id="service-search" type="search" placeholder="Search services" autocomplete="off" />
-              </div>
             </div>
-            <p class="muted small" data-results aria-live="polite" />
-            <ul class="service-list grid grid--3" role="list">
+            <p class="visually-hidden" data-results aria-live="polite" />
+            <ul class="service-list" role="list">
               {services.map((s) => (
                 <li
-                  class="card service-card"
+                  class={`service-card service-card--${s.data.category}`}
                   data-category={s.data.category}
                   data-search={`${s.data.name} ${s.data.subtitle} ${s.data.summary} ${CATEGORIES[s.data.category].label}`.toLowerCase()}
                 >
-                  <DraftFlag state={s.data.publication} />
-                  <p class="eyebrow">{CATEGORIES[s.data.category].label}</p>
-                  <h3>{s.data.name}</h3>
-                  <p class="service-card__subtitle">{s.data.subtitle}</p>
-                  <p>{s.data.summary}</p>
-                  {s.data.fee.display !== 'none' && s.data.fee.amount != null && (
-                    <p class="small muted">
-                      {s.data.fee.display === 'starting' ? 'Starting at ' : 'Fee: '}
-                      {formatPrice(s.data.fee.amount)}
-                    </p>
-                  )}
-                  <a class="btn btn--secondary" href={`/advanced-services/${s.id}`} aria-label={`View service: ${s.data.name}`}>
-                    View Service
-                  </a>
+                  <span class="service-card__icon" aria-hidden="true">
+                    <Icon name={CATEGORIES[s.data.category].icon} size={28} />
+                  </span>
+                  <div class="service-card__body">
+                    <DraftFlag state={s.data.publication} />
+                    <p class="service-card__topic">{CATEGORIES[s.data.category].short}</p>
+                    <h3>{s.data.name}</h3>
+                    <p class="service-card__subtitle">{s.data.subtitle}</p>
+                    <p class="service-card__summary">{s.data.summary}</p>
+                    {s.data.fee.display !== 'none' && s.data.fee.amount != null && (
+                      <p class="service-card__fee">
+                        {s.data.fee.display === 'starting' ? 'Starting at ' : 'Fee: '}
+                        {formatPrice(s.data.fee.amount)}
+                      </p>
+                    )}
+                    <a class="service-card__link" href={`/advanced-services/${s.id}`}>
+                      View Service <Icon name="arrow" size={18} />
+                      <span class="visually-hidden">: {s.data.name}</span>
+                    </a>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -81,41 +94,78 @@ const usedCategories = CATEGORY_SLUGS.filter((c) => services.some((s) => s.data.
             </p>
           </>
         ) : (
-          <div class="card reading">
+          <div class="empty">
             <p>
               Detailed service descriptions are being prepared for publication. In the meantime, tell us what you are working on and our
               team will identify the appropriate next step.
             </p>
-            <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+            <a class="btn btn--primary" href="/start">
+              Discuss My Situation <Icon name="arrow" size={18} />
+            </a>
           </div>
         )
       }
     </div>
   </section>
 
-  <section class="section theme-paper">
-    <div class="container two-col">
+  <!-- Not sure where to start -->
+  <section class="section theme-dark diagnose">
+    <div class="container diagnose__grid">
       <div>
         <h2>You do not need to diagnose the issue yourself.</h2>
-        <p>
+        <p class="lead">
           Tell us what you want to accomplish and what is already in place. Our team will review the information and identify whether a
           consultation, assessment, or defined project is the appropriate next step.
         </p>
         <a class="btn btn--primary" href="/start">Discuss My Situation</a>
       </div>
-      <div>
-        <h2>Clear scope. Agreed fees.</h2>
-        <p>
-          The work required depends on the situation. Before paid work begins, the proposed engagement will identify the responsible
-          provider, the work included, and the fee.
-        </p>
-        <a href="/how-we-work">See how we work</a>
+      <div class="diagnose__media">
+        <img
+          src="/images/tim/tim-berry-suit-768.webp"
+          srcset="/images/tim/tim-berry-suit-400.webp 400w, /images/tim/tim-berry-suit-600.webp 600w, /images/tim/tim-berry-suit-768.webp 768w"
+          sizes="(min-width: 900px) 400px, 75vw"
+          width="768"
+          height="800"
+          alt="Tim Berry, attorney"
+          loading="lazy"
+          decoding="async"
+        />
       </div>
     </div>
   </section>
 
+  <!-- Pricing -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Clear scope. Agreed fees.</h2>
+        <p class="lead">
+          The work required depends on the situation. Before paid work begins, the proposed engagement will identify the responsible provider,
+          the work included, and the fee.
+        </p>
+      </div>
+      <ol class="fee-steps" role="list">
+        {
+          steps.map((step, i) => (
+            <li class={`fee-step fee-step--${i + 1}`}>
+              <span class="fee-step__icon" aria-hidden="true">
+                <Icon name={step.icon} size={30} />
+              </span>
+              <h3>
+                <span class="visually-hidden">Step {i + 1}: </span>
+                {step.title}
+              </h3>
+              <p>{step.copy}</p>
+              {i < steps.length - 1 && <Icon name="arrow" size={20} class="fee-step__arrow" />}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
   <CtaBand
-    heading="Bring us the situation. We will help identify the next step."
+    heading="Let's explore how we can help."
     copy="Tell our team what you are considering, what is already in place, and any deadline."
     note="Any proposed paid work will have a defined scope and fee before it begins."
   />
@@ -130,8 +180,7 @@ const usedCategories = CATEGORY_SLUGS.filter((c) => services.some((s) => s.data.
     const cards = [...document.querySelectorAll<HTMLElement>('.service-card')];
     const results = document.querySelector<HTMLElement>('[data-results]')!;
     const empty = document.querySelector<HTMLElement>('[data-empty]')!;
-    const params = new URLSearchParams(location.search);
-    let category = params.get('category') || 'all';
+    let category = new URLSearchParams(location.search).get('category') || 'all';
     if (!chips.some((c) => c.dataset.category === category)) category = 'all';
 
     const apply = () => {
@@ -162,29 +211,89 @@ const usedCategories = CATEGORY_SLUGS.filter((c) => services.some((s) => s.data.
 </script>
 
 <style>
-  .filters { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .filters__cats { display: flex; flex-wrap: wrap; gap: 8px; }
-  .filters__search { flex: 1 1 260px; max-width: 360px; }
+  .directory__title { font-size: clamp(2.2rem, 4.5vw, 3.4rem); }
+
+  /* Search and topic filters */
+  .filters { margin-bottom: 28px; }
+  .search { position: relative; display: block; margin-bottom: 20px; }
+  .search :global(.search__icon) { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--slate); pointer-events: none; }
+  .search input { min-height: 56px; padding-left: 52px; border-color: #c9cfcd; border-radius: var(--radius); font-size: 1.05rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
   .chip {
     min-height: 44px;
-    padding: 8px 16px;
+    padding: 8px 22px;
     border-radius: 999px;
-    border: 1px solid var(--line);
-    background: var(--paper);
+    border: 1px solid #c9cfcd;
+    background: #fff;
     color: var(--ink);
     font: inherit;
     font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
   }
-  .chip[aria-pressed='true'] { background: var(--teal); border-color: var(--teal); color: var(--light); }
-  .service-list { list-style: none; padding: 0; margin: 0; }
-  .service-list li + li { margin-top: 0; }
-  .service-card[hidden] { display: none; }
-  .service-card h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.45rem; margin-bottom: 4px; }
-  .service-card__subtitle { color: var(--gold-deep); font-weight: 500; }
-  .two-col { display: grid; gap: 56px; }
+  .chip:hover { border-color: var(--teal); }
+  .chip[aria-pressed='true'] { background: var(--teal-deep); border-color: var(--teal-deep); color: #fff; }
+
+  /* Service cards */
+  .service-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; }
   @media (min-width: 900px) {
-    .two-col { grid-template-columns: 1fr 1fr; gap: 80px; }
+    .service-list { grid-template-columns: 1fr 1fr; }
   }
+  .service-list li + li { margin-top: 0; }
+  .service-card { display: flex; gap: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .service-card[hidden] { display: none; }
+  .service-card__icon { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; color: var(--teal); }
+  .service-card--retirement-roth .service-card__icon { background: #e3eeec; }
+  .service-card--trusts-wealth-transfer .service-card__icon { background: #e4ecf3; color: #1f4e6b; }
+  .service-card--ownership-transactions .service-card__icon { background: #f6ecd8; color: #7a5600; }
+  .service-card--plan-transaction-concerns .service-card__icon { background: #e6efe6; color: #2f5f3a; }
+  .service-card__body { flex: 1; min-width: 0; }
+  .service-card__topic { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--slate); margin: 4px 0 8px; }
+  .service-card h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.45rem; margin-bottom: 4px; }
+  .service-card__subtitle { color: var(--teal); font-weight: 500; margin-bottom: 6px; }
+  .service-card__summary { color: var(--slate); }
+  .service-card__fee { font-size: 0.92rem; color: var(--slate); }
+  .service-card__link { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: var(--teal); text-decoration: none; }
+  .service-card__link:hover { text-decoration: underline; }
   .no-results { margin-top: 24px; }
+  .empty { background: var(--light); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; max-width: var(--reading); }
+
+  /* Diagnose */
+  .diagnose__grid { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .diagnose__grid { grid-template-columns: 1fr 1fr; gap: 64px; }
+  }
+  .diagnose h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); color: #fff; }
+  .diagnose .lead { color: #e3eeed; margin-bottom: 28px; }
+  .diagnose__media {
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    background:
+      radial-gradient(ellipse 60% 70% at 50% 35%, #ffffff 0%, transparent 70%),
+      linear-gradient(160deg, #e8eeed 0%, #d5e1df 100%);
+  }
+  .diagnose__media img { width: 62%; height: auto; margin-bottom: -4%; }
+
+  /* Fee steps */
+  .fee-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 32px; }
+  @media (min-width: 900px) {
+    .fee-steps { grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .fee-step { padding: 0 48px; border-left: 1px solid var(--line); }
+    .fee-step:first-child { padding-left: 0; border-left: 0; }
+  }
+  .fee-steps li + li { margin-top: 0; }
+  .fee-step { position: relative; }
+  .fee-step__icon { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%; margin-bottom: 18px; color: var(--teal); background: #e3eeec; }
+  .fee-step--2 .fee-step__icon { background: #e4ecf3; color: #1f4e6b; }
+  .fee-step--3 .fee-step__icon { background: #f6ecd8; color: #7a5600; }
+  .fee-step h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+  .fee-step p { color: var(--slate); margin: 0; }
+  .fee-step :global(.fee-step__arrow) { display: none; }
+  @media (min-width: 900px) {
+    .fee-step :global(.fee-step__arrow) { display: block; position: absolute; right: 14px; top: 50%; color: var(--ink); }
+  }
 </style>

@@ -12,12 +12,6 @@ import { visible, listedEvents, isUpcoming } from '../lib/content';
 import { getEntry } from 'astro:content';
 
 const services = await visible('services');
-const SITUATION_ICONS = {
-  'retirement-roth': 'piggy',
-  'trusts-wealth-transfer': 'shield',
-  'ownership-transactions': 'building',
-  'plan-transaction-concerns': 'document',
-} as const;
 const countByCategory = Object.fromEntries(CATEGORY_SLUGS.map((c) => [c, services.filter((s) => s.data.category === c).length]));
 
 const upcoming = (await listedEvents()).filter(isUpcoming);
@@ -83,7 +77,7 @@ const jsonLd = [
             const has = countByCategory[slug] > 0;
             return (
               <a class="situation" href={has ? `/advanced-services?category=${slug}#directory` : `/start?subject=${slug}`}>
-                <Icon name={SITUATION_ICONS[slug]} size={44} class="situation__icon" />
+                <Icon name={CATEGORIES[slug].icon} size={44} class="situation__icon" />
                 <span class="situation__text">
                   <span class="situation__title">{CATEGORIES[slug].label}</span>
                   <span class="situation__desc">{CATEGORIES[slug].description}</span>
