@@ -1,89 +1,148 @@
 ---
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
+import PhotoHero from '../components/PhotoHero.astro';
 import Turnstile from '../components/Turnstile.astro';
+import Icon from '../components/Icon.astro';
 import { site } from '../data/site';
 
 const ext = site.external;
+
+// Each route appears only when its destination is set. External destinations
+// come from site settings and stay hidden until approved.
+const routes = [
+  {
+    icon: 'document',
+    title: 'Advanced planning & specialized services',
+    copy: 'Share the decision, transaction, or concern you would like reviewed.',
+    label: 'Discuss My Situation',
+    href: '/start',
+  },
+  {
+    icon: 'people',
+    title: 'Conference questions',
+    copy: 'Each event page lists its dates, inclusions, terms, and next steps.',
+    label: 'Explore Conferences',
+    href: '/conferences',
+  },
+  ext.existingEngagementSupport && {
+    icon: 'person',
+    title: 'Existing engagement',
+    copy: 'Current clients can reach support through the client destination.',
+    label: 'Client Access',
+    href: ext.existingEngagementSupport,
+  },
+  ext.taxAcademy && {
+    icon: 'book',
+    title: 'Routine plan renewals & administration',
+    copy: 'Renewals and routine administration are handled separately.',
+    label: 'Plan Administration',
+    href: ext.taxAcademy,
+  },
+].filter(Boolean) as { icon: 'document' | 'people' | 'person' | 'book'; title: string; copy: string; label: string; href: string }[];
 ---
 
 <Base title="Contact" description="Contact the IRA Ideas team. Find the right route for service requests, conference questions, and general inquiries.">
-  <PageHero eyebrow="Contact" title="Contact the IRA Ideas team." lead="Choose the route that fits your question so it reaches the right place." />
+  <PhotoHero title="Contact the IRA Ideas team." lead="Choose the right route for your question." angled={false} label={false} />
 
   <section class="section">
-    <div class="container">
+    <div class="container contact">
       <div class="routes">
-        <article class="card route route--primary">
-          <h2 class="h3">Advanced planning or specialized services</h2>
-          <p>Share the decision, transaction, or concern you would like reviewed.</p>
-          <a class="btn btn--primary" href="/start">Discuss My Situation</a>
-        </article>
-        <article class="card route">
-          <h2 class="h3">Conference questions</h2>
-          <p>Each event page lists its details, terms, and next steps.</p>
-          <a class="btn btn--secondary" href="/conferences">View Conferences</a>
-        </article>
+        <h2>How can we help?</h2>
+        <p class="lead">Choose the option that best matches your question.</p>
+        <ul role="list">
+          {
+            routes.map((r) => (
+              <li class="route">
+                <Icon name={r.icon} size={48} class="route__icon" />
+                <div>
+                  <h3>{r.title}</h3>
+                  <p>{r.copy}</p>
+                  <a class="btn btn--primary route__btn" href={r.href} rel={r.href.startsWith('http') ? 'noopener' : undefined}>
+                    {r.label} <Icon name="arrow" size={18} />
+                  </a>
+                </div>
+                <Icon name="chevron" size={22} class="route__chevron" />
+              </li>
+            ))
+          }
+        </ul>
         {
-          ext.existingEngagementSupport && (
-            <article class="card route">
-              <h2 class="h3">Existing engagement</h2>
-              <p>Current clients can reach support through the client destination.</p>
-              <a class="btn btn--secondary" href={ext.existingEngagementSupport} rel="noopener">Client Support</a>
-            </article>
-          )
-        }
-        {
-          ext.taxAcademy && (
-            <article class="card route">
-              <h2 class="h3">Routine plan renewals and administration</h2>
-              <p>Renewals and routine administration are handled separately.</p>
-              <a class="btn btn--secondary" href={ext.taxAcademy} rel="noopener">Renewals and Administration</a>
-            </article>
-          )
-        }
-      </div>
-    </div>
-  </section>
-
-  <section class="section theme-light">
-    <div class="container contact-grid">
-      <div>
-        <h2>General business inquiry</h2>
-        <p>For media, partnership, or other business questions. For a planning question, please use <a href="/start">Discuss My Situation</a> instead.</p>
-        {
-          (site.contact.email || site.contact.phone) && (
-            <ul class="contact-details">
-              {site.contact.email && <li><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>}
-              {site.contact.phone && <li><a href={`tel:${site.contact.phone.replace(/[^0-9+]/g, '')}`}>{site.contact.phone}</a></li>}
+          (site.contact.email || site.contact.phone || site.contact.address) && (
+            <ul class="details" role="list">
+              {site.contact.address && <li>{site.contact.address}</li>}
+              {site.contact.email && (
+                <li>
+                  <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+                </li>
+              )}
+              {site.contact.phone && (
+                <li>
+                  <a href={`tel:${site.contact.phone.replace(/[^0-9+]/g, '')}`}>{site.contact.phone}</a>
+                </li>
+              )}
             </ul>
           )
         }
       </div>
-      <form id="contact-form" class="contact-form" action="/api/contact" method="post">
-        <div class="form-alert" role="alert" tabindex="-1" hidden></div>
-        <div class="field">
-          <label for="c-name">Name</label>
-          <input id="c-name" name="name" type="text" autocomplete="name" required maxlength="120" />
-          <p class="field-error" data-error-for="name"></p>
+
+      <div class="inquiry">
+        <h2>General business inquiry</h2>
+        <p class="inquiry__intro">For media, partnership, or other business questions. The team will review your message and respond as appropriate.</p>
+        <form id="contact-form" action="/api/contact" method="post">
+          <div class="form-alert" role="alert" tabindex="-1" hidden></div>
+          <div class="field">
+            <label for="c-name">Name</label>
+            <input id="c-name" name="name" type="text" autocomplete="name" required maxlength="120" />
+            <p class="field-error" data-error-for="name"></p>
+          </div>
+          <div class="field">
+            <label for="c-email">Email</label>
+            <input id="c-email" name="email" type="email" autocomplete="email" required maxlength="254" />
+            <p class="field-error" data-error-for="email"></p>
+          </div>
+          <div class="field">
+            <label for="c-subject">Subject <span class="optional">(optional)</span></label>
+            <input id="c-subject" name="subject" type="text" maxlength="150" />
+            <p class="field-error" data-error-for="subject"></p>
+          </div>
+          <div class="field">
+            <label for="c-message">Message</label>
+            <textarea id="c-message" name="message" required maxlength="1000" rows="5"></textarea>
+            <p class="field-error" data-error-for="message"></p>
+          </div>
+          <Turnstile />
+          <button type="submit" class="btn btn--primary inquiry__submit">Send Message <Icon name="arrow" size={18} /></button>
+        </form>
+        <div class="inquiry__note" role="note">
+          <span class="inquiry__info" aria-hidden="true">i</span>
+          <p>
+            For planning requests, please use <a href="/start">Discuss My Situation</a> so the team can understand your needs and direct you to the
+            right next step. Please do not include confidential documents or sensitive account information.
+          </p>
         </div>
-        <div class="field">
-          <label for="c-email">Email</label>
-          <input id="c-email" name="email" type="email" autocomplete="email" required maxlength="254" />
-          <p class="field-error" data-error-for="email"></p>
-        </div>
-        <div class="field">
-          <label for="c-org">Organization <span class="optional">(optional)</span></label>
-          <input id="c-org" name="organization" type="text" autocomplete="organization" maxlength="120" />
-        </div>
-        <div class="field">
-          <label for="c-message">Message</label>
-          <textarea id="c-message" name="message" required maxlength="1000" rows="4"></textarea>
-          <p class="field-error" data-error-for="message"></p>
-        </div>
-        <Turnstile />
-        <p class="notice">Please do not include confidential documents or sensitive account information.</p>
-        <button type="submit" class="btn btn--primary">Send Message</button>
-      </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="decision theme-dark">
+    <div class="container decision__grid">
+      <div class="decision__media" aria-hidden="true">
+        <img
+          src="/images/tim/tim-berry-shirt-600.webp"
+          srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w"
+          sizes="(min-width: 900px) 320px, 60vw"
+          width="600"
+          height="714"
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div class="decision__copy">
+        <h2>Working through a planning decision?</h2>
+        <p>Tell the team what you are considering, what is already in place, and any deadline. We will review the request and identify the appropriate next step.</p>
+        <a class="btn btn--primary" href="/start">Discuss My Situation <Icon name="arrow" size={18} /></a>
+      </div>
     </div>
   </section>
 </Base>
@@ -94,16 +153,48 @@ const ext = site.external;
 </script>
 
 <style>
-  .routes { display: grid; gap: 24px; }
-  @media (min-width: 900px) {
-    .routes { grid-template-columns: repeat(2, 1fr); }
+  .contact { display: grid; gap: 48px; align-items: start; }
+  @media (min-width: 1000px) {
+    .contact { grid-template-columns: 1fr 1fr; gap: 0; }
+    .routes { padding-right: 56px; border-right: 1px solid var(--line); }
+    .inquiry { margin-left: 56px; }
   }
-  .route .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.3rem; }
-  .route--primary { border-top: 4px solid var(--gold); }
-  .contact-grid { display: grid; gap: 40px; }
-  @media (min-width: 900px) {
-    .contact-grid { grid-template-columns: 1fr 1.2fr; gap: 72px; }
+  .routes h2, .inquiry h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+  .routes > ul { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 16px; }
+  .routes li + li { margin-top: 0; }
+  .route { display: flex; gap: 24px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .route :global(.route__icon) { flex: none; color: var(--teal); margin-top: 4px; }
+  .route > div { flex: 1; }
+  .route h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; margin-bottom: 6px; }
+  .route p { color: var(--slate); font-size: 0.97rem; margin-bottom: 14px; }
+  .route__btn { min-height: 44px; padding: 10px 20px; font-size: 0.95rem; }
+  .route :global(.route__chevron) { flex: none; color: var(--teal); margin-top: 6px; }
+  @media (max-width: 500px) {
+    .route { flex-direction: column; gap: 12px; }
+    .route :global(.route__chevron) { display: none; }
   }
-  .contact-form { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 36px); }
-  .contact-details { list-style: none; padding: 0; }
+  .details { list-style: none; padding: 0; margin: 24px 0 0; color: var(--slate); }
+
+  .inquiry { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 4vw, 36px); }
+  .inquiry__intro { color: var(--slate); margin-bottom: 24px; }
+  .inquiry__submit { width: 100%; }
+  .inquiry__note { display: flex; gap: 14px; align-items: flex-start; background: var(--light); border-radius: var(--radius); padding: 16px 18px; margin-top: 24px; border-top: 1px solid var(--line); }
+  .inquiry__note p { margin: 0; color: var(--slate); font-size: 0.93rem; }
+  .inquiry__note a { font-weight: 700; color: var(--ink); }
+  .inquiry__info { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--teal); color: var(--teal); font-weight: 700; font-size: 0.9rem; font-family: var(--font-heading); }
+
+  .decision { background: var(--teal); overflow: hidden; }
+  .decision__grid { display: grid; gap: 24px; align-items: end; }
+  @media (min-width: 900px) {
+    .decision__grid { grid-template-columns: 1fr 1.4fr; gap: 64px; align-items: center; }
+  }
+  .decision__media { align-self: end; display: flex; justify-content: center; padding-top: 32px; }
+  .decision__media img { width: min(320px, 70%); height: auto; }
+  .decision__copy { padding: 48px 0; }
+  .decision__copy h2 { color: #fff; font-size: clamp(2rem, 4vw, 3rem); }
+  .decision__copy p { color: #e3eeed; font-size: 1.1rem; max-width: 560px; margin-bottom: 24px; }
+  @media (max-width: 899px) {
+    .decision__media { order: 2; }
+    .decision__copy { padding-bottom: 0; }
+  }
 </style>

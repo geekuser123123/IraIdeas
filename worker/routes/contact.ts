@@ -17,13 +17,14 @@ export async function handleContact(request: Request, env: Env, ctx: ExecutionCo
   const name = v.text('name', 'Name', { required: true, max: 120 });
   const email = v.email('email');
   const organization = v.text('organization', 'Organization', { max: 120 });
+  const subject = v.text('subject', 'Subject', { max: 150 });
   const message = v.text('message', 'Message', { required: true, max: 1000 });
   if (!v.ok) return failure(request, 422, 'Please correct the highlighted fields.', v.errors);
 
-  const record = { id, name, email, organization, message, source_page: sourcePage(fields) };
+  const record = { id, name, email, organization, subject, message, source_page: sourcePage(fields) };
   try {
-    await env.DB.prepare('INSERT INTO contact_messages (id, name, email, organization, message, source_page) VALUES (?, ?, ?, ?, ?, ?)')
-      .bind(id, name, email, organization, message, record.source_page)
+    await env.DB.prepare('INSERT INTO contact_messages (id, name, email, organization, subject, message, source_page) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .bind(id, name, email, organization, subject, message, record.source_page)
       .run();
   } catch (err) {
     if (isDuplicate(err)) return success(request, REDIRECT);
