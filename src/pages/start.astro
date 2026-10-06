@@ -1,38 +1,136 @@
 ---
 import Base from '../layouts/Base.astro';
 import Turnstile from '../components/Turnstile.astro';
+import Icon from '../components/Icon.astro';
 import { CATEGORIES, CATEGORY_SLUGS } from '../data/categories';
 import { visible } from '../lib/content';
 
 const services = (await visible('services')).sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+const STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
+  'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
+  'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+  'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+  'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+];
 ---
 
 <Base
   title="Discuss My Situation"
   description="Tell the IRA Ideas team about the decision, transaction, or concern you would like reviewed. You do not need to know which service applies."
 >
-  <section class="start-hero theme-dark">
-    <div class="container">
-      <div class="reading">
-        <p class="eyebrow">Discuss My Situation</p>
+  <div class="start">
+    <aside class="panel theme-dark">
+      <div class="panel__inner">
         <h1>Tell us what you are working on.</h1>
-        <p class="lead">Share the decision, transaction, or concern you would like reviewed. You do not need to know which service applies.</p>
+        <p class="panel__lead">Share the decision, transaction, or concern you would like reviewed. You do not need to know which service applies.</p>
+        <h2>What happens next:</h2>
+        <ol role="list">
+          <li><span aria-hidden="true">1</span>Our team will review your request.</li>
+          <li><span aria-hidden="true">2</span>We will contact you about the appropriate next step.</li>
+          <li><span aria-hidden="true">3</span>Any paid work has a defined scope and fee before it begins.</li>
+        </ol>
+        <p class="panel__note">A request is not an appointment. <a href="/how-we-work">See how we work</a>.</p>
       </div>
-    </div>
-  </section>
+      <img
+        class="panel__photo"
+        src="/images/tim/tim-berry-shirt-600.webp"
+        srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w"
+        sizes="360px"
+        width="600"
+        height="714"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
+    </aside>
 
-  <section class="section start-body">
-    <div class="container start-grid">
+    <div class="main">
       <form id="inquiry-form" class="inquiry" action="/api/inquiry" method="post">
-        <div class="progress" data-progress hidden>
-          <p class="progress__label" aria-live="polite"><span data-step-label>Step 1 of 2: Your situation</span></p>
-          <div class="progress__bar" aria-hidden="true"><span data-step-bar></span></div>
-        </div>
+        <ol class="stepper" data-stepper hidden aria-label="Form progress">
+          <li data-stepper-item="0"><span class="stepper__dot" aria-hidden="true"><span>1</span><Icon name="tick" size={18} /></span>Your details</li>
+          <li class="stepper__line" aria-hidden="true"></li>
+          <li data-stepper-item="1"><span class="stepper__dot" aria-hidden="true"><span>2</span><Icon name="tick" size={18} /></span>Your situation</li>
+        </ol>
+        <p class="visually-hidden" aria-live="polite" data-step-label></p>
 
         <div class="form-alert" role="alert" tabindex="-1" hidden></div>
 
+        <!-- Step 1: contact details -->
+        <fieldset class="step" data-step="0">
+          <legend class="step__legend"><span class="step__num" aria-hidden="true">1</span> Your details</legend>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
+              <p class="field-error" data-error-for="name"></p>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
+              <p class="field-error" data-error-for="email"></p>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="region">State or country</label>
+              <select id="region" name="region" required>
+                <option value="">Select your state or country</option>
+                {STATES.map((s) => <option value={s}>{s}</option>)}
+                <option value="Outside the United States">Outside the United States</option>
+              </select>
+              <p class="field-error" data-error-for="region"></p>
+            </div>
+            <div class="field">
+              <label for="phone">Phone <span class="optional" data-phone-optional>(optional)</span></label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
+              <p class="field-error" data-error-for="phone"></p>
+            </div>
+          </div>
+          <div class="field-row">
+            <fieldset class="field">
+              <legend>I am contacting you for</legend>
+              <label class="choice"><input type="radio" name="contacting_for" value="myself" required /> Myself</label>
+              <label class="choice"><input type="radio" name="contacting_for" value="business" /> My business</label>
+              <label class="choice"><input type="radio" name="contacting_for" value="client" /> A client</label>
+              <p class="field-error" data-error-for="contacting_for"></p>
+            </fieldset>
+            <fieldset class="field">
+              <legend>Preferred response</legend>
+              <label class="choice"><input type="radio" name="preferred_response" value="email" required checked /> Email</label>
+              <label class="choice"><input type="radio" name="preferred_response" value="phone" /> Phone</label>
+              <p class="field-error" data-error-for="preferred_response"></p>
+            </fieldset>
+          </div>
+
+          <div class="step__nav" data-js-only hidden>
+            <button type="button" class="btn btn--primary" data-next>Continue <Icon name="arrow" size={18} /></button>
+          </div>
+        </fieldset>
+
+        <!-- Summary of step 1, shown while on step 2 -->
+        <div class="summary" data-summary hidden>
+          <div class="summary__head">
+            <span class="summary__check" aria-hidden="true"><Icon name="tick" size={20} /></span>
+            <h2>Your details</h2>
+            <button type="button" class="summary__edit" data-edit>Edit details</button>
+          </div>
+          <dl class="summary__grid">
+            <div><dt>Name</dt><dd data-show="name"></dd></div>
+            <div><dt>Contacting you for</dt><dd data-show="contacting_for"></dd></div>
+            <div><dt>Email</dt><dd data-show="email"></dd></div>
+            <div><dt>Preferred response</dt><dd data-show="preferred_response"></dd></div>
+            <div><dt>State or country</dt><dd data-show="region"></dd></div>
+            <div><dt>Phone</dt><dd data-show="phone"></dd></div>
+          </dl>
+        </div>
+
+        <!-- Step 2: the situation -->
         <fieldset class="step" data-step="1">
-          <legend class="step__legend">Your situation</legend>
+          <legend class="step__legend"><span class="step__num" aria-hidden="true">2</span> Your situation</legend>
 
           <div class="field">
             <label for="subject">Service or subject</label>
@@ -70,13 +168,15 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
 
           <fieldset class="field">
             <legend>Timing</legend>
-            <label class="choice"><input type="radio" name="timing" value="exploring" required /> Exploring options</label>
-            <label class="choice"><input type="radio" name="timing" value="upcoming" /> Upcoming decision</label>
-            <label class="choice"><input type="radio" name="timing" value="deadline" /> Specific deadline</label>
+            <div class="inline-choices">
+              <label class="choice"><input type="radio" name="timing" value="exploring" required /> Exploring</label>
+              <label class="choice"><input type="radio" name="timing" value="upcoming" /> Upcoming decision</label>
+              <label class="choice"><input type="radio" name="timing" value="deadline" /> Specific deadline</label>
+            </div>
             <p class="field-error" data-error-for="timing"></p>
           </fieldset>
 
-          <div class="field" data-deadline>
+          <div class="field field--narrow" data-deadline>
             <label for="deadline">Deadline date</label>
             <input id="deadline" name="deadline" type="date" />
             <p class="field-error" data-error-for="deadline"></p>
@@ -94,59 +194,10 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
             </select>
           </div>
 
-          <div class="step__nav" data-js-only hidden>
-            <button type="button" class="btn btn--primary" data-next>Continue</button>
-          </div>
-        </fieldset>
-
-        <fieldset class="step" data-step="2">
-          <legend class="step__legend">About you</legend>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="name">Name</label>
-              <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
-              <p class="field-error" data-error-for="name"></p>
-            </div>
-            <div class="field">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
-              <p class="field-error" data-error-for="email"></p>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="region">State or country</label>
-              <input id="region" name="region" type="text" autocomplete="address-level1" required maxlength="80" />
-              <p class="field-error" data-error-for="region"></p>
-            </div>
-            <div class="field">
-              <label for="phone">Phone <span class="optional" data-phone-optional>(optional)</span></label>
-              <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
-              <p class="field-error" data-error-for="phone"></p>
-            </div>
-          </div>
-
-          <fieldset class="field">
-            <legend>I am contacting you for</legend>
-            <label class="choice"><input type="radio" name="contacting_for" value="myself" required /> Myself</label>
-            <label class="choice"><input type="radio" name="contacting_for" value="business" /> My business</label>
-            <label class="choice"><input type="radio" name="contacting_for" value="client" /> A client</label>
-            <p class="field-error" data-error-for="contacting_for"></p>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Preferred response</legend>
-            <label class="choice"><input type="radio" name="preferred_response" value="email" required checked /> Email</label>
-            <label class="choice"><input type="radio" name="preferred_response" value="phone" /> Phone</label>
-            <p class="field-error" data-error-for="preferred_response"></p>
-          </fieldset>
-
           <fieldset class="field optins">
-            <legend>Optional updates <span class="optional">(separate from your request)</span></legend>
-            <label class="choice"><input type="checkbox" name="marketing_email_optin" /> Send me IRA Ideas educational and event emails.</label>
-            <label class="choice"><input type="checkbox" name="sms_optin" /> Send me IRA Ideas text messages. Message and data rates may apply.</label>
+            <legend class="visually-hidden">Optional updates, separate from your request</legend>
+            <label class="choice"><input type="checkbox" name="marketing_email_optin" /> Send me occasional IRA Ideas emails with educational content and event information.</label>
+            <label class="choice"><input type="checkbox" name="sms_optin" /> Send me occasional IRA Ideas text messages. Message and data rates may apply.</label>
           </fieldset>
 
           <Turnstile />
@@ -156,26 +207,14 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
             account information. The team will provide instructions if additional information is needed.
           </p>
 
-          <div class="step__nav">
-            <button type="button" class="btn btn--secondary" data-back data-js-only hidden>Back</button>
-            <button type="submit" class="btn btn--primary">Send My Request</button>
+          <div class="step__nav step__nav--end">
+            <button type="button" class="back" data-back data-js-only hidden><Icon name="arrow" size={18} /> Back to your details</button>
+            <button type="submit" class="btn btn--primary">Send My Request <Icon name="arrow" size={18} /></button>
           </div>
         </fieldset>
       </form>
-
-      <aside class="start-aside">
-        <div class="card">
-          <h2 class="h3">What happens next</h2>
-          <ol>
-            <li>The team reviews your request.</li>
-            <li>We contact you about the appropriate next step, which may be a request for more detail or a proposed paid consultation or engagement.</li>
-            <li>Any paid work has a defined scope and fee before it begins.</li>
-          </ol>
-          <p class="small muted">A request is not an appointment. <a href="/how-we-work">See how we work</a>.</p>
-        </div>
-      </aside>
     </div>
-  </section>
+  </div>
 </Base>
 
 <script>
@@ -184,9 +223,9 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
   const form = document.getElementById('inquiry-form') as HTMLFormElement;
   const subject = form.querySelector<HTMLSelectElement>('#subject')!;
   const steps = [...form.querySelectorAll<HTMLFieldSetElement>('[data-step]')];
-  const progress = form.querySelector<HTMLElement>('[data-progress]')!;
+  const stepper = form.querySelector<HTMLElement>('[data-stepper]')!;
   const label = form.querySelector<HTMLElement>('[data-step-label]')!;
-  const bar = form.querySelector<HTMLElement>('[data-step-bar]')!;
+  const summary = form.querySelector<HTMLElement>('[data-summary]')!;
   const deadlineField = form.querySelector<HTMLElement>('[data-deadline]')!;
   const deadline = form.querySelector<HTMLInputElement>('#deadline')!;
   const phone = form.querySelector<HTMLInputElement>('#phone')!;
@@ -199,21 +238,43 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
   if (wanted === 'private-strategy-intensive') subject.add(new Option('Private Strategy Intensive', wanted), 1);
   if (wanted && [...subject.options].some((o) => o.value === wanted)) subject.value = wanted;
 
-  // Two steps with a visible progress indicator. Without JavaScript, both show.
-  const titles = ['Your situation', 'About you'];
+  // Fill the step 1 summary from the entered values.
+  const LABELS: Record<string, Record<string, string>> = {
+    contacting_for: { myself: 'Myself', business: 'My business', client: 'A client' },
+    preferred_response: { email: 'Email', phone: 'Phone' },
+  };
+  const fillSummary = () => {
+    const data = new FormData(form);
+    summary.querySelectorAll<HTMLElement>('[data-show]').forEach((dd) => {
+      const key = dd.dataset.show!;
+      const raw = String(data.get(key) ?? '').trim();
+      dd.textContent = (LABELS[key]?.[raw] ?? raw) || 'Not provided';
+    });
+  };
+
+  // Two steps with a visible indicator. Without JavaScript, both steps show.
+  const titles = ['Your details', 'Your situation'];
   let current = 0;
   const show = (i: number, focus = true) => {
     current = i;
     steps.forEach((s, n) => (s.hidden = n !== i));
-    label.textContent = `Step ${i + 1} of ${steps.length}: ${titles[i]}`;
-    bar.style.width = `${((i + 1) / steps.length) * 100}%`;
+    summary.hidden = i !== 1;
+    if (i === 1) fillSummary();
+    stepper.querySelectorAll<HTMLElement>('[data-stepper-item]').forEach((li) => {
+      const n = Number(li.dataset.stepperItem);
+      li.classList.toggle('is-done', n < i);
+      li.classList.toggle('is-current', n === i);
+      if (n === i) li.setAttribute('aria-current', 'step');
+      else li.removeAttribute('aria-current');
+    });
+    label.textContent = `Step ${i + 1} of 2: ${titles[i]}`;
     if (focus) {
-      progress.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      stepper.scrollIntoView({ block: 'start', behavior: 'smooth' });
       steps[i].querySelector<HTMLElement>('input:not([type=hidden]), select, textarea')?.focus({ preventScroll: true });
     }
   };
   form.querySelectorAll<HTMLElement>('[data-js-only]').forEach((el) => (el.hidden = false));
-  progress.hidden = false;
+  stepper.hidden = false;
   show(0, false);
 
   const validStep = (i: number) => {
@@ -227,6 +288,7 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
   };
   form.querySelector('[data-next]')!.addEventListener('click', () => validStep(0) && show(1));
   form.querySelector('[data-back]')!.addEventListener('click', () => show(0));
+  form.querySelector('[data-edit]')!.addEventListener('click', () => show(0));
 
   // Server errors: return to whichever step holds the first problem field.
   form.addEventListener('form:errors', (e) => {
@@ -262,28 +324,72 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
 </script>
 
 <style>
-  .start-hero { padding: clamp(48px, 7vw, 80px) 0; }
-  .start-body { padding-top: 56px; }
-  .start-grid { display: grid; gap: 48px; }
+  .start { display: grid; }
   @media (min-width: 1000px) {
-    .start-grid { grid-template-columns: minmax(0, 720px) 320px; gap: 72px; justify-content: space-between; }
+    .start { grid-template-columns: minmax(340px, 34%) 1fr; }
   }
-  .inquiry { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
+
+  /* Left panel */
+  .panel { position: relative; overflow: hidden; background: linear-gradient(170deg, #0f504e 0%, var(--teal) 50%, var(--teal-deep) 100%); }
+  .panel__inner { position: relative; z-index: 1; padding: clamp(40px, 6vw, 72px) clamp(20px, 3vw, 40px) 32px; max-width: 520px; margin-left: auto; }
+  .panel h1 { color: #fff; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.05; }
+  .panel__lead { color: #e3eeed; font-size: 1.12rem; padding-bottom: 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.25); }
+  .panel h2 { color: #fff; font-size: 1.7rem; margin: 28px 0 18px; }
+  .panel ol { list-style: none; margin: 0; padding: 0; }
+  .panel ol li { display: flex; gap: 16px; align-items: flex-start; color: #fff; font-size: 1.05rem; margin: 0 0 18px; }
+  .panel ol li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #c9ddd8; color: var(--teal-deep); font-weight: 700; }
+  .panel__note { color: var(--mist); font-size: 0.92rem; margin: 8px 0 0; }
+  .panel__photo { display: none; }
+  @media (min-width: 1000px) {
+    .panel { min-height: 100%; }
+    .panel__inner { padding-bottom: 380px; }
+    .panel__photo { display: block; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(360px, 90%); height: auto; }
+  }
+
+  /* Form */
+  .main { background: var(--light); padding: clamp(20px, 3vw, 32px) clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px); }
+  .inquiry { max-width: 820px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 36px); }
+  .stepper { list-style: none; display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0 0 28px; padding: 0; scroll-margin-top: 16px; }
+  .stepper[hidden] { display: none; }
+  .stepper li { display: flex; align-items: center; gap: 12px; margin: 0; font-weight: 500; color: var(--slate); }
+  .stepper__line { flex: 0 1 140px; height: 1px; background: var(--line); }
+  .stepper__dot { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #9fb9b4; color: var(--teal-deep); font-weight: 700; }
+  .stepper__dot :global(svg) { display: none; }
+  .is-current { color: var(--ink) !important; }
+  .is-current .stepper__dot { background: var(--teal-deep); border-color: var(--teal-deep); color: #fff; }
+  .is-done .stepper__dot { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .is-done .stepper__dot span { display: none; }
+  .is-done .stepper__dot :global(svg) { display: block; }
+
   .step[hidden] { display: none; }
-  .step__legend { font-family: var(--font-heading); font-weight: 700; font-size: 1.7rem; margin-bottom: 24px; padding: 0; }
-  .step__nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
-  .step__nav[hidden], [data-js-only][hidden] { display: none; }
-  .field-row { display: grid; gap: 0 20px; }
+  .step__legend { display: flex; align-items: center; gap: 16px; font-family: var(--font-heading); font-weight: 700; font-size: clamp(1.6rem, 3vw, 2rem); margin-bottom: 22px; padding: 0; }
+  .step__num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--teal-deep); color: #fff; font-family: var(--font-body); font-size: 1.05rem; }
+  .field-row { display: grid; gap: 0 24px; }
   @media (min-width: 640px) {
     .field-row { grid-template-columns: 1fr 1fr; }
   }
+  .field--narrow { max-width: 280px; }
   [data-deadline][hidden] { display: none; }
-  .progress { margin-bottom: 28px; scroll-margin-top: 16px; }
-  .progress[hidden] { display: none; }
-  .progress__label { font-weight: 500; margin-bottom: 8px; }
-  .progress__bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
-  .progress__bar span { display: block; height: 100%; width: 50%; background: var(--gold-deep); transition: width 0.2s ease; }
-  .optins { margin-top: 8px; }
-  .start-aside .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.3rem; }
-  .start-aside ol { padding-left: 1.2em; }
+  .inline-choices { display: flex; flex-wrap: wrap; gap: 4px 28px; }
+  .optins { margin-top: 8px; padding-top: 4px; }
+  .step__nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+  .step__nav[hidden], [data-js-only][hidden] { display: none !important; }
+  .step__nav--end { justify-content: space-between; align-items: center; }
+  .step__nav--end .btn { margin-left: auto; }
+  .back { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; padding: 8px 0; font: inherit; font-weight: 500; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .back :global(svg) { transform: rotate(180deg); }
+
+  /* Summary */
+  .summary { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 28px; overflow: hidden; }
+  .summary[hidden] { display: none; }
+  .summary__head { display: flex; align-items: center; gap: 14px; background: #f3f5f4; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .summary__check { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--teal); color: #fff; }
+  .summary__head h2 { flex: 1; font-size: 1.4rem; margin: 0; }
+  .summary__edit { background: none; border: 0; font: inherit; font-weight: 500; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 6px 0; }
+  .summary__grid { display: grid; gap: 14px 24px; margin: 0; padding: 18px 20px; }
+  @media (min-width: 640px) {
+    .summary__grid { grid-template-columns: 1fr 1fr; }
+  }
+  .summary__grid dt { font-weight: 500; font-size: 0.92rem; }
+  .summary__grid dd { margin: 0; color: var(--slate); font-size: 0.92rem; overflow-wrap: anywhere; }
 </style>
