@@ -115,7 +115,7 @@ const courses = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    objectives: z.array(z.string()).default([]),
+    objectives: z.array(point).default([]),
     audience: z.string(),
     prerequisites: z.array(z.string()).default([]),
     instructor: reference('people'),

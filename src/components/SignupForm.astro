@@ -1,24 +1,24 @@
 ---
 import Turnstile from './Turnstile.astro';
 
-interface Props { list: 'learning' | 'priority'; id?: string; button?: string; stacked?: boolean }
-const { list, id = `${list}-signup`, button = list === 'learning' ? 'Get Learning Updates' : 'Join the Priority List', stacked = false } = Astro.props;
+interface Props { list: 'learning' | 'priority'; id?: string; button?: string; stacked?: boolean; inline?: boolean }
+const { list, id = `${list}-signup`, button = list === 'learning' ? 'Get Learning Updates' : 'Join the Priority List', stacked = false, inline = false } = Astro.props;
 ---
 
-<form class:list={['signup-form', { 'signup-form--stacked': stacked }]} id={id} action="/api/signup" method="post" data-list={list} novalidate={false}>
+<form class:list={['signup-form', { 'signup-form--stacked': stacked, 'signup-form--inline': inline }]} id={id} action="/api/signup" method="post" data-list={list} novalidate={false}>
   <input type="hidden" name="list" value={list} />
   <div class="form-alert" role="alert" tabindex="-1" hidden></div>
   {
     list === 'learning' ? (
       <div class="signup-form__fields">
-        <div class="field">
+        {!inline && <div class="field">
           <label for={`${id}-first`}>First name <span class="optional">(optional)</span></label>
           <input id={`${id}-first`} name="first_name" type="text" autocomplete="given-name" maxlength="120" />
           <p class="field-error" data-error-for="first_name" />
-        </div>
+        </div>}
         <div class="field">
           <label for={`${id}-email`}>Email</label>
-          <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" />
+          <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" placeholder={inline ? 'Your email address' : undefined} />
           <p class="field-error" data-error-for="email" />
         </div>
       </div>
@@ -70,4 +70,11 @@ const { list, id = `${list}-signup`, button = list === 'learning' ? 'Get Learnin
   }
   :global(.theme-dark) .signup-form label { color: var(--light); }
   :global(.theme-dark) .signup-form .optional { color: var(--mist); }
+  /* Inline: email and button on one row (learning list only) */
+  .signup-form--inline { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; max-width: 680px; }
+  .signup-form--inline .signup-form__fields { flex: 1 1 280px; display: block !important; }
+  .signup-form--inline .field { margin: 0; }
+  .signup-form--inline label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .signup-form--inline .form-alert { flex-basis: 100%; }
+  .signup-form--inline .btn { flex: 0 0 auto; }
 </style>

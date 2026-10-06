@@ -1,9 +1,12 @@
 ---
 import { getEntry, getEntries, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
+import PhotoHero from '../../../components/PhotoHero.astro';
+import SignupForm from '../../../components/SignupForm.astro';
 import DraftFlag from '../../../components/DraftFlag.astro';
-import CtaBand from '../../../components/CtaBand.astro';
+import Icon from '../../../components/Icon.astro';
 import { visible, formatDay, SHOW_DRAFTS } from '../../../lib/content';
+import { bands, bandClass } from '../../../lib/bands';
 
 export async function getStaticPaths() {
   const courses = await visible('courses');
@@ -13,6 +16,7 @@ export async function getStaticPaths() {
 const { course } = Astro.props;
 const d = course.data;
 const instructor = await getEntry(d.instructor);
+const isTim = d.instructor.id === 'tim-berry';
 const services = (await getEntries(d.relatedServices)).filter((s) => s && (SHOW_DRAFTS || s.data.publication === 'published'));
 const supporting = (await getEntries(d.supportingResources)).filter((r) => r && (SHOW_DRAFTS || r.data.publication === 'published'));
 const isReleased = async (id?: string) => {
@@ -23,55 +27,319 @@ const isReleased = async (id?: string) => {
 const modules = await Promise.all(
   d.modules.map(async (m) => ({ ...m, lessons: await Promise.all(m.lessons.map(async (l) => ({ ...l, released: await isReleased(l.resource?.id) }))) })),
 );
+const anyReleased = modules.some((m) => m.lessons.some((l) => l.released));
 const { Content } = await render(course);
+const hasBody = Boolean(course.body && course.body.trim());
+
+type Point = string | { title: string; text: string };
+const asPoint = (p: Point) => (typeof p === 'string' ? { title: '', text: p } : p);
+const OBJECTIVE_ICONS = ['bulb', 'document', 'gear'] as const;
+
+const bg = bands([
+  (d.objectives.length > 0 || d.audience || d.prerequisites.length > 0) && 'learn',
+  modules.length > 0 && 'curriculum',
+  'more',
+]);
 ---
 
 <Base title={d.title} description={d.description} noindex={d.publication !== 'published'}>
-  <section class="course-hero theme-dark">
+  <PhotoHero eyebrow="Advanced Learning" title={d.title} lead={d.description} photo={false} angled={false}>
+    <DraftFlag slot="top" state={d.publication} />
+    <aside slot="panel" class="overview" aria-labelledby="overview-title">
+      <h2 id="overview-title">Course Overview</h2>
+      <ul role="list">
+        {
+          d.entirelyFree && (
+            <li>
+              <span class="overview__icon"><Icon name="tag" size={24} /></span>
+              <span><strong>Free course</strong>Every lesson in this course is free.</span>
+            </li>
+          )
+        }
+        <li>
+          <span class="overview__icon"><Icon name="book" size={24} /></span>
+          <span><strong>Public lessons{anyReleased ? '' : ', once released'}</strong>No account required to view released lessons.</span>
+        </li>
+        <li>
+          <span class="overview__icon"><Icon name="bell" size={24} /></span>
+          <span><strong>Learning updates</strong>Get notified when new lessons are released.</span>
+        </li>
+      </ul>
+      <a class="btn btn--primary overview__btn" href="#course-updates">Get Learning Updates</a>
+    </aside>
+  </PhotoHero>
+
+  {
+    (d.objectives.length > 0 || d.audience || d.prerequisites.length > 0) && (
+      <section class:list={['section', bandClass(bg.learn)]}>
+        <div class="container">
+          {d.objectives.length > 0 && (
+            <>
+              <div class="section-head">
+                <h2>What you will learn</h2>
+              </div>
+              <ul class="objectives" role="list">
+                {d.objectives.map(asPoint).map((o, i) => (
+                  <li class="row-card">
+                    <Icon name={OBJECTIVE_ICONS[i % OBJECTIVE_ICONS.length]} size={36} class="row-card__icon" />
+                    <span>
+                      {o.title && <strong class="row-card__title">{o.title}</strong>}
+                      <span class="row-card__text">{o.text}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <div class="pair">
+            <div class="pair__card pair__card--teal">
+              <Icon name="people" size={44} />
+              <div>
+                <h2>Who this course is for</h2>
+                <p>{d.audience}</p>
+              </div>
+            </div>
+            {d.prerequisites.length > 0 && (
+              <div class="pair__card pair__card--blue">
+                <Icon name="document" size={44} />
+                <div>
+                  <h2>Before you begin</h2>
+                  <ul>
+                    {d.prerequisites.map((p) => (
+                      <li>{p}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+          {hasBody && (
+            <div class="prose body">
+              <Content />
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    modules.length > 0 && (
+      <section class:list={['section', bandClass(bg.curriculum)]}>
+        <div class="container">
+          <div class="section-head">
+            <h2>Course curriculum</h2>
+            <p class="lead">Released lessons are free to view without an account.</p>
+          </div>
+          <div class="modules">
+            {modules.map((m, i) => (
+              <details open={i === 0}>
+                <summary>
+                  <Icon name="chevron" size={20} class="modules__chevron" />
+                  <span>
+                    Module {i + 1}: {m.title}
+                  </span>
+                </summary>
+                <ul role="list">
+                  {m.lessons.map((l) => (
+                    <li>
+                      <Icon name="document" size={22} />
+                      {l.released && l.resource ? <a href={`/learn/${l.resource.id}`}>{l.title}</a> : <span>{l.title}</span>}
+                      {l.released ? <span class="pill pill--live">Available</span> : <span class="pill">Not released</span>}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class:list={['section', bandClass(bg.more)]}>
     <div class="container">
-      <div class="reading">
-        <nav aria-label="Breadcrumb" class="crumbs small"><a href="/learn">Advanced Learning</a> <span aria-hidden="true">/</span> Courses</nav>
-        <DraftFlag state={d.publication} />
-        <p class="eyebrow">IRA Ideas Advanced Learning{d.entirelyFree && <> &middot; Free course</>}</p>
-        <h1>{d.title}</h1>
-        <p class="lead">{d.description}</p>
-        <p class="small muted">
-          For {d.audience}{instructor && <> &middot; Taught by {instructor.data.name}</>}{d.reviewedDate && <> &middot; Reviewed {formatDay(d.reviewedDate)}</>}
-        </p>
+      <div class="more">
+        {
+          instructor && (
+            <div class="instructor">
+              {isTim && (
+                <div class="instructor__media">
+                  <img
+                    src="/images/tim/tim-berry-shirt-400.webp"
+                    srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w"
+                    sizes="240px"
+                    width="400"
+                    height="476"
+                    alt="Tim Berry, attorney"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              )}
+              <div class="instructor__copy">
+                <p class="instructor__eyebrow">Your instructor</p>
+                <h2>{instructor.data.name}</h2>
+                <p>{instructor.data.role}</p>
+                <a href={isTim ? '/about/tim-berry' : '/about'}>
+                  View profile <Icon name="arrow" size={16} />
+                </a>
+              </div>
+            </div>
+          )
+        }
+        <div class="facts">
+          <div>
+            <span class="facts__icon"><Icon name="document" size={24} /></span>
+            <span>
+              <strong>Supporting resources</strong>
+              {supporting.length > 0 ? (
+                <ul>
+                  {supporting.map((r) => (
+                    <li>
+                      <a href={`/learn/${r!.id}`}>{r!.data.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span>Supporting resources are added as lessons are released.</span>
+              )}
+            </span>
+          </div>
+          {
+            d.reviewedDate && (
+              <div>
+                <span class="facts__icon">
+                  <Icon name="calendar" size={24} />
+                </span>
+                <span>
+                  <strong>Reviewed</strong>
+                  <span>
+                    <time datetime={d.reviewedDate}>{formatDay(d.reviewedDate)}</time>
+                  </span>
+                </span>
+              </div>
+            )
+          }
+        </div>
+      </div>
+
+      <div class="related">
+        <Icon name="network" size={44} />
+        <div class="related__copy">
+          <h2>Related services</h2>
+          {
+            services.length > 0 ? (
+              <p>
+                {services.map((s, i) => (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={`/advanced-services/${s!.id}`}>{s!.data.name}</a>
+                  </>
+                ))}
+              </p>
+            ) : (
+              <p>Working through a situation involving this topic? Start with the IRA Ideas team.</p>
+            )
+          }
+        </div>
+        <a class="btn btn--primary" href="/start">Discuss My Situation</a>
       </div>
     </div>
   </section>
 
-  <div class="container section course-body">
-    {d.objectives.length > 0 && <section><h2>What you will learn</h2><ul class="checklist">{d.objectives.map((o) => <li>{o}</li>)}</ul></section>}
-    {d.prerequisites.length > 0 && <section><h2>Before you begin</h2><ul>{d.prerequisites.map((p) => <li>{p}</li>)}</ul></section>}
-    <div class="prose"><Content /></div>
-    {modules.length > 0 && (
-      <section>
-        <h2>Modules</h2>
-        {modules.map((m, i) => (
-          <div class="module">
-            <h3>Module {i + 1}: {m.title}</h3>
-            <ol>
-              {m.lessons.map((l) => (
-                <li>{l.released && l.resource ? <a href={`/learn/${l.resource.id}`}>{l.title}</a> : <>{l.title} <span class="muted small">(not yet released)</span></>}</li>
-              ))}
-            </ol>
-          </div>
-        ))}
-      </section>
-    )}
-    {supporting.length > 0 && <section><h2>Supporting resources</h2><ul>{supporting.map((r) => <li><a href={`/learn/${r!.id}`}>{r!.data.title}</a></li>)}</ul></section>}
-    {services.length > 0 && <section><h2>Related services</h2><ul>{services.map((s) => <li><a href={`/advanced-services/${s!.id}`}>{s!.data.name}</a></li>)}</ul></section>}
-  </div>
-
-  <CtaBand heading="Working through a situation involving this topic?" copy="Tell our team what you are considering and we will identify the appropriate next step." />
+  <section class="updates theme-dark" id="course-updates" tabindex="-1">
+    <div class="container updates__inner">
+      <h2>Get learning updates</h2>
+      <p>Be the first to know when lessons from this course are released.</p>
+      <SignupForm list="learning" id="course-signup" inline />
+    </div>
+  </section>
 </Base>
 
 <style>
-  .course-hero { padding: clamp(48px, 7vw, 80px) 0; }
-  .crumbs { margin-bottom: 20px; color: var(--mist); }
-  .course-body > * { max-width: var(--reading); }
-  .course-body section + section, .course-body .prose + section { margin-top: 48px; }
-  .module + .module { margin-top: 24px; }
+  /* Hero panel */
+  .overview { background: #fff; color: var(--ink); border-radius: var(--radius); padding: 24px 26px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25); }
+  .overview h2 { color: var(--ink); font-size: 1.6rem; margin-bottom: 8px; }
+  .overview ul { list-style: none; margin: 0 0 18px; padding: 0; }
+  .overview li { display: flex; gap: 16px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--line); margin: 0; }
+  .overview__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius); background: #e3eeec; color: var(--teal); }
+  .overview li strong { display: block; font-family: var(--font-heading); font-size: 1.02rem; }
+  .overview li > span:last-child { color: var(--slate); font-size: 0.9rem; line-height: 1.45; }
+  .overview__btn { width: 100%; }
+
+  /* Objectives and audience */
+  .section-head h2, .pair h2, .more h2, .related h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); }
+  .objectives { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 16px; }
+  @media (min-width: 800px) {
+    .objectives { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  }
+  .objectives li + li { margin-top: 0; }
+  .row-card { display: flex; gap: 18px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+  .row-card :global(.row-card__icon) { flex: none; color: var(--teal); }
+  .row-card__title { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; margin-bottom: 2px; }
+  .row-card__text { display: block; color: var(--slate); font-size: 0.95rem; line-height: 1.5; }
+  .pair { display: grid; gap: 20px; }
+  @media (min-width: 800px) {
+    .pair { grid-template-columns: 1fr 1fr; }
+  }
+  .pair__card { display: flex; gap: 24px; align-items: flex-start; border-radius: var(--radius); padding: 28px; border: 1px solid var(--line); }
+  .pair__card :global(svg) { flex: none; color: var(--teal); }
+  .pair__card--teal { background: #eaf2f0; }
+  .pair__card--blue { background: #eaf1f6; }
+  .pair__card h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: 8px; }
+  .pair__card p, .pair__card ul { color: var(--slate); margin: 0; }
+  .body { margin-top: 32px; }
+
+  /* Curriculum */
+  .modules details { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+  .modules details + details { margin-top: 12px; }
+  .modules summary { display: flex; align-items: center; gap: 16px; padding: 16px 22px; cursor: pointer; list-style: none; background: #f3f5f4; border-radius: var(--radius); font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .modules summary::-webkit-details-marker { display: none; }
+  .modules :global(.modules__chevron) { flex: none; transition: transform 0.15s ease; }
+  .modules details[open] :global(.modules__chevron) { transform: rotate(90deg); }
+  .modules details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--line); }
+  .modules ul { list-style: none; margin: 0; padding: 0 22px 0 58px; }
+  .modules li { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); margin: 0; }
+  .modules li:last-child { border-bottom: 0; }
+  .modules li :global(svg) { flex: none; color: var(--slate); }
+  .modules li > a, .modules li > span:not(.pill) { flex: 1; }
+  .pill { flex: none; font-size: 0.8rem; padding: 4px 10px; border-radius: var(--radius); background: #e6e9e8; color: var(--slate); }
+  .pill--live { background: #e3eeec; color: var(--teal); font-weight: 500; }
+  @media (max-width: 600px) {
+    .modules ul { padding-left: 22px; }
+  }
+
+  /* Instructor and facts */
+  .more { display: grid; gap: 20px; }
+  @media (min-width: 900px) {
+    .more { grid-template-columns: 1.1fr 1fr; }
+  }
+  .instructor { display: flex; gap: 0; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .instructor__media { flex: 0 0 42%; display: flex; align-items: flex-end; justify-content: center; background: linear-gradient(170deg, #145856 0%, var(--teal-deep) 100%); padding-top: 16px; }
+  .instructor__media img { width: 92%; height: auto; }
+  .instructor__copy { padding: 24px 28px; }
+  .instructor__eyebrow { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--slate); margin-bottom: 6px; }
+  .instructor__copy h2 { margin-bottom: 4px; }
+  .instructor__copy p:not(.instructor__eyebrow) { color: var(--slate); }
+  .instructor__copy a { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--teal); }
+  .facts { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 24px; }
+  .facts > div { display: flex; gap: 18px; align-items: flex-start; padding: 18px 0; }
+  .facts > div + div { border-top: 1px solid var(--line); }
+  .facts__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius); background: #e3eeec; color: var(--teal); }
+  .facts strong { display: block; font-family: var(--font-heading); font-size: 1.15rem; }
+  .facts span span, .facts ul { color: var(--slate); font-size: 0.95rem; }
+  .facts ul { margin: 4px 0 0; }
+  .related { display: flex; flex-wrap: wrap; align-items: center; gap: 20px 28px; background: #eaf2f0; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 28px; margin-top: 20px; }
+  .related > :global(svg) { flex: none; color: var(--teal); }
+  .related__copy { flex: 1 1 320px; }
+  .related h2 { margin-bottom: 4px; }
+  .related p { color: var(--slate); margin: 0; }
+
+  /* Updates band */
+  .updates { background: var(--teal); padding: clamp(40px, 5vw, 56px) 0; }
+  .updates__inner { text-align: center; }
+  .updates h2 { color: #fff; font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin-bottom: 8px; }
+  .updates p { color: #e3eeed; margin-bottom: 24px; }
+  .updates :global(.signup-form) { margin: 0 auto; text-align: left; }
 </style>
