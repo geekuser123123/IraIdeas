@@ -1,81 +1,86 @@
 ---
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import TimPhoto from '../../components/TimPhoto.astro';
+import PhotoHero from '../../components/PhotoHero.astro';
+import OfferingCards from '../../components/OfferingCards.astro';
+import PhotoPanel from '../../components/PhotoPanel.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
 import { visible } from '../../lib/content';
 
 // Only real, approved team members appear. Nothing is shown until they are added.
 const team = (await visible('people')).filter((p) => p.id !== 'tim-berry').sort((a, b) => a.data.order - b.data.order);
+
+const steps = [
+  { title: 'Inquiry', copy: 'Tell us your objective, the general situation, and any deadline.' },
+  { title: 'Review', copy: 'The team reviews the request and determines the appropriate next step.' },
+  { title: 'Defined engagement', copy: 'The proposal identifies the provider, deliverables, exclusions, and fee before paid work begins.' },
+  { title: 'Agreed work', copy: 'The assigned professional handles the agreed work, with coordinated communication and follow-through.' },
+];
 ---
 
 <Base
   title="About IRA Ideas"
   description="IRA Ideas brings together specialized services, focused conferences, and advanced education, built on attorney Tim Berry's nearly 30 years of retirement-plan experience."
 >
-  <PageHero eyebrow="About IRA Ideas" title="Advanced thinking. Organized around your next move.">
-    <p class="lead">
-      IRA Ideas brings together specialized services, focused conferences, and advanced education for people working through significant
-      retirement and tax-planning questions.
-    </p>
-    <p class="lead">
-      Attorney Tim Berry's nearly 30 years of retirement-plan experience are central to the brand. Our team helps turn that expertise into
-      an organized experience, from the first inquiry through the agreed next steps.
-    </p>
-    <div class="btn-row"><a class="btn btn--primary" href="/start">Discuss My Situation</a></div>
-  </PageHero>
+  <PhotoHero
+    title="Advanced thinking. Organized around your next move."
+    lead="IRA Ideas brings together specialized services, focused conferences, and advanced education for people working through significant retirement and tax-planning questions."
+  >
+    <Fragment slot="actions">
+      <a class="btn btn--primary" href="/start">Discuss My Situation <Icon name="arrow" size={18} /></a>
+    </Fragment>
+  </PhotoHero>
 
+  <!-- The three offerings -->
   <section class="section">
     <div class="container">
-      <div class="section-head"><h2>Three ways to work with IRA Ideas</h2></div>
-      <div class="grid grid--3">
-        <article class="card">
-          <h3>Advanced Services</h3>
-          <p>Specialized review and defined work for significant planning decisions, specialized structures, complex transactions, and specific problems.</p>
-          <a class="card-link" href="/advanced-services">Explore Advanced Services</a>
-        </article>
-        <article class="card">
-          <h3>Conferences</h3>
-          <p>Focused educational events, advanced workshops, and private planning experiences.</p>
-          <a class="card-link" href="/conferences">Explore Conferences</a>
-        </article>
-        <article class="card">
-          <h3>Advanced Learning</h3>
-          <p>Educational resources on the strategies, structures, and questions behind important financial decisions.</p>
-          <a class="card-link" href="/learn">Explore Learning</a>
-        </article>
+      <div class="section-head section-head--center">
+        <h2>Three ways to move forward.</h2>
+        <p class="lead">Practical ways to get started, based on where you are today.</p>
       </div>
+      <OfferingCards />
     </div>
   </section>
 
-  <section class="section theme-paper">
-    <div class="container split">
-      <div class="split__media"><TimPhoto variant="shirt" sizes="(min-width: 900px) 360px, 80vw" /></div>
-      <div class="reading">
-        <hr class="rule" />
-        <h2>Tim's role</h2>
+  <!-- Tim's role -->
+  <section class="section section--flush-top">
+    <div class="container experience">
+      <div class="experience__copy">
+        <h2>Experience at the center. A coordinated team around the work.</h2>
         <p>
-          IRA Ideas brings attorney Tim Berry's retirement-plan experience together with a coordinated approach to education and
-          specialized services. Tim's expertise is central to the work.
+          Attorney Tim Berry's nearly 30 years of retirement-plan experience are central to the brand. Our team helps turn that expertise
+          into an organized experience, from the first inquiry through the agreed next steps.
         </p>
-        <p>
-          Our team helps organize the information, communication, and next steps around each engagement, so requests start with the IRA
-          Ideas team rather than a personal calendar.
-        </p>
-        <a class="btn btn--secondary" href="/about/tim-berry">Meet Tim Berry</a>
+      </div>
+      <div class="experience__media">
+        <img
+          src="/images/tim/tim-berry-suit-768.webp"
+          srcset="/images/tim/tim-berry-suit-400.webp 400w, /images/tim/tim-berry-suit-600.webp 600w, /images/tim/tim-berry-suit-768.webp 768w"
+          sizes="(min-width: 900px) 420px, 80vw"
+          width="768"
+          height="800"
+          alt="Tim Berry, attorney, in a dark suit"
+          loading="lazy"
+          decoding="async"
+        />
+        <a class="btn btn--primary experience__cta" href="/about/tim-berry">Meet Tim Berry <Icon name="arrow" size={18} /></a>
       </div>
     </div>
   </section>
 
   {
     team.length > 0 && (
-      <section class="section">
+      <section class="section section--flush-top">
         <div class="container">
-          <div class="section-head"><h2>The team</h2></div>
+          <div class="section-head">
+            <h2>The team</h2>
+          </div>
           <div class="grid grid--3">
             {team.map((p) => (
               <article class="card">
-                {p.data.photo && <img src={`${p.data.photo}-600.webp`} alt={p.data.photoAlt ?? p.data.name} width="600" height="600" loading="lazy" />}
+                {p.data.photo && (
+                  <img src={`${p.data.photo}-600.webp`} alt={p.data.photoAlt ?? p.data.name} width="600" height="600" loading="lazy" />
+                )}
                 <h3>{p.data.name}</h3>
                 <p class="muted">{p.data.role}</p>
               </article>
@@ -86,27 +91,112 @@ const team = (await visible('people')).filter((p) => p.id !== 'tim-berry').sort(
     )
   }
 
-  <section class="section">
+  <!-- Process -->
+  <section class="section theme-light">
     <div class="container">
-      <div class="reading">
-        <h2>How the work proceeds</h2>
+      <div class="section-head section-head--center">
+        <h2>An organized experience.</h2>
+        <p class="lead">A clear path from your initial inquiry to the work we agree on.</p>
+      </div>
+      <ol class="steps" role="list">
+        {
+          steps.map((step, i) => (
+            <li class="step">
+              <span class="step__num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <h3>
+                <span class="visually-hidden">Step {i + 1}: </span>
+                {step.title}
+              </h3>
+              <p>{step.copy}</p>
+              {i < steps.length - 1 && <Icon name="arrow" size={20} class="step__arrow" />}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- How we work -->
+  <section class="section">
+    <div class="container split">
+      <div class="split__media">
+        <PhotoPanel name="about-how-we-work" alt="A notebook and pen on a desk" icon="document" tone="navy" />
+      </div>
+      <div class="split__copy">
+        <h2>How we work.</h2>
         <p>
-          Every engagement starts with the situation. The team reviews the request, identifies the appropriate next step, and defines the
-          scope and fee before paid work begins.
+          Start with the situation. We organize the information, review the fit, and define the next step before paid work begins. Any
+          proposed paid work will have a defined scope and fee before it begins.
         </p>
-        <a href="/how-we-work">See how we work</a>
+        <a class="btn btn--outline" href="/how-we-work">See How We Work <Icon name="arrow" size={18} /></a>
       </div>
     </div>
   </section>
 
-  <CtaBand heading="Bring us the situation. We will help identify the next step." note="Any proposed paid work will have a defined scope and fee before it begins." />
+  <CtaBand
+    heading="Let's discuss your situation."
+    copy="Tell our team what you are considering, what is already in place, and any deadline. We will review the request and explain how the work could proceed."
+  />
 </Base>
 
 <style>
+  .section--flush-top { padding-top: 0; }
+
+  /* Tim's role */
+  .experience { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .experience { grid-template-columns: 1fr 1fr; gap: 64px; }
+  }
+  .experience__copy h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); }
+  .experience__copy p { color: var(--slate); font-size: 1.1rem; max-width: 560px; }
+  .experience__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    background:
+      radial-gradient(ellipse 60% 70% at 50% 35%, #ffffff 0%, transparent 70%),
+      linear-gradient(160deg, #e8eeed 0%, #d5e1df 100%);
+    box-shadow: 0 12px 32px rgba(11, 27, 35, 0.1);
+  }
+  .experience__media img { width: 72%; height: auto; margin-bottom: -4%; }
+  .experience__cta { position: absolute; right: 20px; bottom: 20px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18); }
+
+  /* Process steps */
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
+  @media (min-width: 900px) {
+    .steps { grid-template-columns: repeat(4, 1fr); gap: 40px; }
+  }
+  .steps li + li { margin-top: 0; }
+  .step { position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .step__num {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #c9d8d3;
+    color: var(--teal-deep);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .step h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; margin-bottom: 6px; }
+  .step p { color: var(--slate); font-size: 0.95rem; margin: 0; }
+  .step :global(.step__arrow) { display: none; }
+  @media (min-width: 900px) {
+    .step :global(.step__arrow) { display: block; position: absolute; right: -30px; top: 50%; transform: translateY(-50%); color: var(--ink); }
+  }
+
+  /* Split */
   .split { display: grid; gap: 40px; align-items: center; }
   @media (min-width: 900px) {
-    .split { grid-template-columns: 360px 1fr; gap: 72px; }
+    .split { grid-template-columns: 1fr 1fr; gap: 64px; }
   }
-  .split__media { max-width: 360px; }
-  .card-link { font-weight: 500; }
+  .split__copy h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+  .split__copy p { color: var(--slate); font-size: 1.05rem; }
 </style>

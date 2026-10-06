@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+import { visible } from '../lib/content';
+
+// The three IRA Ideas offerings, with Advanced Services emphasized.
+const learningAvailable = (await visible('resources')).length > 0;
+---
+
+<div class="offerings">
+  <article class="offering offering--primary">
+    <Icon name="document" size={40} class="offering__icon" />
+    <h3>Advanced Services</h3>
+    <p>
+      Bring us a significant planning decision, proposed transaction, or issue that needs a closer look. We will review the request and
+      identify the appropriate next step.
+    </p>
+    <a class="btn btn--primary" href="/advanced-services">Explore Advanced Services <Icon name="arrow" size={18} /></a>
+  </article>
+  <article class="offering">
+    <Icon name="people" size={40} class="offering__icon" />
+    <h3>Conferences</h3>
+    <p>Join focused events built around advanced concepts, practical discussion, and clearly defined learning or planning objectives.</p>
+    <a class="btn btn--outline" href="/conferences">Explore Conferences <Icon name="arrow" size={18} /></a>
+  </article>
+  <article class="offering">
+    <Icon name="book" size={40} class="offering__icon" />
+    <h3>Advanced Learning</h3>
+    <p>Build a deeper understanding of the strategies, structures, and questions behind important financial decisions.</p>
+    {
+      learningAvailable ? (
+        <a class="btn btn--outline" href="/learn">
+          Explore Learning <Icon name="arrow" size={18} />
+        </a>
+      ) : (
+        <a class="btn btn--outline" href="/learn#learning-signup">
+          Get Learning Updates <Icon name="arrow" size={18} />
+        </a>
+      )
+    }
+  </article>
+</div>
+
+<style>
+  /* Offerings */
+  .offerings { display: grid; gap: 20px; }
+  @media (min-width: 900px) {
+    .offerings { grid-template-columns: repeat(3, 1fr); }
+  }
+  .offering {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: 0 1px 2px rgba(11, 27, 35, 0.04);
+  }
+  .offering h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.55rem; margin: 18px 0 10px; }
+  .offering p { color: var(--slate); flex: 1; }
+  .offering :global(.offering__icon) { color: var(--teal); }
+  .offering .btn { margin-top: 8px; width: 100%; }
+  .offering--primary { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 16px 36px rgba(12, 67, 66, 0.25); }
+  .offering--primary p { color: #d9e6e5; }
+  .offering--primary :global(.offering__icon) { color: #fff; }
+
+</style>

@@ -1,0 +1,49 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import Icon from './Icon.astro';
+
+/**
+ * A photo spot. Shows public/images/site/<name>.webp (or .jpg) when that
+ * file exists; until then, a branded panel with an icon. Drop a photo in
+ * with the right name and it appears on the next build.
+ */
+interface Props {
+  name: string;
+  alt: string;
+  icon: 'people' | 'book' | 'document';
+  tone?: 'teal' | 'navy';
+}
+const { name, alt, icon, tone = 'teal' } = Astro.props;
+const file = ['webp', 'jpg', 'jpeg', 'png'].map((ext) => `/images/site/${name}.${ext}`).find((f) => existsSync(join(process.cwd(), 'public', f)));
+---
+
+{
+  file ? (
+    <img class="photo-panel" src={file} alt={alt} loading="lazy" decoding="async" width="1200" height="675" />
+  ) : (
+    <div class:list={['photo-panel', 'art', `art--${tone}`]} aria-hidden="true">
+      <Icon name={icon} size={120} />
+    </div>
+  )
+}
+
+<style>
+  .photo-panel { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius); box-shadow: 0 12px 32px rgba(11, 27, 35, 0.14); }
+  .art {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius);
+    display: grid;
+    place-items: center;
+    color: rgba(255, 255, 255, 0.85);
+    background:
+      radial-gradient(circle at 25% 20%, rgba(255, 180, 0, 0.18), transparent 45%),
+      radial-gradient(ellipse 70% 80% at 70% 80%, rgba(255, 255, 255, 0.08), transparent 70%),
+      linear-gradient(150deg, #145856 0%, var(--teal) 50%, var(--teal-deep) 100%);
+    box-shadow: 0 12px 32px rgba(11, 27, 35, 0.14);
+  }
+  .art--navy { background:
+      radial-gradient(circle at 75% 25%, rgba(255, 180, 0, 0.18), transparent 45%),
+      linear-gradient(150deg, var(--navy) 0%, #12313a 60%, var(--teal-deep) 100%); }
+
+</style>

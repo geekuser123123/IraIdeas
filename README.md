@@ -51,6 +51,19 @@ Content lives in `src/content/` as Markdown files with a front-matter block:
 Every entry has `publication: draft | review | published`. Only `published` appears on the live site.
 Missing business content stays unpublished; the build fails if `PLACEHOLDER` text reaches production.
 
+## Photos
+
+Photo spots show a branded placeholder until a photo is added to `public/images/site/`
+with the matching name (`.webp`, `.jpg` or `.png`; landscape, at least 1600px wide, about 16:9):
+
+| File name | Where it appears |
+|---|---|
+| `home-conference` | Homepage, "Go deeper in the room." |
+| `home-learning` | Homepage, "Free advanced learning is on the way." |
+| `about-how-we-work` | About page, "How we work." |
+
+Use real photos of IRA Ideas events where possible. Never use stock photos of people presented as clients or staff.
+
 ## Deploying to Cloudflare
 
 1. Create the database and copy its ID into `wrangler.jsonc`:

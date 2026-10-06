@@ -3,6 +3,9 @@ import Base from '../layouts/Base.astro';
 import EventCard from '../components/EventCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Icon from '../components/Icon.astro';
+import PhotoHero from '../components/PhotoHero.astro';
+import OfferingCards from '../components/OfferingCards.astro';
+import PhotoPanel from '../components/PhotoPanel.astro';
 import { CATEGORIES, CATEGORY_SLUGS } from '../data/categories';
 import { site } from '../data/site';
 import { visible, listedEvents, isUpcoming } from '../lib/content';
@@ -44,50 +47,17 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <!-- 1. Hero -->
-  <section class="hero theme-dark">
-    <div class="container hero__grid">
-      <div class="hero__copy">
-        <p class="hero__eyebrow">Advanced Retirement &amp; Tax Strategies</p>
-        <h1>Before your next major move, know your options.</h1>
-        <p class="hero__lead">
-          Advanced planning for retirement accounts, trusts, ownership structures, and complex transactions. Work with our team on your
-          situation, join a focused planning event, or deepen your understanding through advanced education.
-        </p>
-        <div class="btn-row">
-          <a class="btn btn--primary" href="/start">Discuss My Situation</a>
-          <a class="btn btn--secondary" href="/conferences">Explore Conferences</a>
-        </div>
-        <div class="hero__authority-row">
-          <img
-            class="hero__avatar"
-            src="/images/tim/tim-berry-shirt-400.webp"
-            width="400"
-            height="476"
-            alt=""
-            aria-hidden="true"
-            decoding="async"
-          />
-          <p class="hero__authority">{site.authority}</p>
-        </div>
-      </div>
-      <div class="hero__visual">
-        <img
-          class="hero__photo"
-          src="/images/tim/tim-berry-shirt-861.webp"
-          srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w, /images/tim/tim-berry-shirt-861.webp 861w"
-          sizes="(min-width: 1200px) 620px, (min-width: 900px) 50vw, 85vw"
-          width="861"
-          height="1024"
-          alt="Tim Berry, attorney, in a striped shirt with arms crossed"
-          fetchpriority="high"
-        />
-        <p class="hero__label">
-          <span class="hero__label-name">Tim Berry</span>
-          <span class="hero__label-role">Attorney</span>
-        </p>
-      </div>
-    </div>
-  </section>
+  <PhotoHero
+    eyebrow="Advanced Retirement & Tax Strategies"
+    title="Before your next major move, know your options."
+    lead="Advanced planning for retirement accounts, trusts, ownership structures, and complex transactions. Work with our team on your situation, join a focused planning event, or deepen your understanding through advanced education."
+    authority
+  >
+    <Fragment slot="actions">
+      <a class="btn btn--primary" href="/start">Discuss My Situation</a>
+      <a class="btn btn--secondary" href="/conferences">Explore Conferences</a>
+    </Fragment>
+  </PhotoHero>
 
   <!-- 2. Three ways to work with IRA Ideas -->
   <section class="section">
@@ -96,40 +66,7 @@ const jsonLd = [
         <h2>Choose your next step.</h2>
         <p class="lead">Three ways to work with IRA Ideas.</p>
       </div>
-      <div class="offerings">
-        <article class="offering offering--primary">
-          <Icon name="document" size={40} class="offering__icon" />
-          <h3>Advanced Services</h3>
-          <p>
-            Bring us a significant planning decision, proposed transaction, or issue that needs a closer look. We will review the request
-            and identify the appropriate next step.
-          </p>
-          <a class="btn btn--primary" href="/advanced-services">Explore Advanced Services <Icon name="arrow" size={18} /></a>
-        </article>
-        <article class="offering">
-          <Icon name="people" size={40} class="offering__icon" />
-          <h3>Conferences</h3>
-          <p>Join focused events built around advanced concepts, practical discussion, and clearly defined learning or planning objectives.</p>
-          <a class="btn btn--outline" href="/conferences">Explore Conferences <Icon name="arrow" size={18} /></a>
-        </article>
-        <article class="offering">
-          <Icon name="book" size={40} class="offering__icon" />
-          <h3>Advanced Learning</h3>
-          <p>Build a deeper understanding of the strategies, structures, and questions behind important financial decisions.</p>
-          {
-            learningAvailable ? (
-              <a class="btn btn--outline" href="/learn">
-                Explore Learning <Icon name="arrow" size={18} />
-              </a>
-            ) : (
-              <a class="btn btn--outline" href="/learn#learning-signup">
-                Get Learning Updates <Icon name="arrow" size={18} />
-              </a>
-            )
-          }
-        </article>
-      </div>
-
+      <OfferingCards />
     </div>
   </section>
 
@@ -255,9 +192,7 @@ const jsonLd = [
           featured ? (
             <EventCard event={featured} />
           ) : (
-            <div class="art art--conference" aria-hidden="true">
-              <Icon name="people" size={120} />
-            </div>
+            <PhotoPanel name="home-conference" alt="An IRA Ideas event" icon="people" />
           )
         }
       </div>
@@ -299,9 +234,7 @@ const jsonLd = [
       <section class="section theme-light split-section">
         <div class="container split split--reverse">
           <div class="split__media">
-            <div class="art art--learning" aria-hidden="true">
-              <Icon name="book" size={120} />
-            </div>
+            <PhotoPanel name="home-learning" alt="Study materials on a desk" icon="book" tone="navy" />
           </div>
           <div class="split__copy">
             <h2>Free advanced learning is on the way.</h2>
@@ -326,100 +259,6 @@ const jsonLd = [
 </Base>
 
 <style>
-  /* Hero: angled bottom edge kept from the previous design */
-  .hero {
-    position: relative;
-    padding: clamp(48px, 6vw, 72px) 0 0;
-    background:
-      radial-gradient(ellipse 45% 75% at 80% 45%, rgba(255, 255, 255, 0.08), transparent 70%),
-      linear-gradient(160deg, #0f504e 0%, var(--teal) 55%, var(--teal-deep) 100%);
-    clip-path: polygon(0 0, 100% 0, 100% 88%, 62% 100%, 0 93%);
-    overflow: hidden;
-  }
-  .hero__grid { display: grid; gap: 24px; align-items: end; }
-  @media (min-width: 900px) {
-    .hero__grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-  }
-  .hero__copy { padding-bottom: clamp(80px, 10vw, 150px); }
-  .hero__eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #fff;
-    margin-bottom: 20px;
-  }
-  .hero__eyebrow::after { content: ''; width: 56px; height: 1px; background: rgba(255, 255, 255, 0.6); }
-  .hero h1 { font-size: clamp(2.5rem, 5.2vw, 4rem); color: #fff; letter-spacing: -0.02em; line-height: 1.05; }
-  .hero__lead { color: #e3eeed; max-width: 560px; font-size: 1.1rem; margin-bottom: 28px; }
-  .hero__authority-row { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
-  .hero__authority { margin: 0; color: #e3eeed; font-size: 0.95rem; }
-  .hero__avatar {
-    display: none;
-    width: 64px;
-    height: 64px;
-    flex: none;
-    object-fit: cover;
-    object-position: 50% 6%;
-    border-radius: 50%;
-    border: 2px solid var(--gold);
-    background: var(--teal-deep);
-  }
-  .hero__visual { position: relative; align-self: end; justify-self: end; width: 100%; max-width: 620px; }
-  .hero__photo { width: 100%; height: auto; }
-  /* Name tag attached to the photo */
-  .hero__label {
-    position: absolute;
-    left: 6%;
-    bottom: 16%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-    color: #fff;
-    background: rgba(0, 58, 58, 0.92);
-    border-left: 3px solid var(--gold);
-    border-radius: var(--radius);
-    padding: 12px 18px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
-  }
-  .hero__label-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; }
-  .hero__label-role { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
-  @media (max-width: 899px) {
-    .hero { clip-path: polygon(0 0, 100% 0, 100% 96%, 0 100%); }
-    .hero__copy { padding-bottom: 8px; }
-    .hero__avatar { display: block; }
-    .hero__eyebrow::after { display: none; }
-    .hero__visual { max-width: 420px; justify-self: center; }
-    .hero__label { left: 0; bottom: 14%; padding: 10px 14px; }
-  }
-
-  /* Offerings */
-  .offerings { display: grid; gap: 20px; }
-  @media (min-width: 900px) {
-    .offerings { grid-template-columns: repeat(3, 1fr); }
-  }
-  .offering {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 32px;
-    box-shadow: 0 1px 2px rgba(11, 27, 35, 0.04);
-  }
-  .offering h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.55rem; margin: 18px 0 10px; }
-  .offering p { color: var(--slate); flex: 1; }
-  .offering :global(.offering__icon) { color: var(--teal); }
-  .offering .btn { margin-top: 8px; width: 100%; }
-  .offering--primary { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 16px 36px rgba(12, 67, 66, 0.25); }
-  .offering--primary p { color: #d9e6e5; }
-  .offering--primary :global(.offering__icon) { color: #fff; }
-
   /* Situations */
   .situations { display: grid; gap: 16px; }
   @media (min-width: 800px) {
@@ -495,23 +334,6 @@ const jsonLd = [
   .split__aside { margin: 24px 0 0; color: var(--slate); font-size: 0.95rem; }
   .split__aside a { font-weight: 500; color: var(--teal); white-space: nowrap; }
   .split__aside :global(svg) { vertical-align: -3px; }
-
-  /* Illustration panels, used until real event or learning photos are supplied */
-  .art {
-    aspect-ratio: 16 / 9;
-    border-radius: var(--radius);
-    display: grid;
-    place-items: center;
-    color: rgba(255, 255, 255, 0.85);
-    background:
-      radial-gradient(circle at 25% 20%, rgba(255, 180, 0, 0.18), transparent 45%),
-      radial-gradient(ellipse 70% 80% at 70% 80%, rgba(255, 255, 255, 0.08), transparent 70%),
-      linear-gradient(150deg, #145856 0%, var(--teal) 50%, var(--teal-deep) 100%);
-    box-shadow: 0 12px 32px rgba(11, 27, 35, 0.14);
-  }
-  .art--learning { background:
-      radial-gradient(circle at 75% 25%, rgba(255, 180, 0, 0.18), transparent 45%),
-      linear-gradient(150deg, var(--navy) 0%, #12313a 60%, var(--teal-deep) 100%); }
 
   .learn-more { margin-top: 32px; }
   .proof blockquote { margin: 0 0 16px; font-family: var(--font-heading); font-size: 1.2rem; }
