@@ -20,47 +20,32 @@ const STATES = [
   title="Discuss My Situation"
   description="Tell the IRA Ideas team about the decision, transaction, or concern you would like reviewed. You do not need to know which service applies."
 >
-  <div class="start">
-    <aside class="panel theme-dark">
-      <div class="panel__inner">
-        <h1>Tell us what you are working on.</h1>
-        <p class="panel__lead">Share the decision, transaction, or concern you would like reviewed. You do not need to know which service applies.</p>
-        <h2>What happens next:</h2>
-        <ol role="list">
-          <li><span aria-hidden="true">1</span>Our team will review your request.</li>
-          <li><span aria-hidden="true">2</span>We will contact you about the appropriate next step.</li>
-          <li><span aria-hidden="true">3</span>Any paid work has a defined scope and fee before it begins.</li>
-        </ol>
-        <p class="panel__note">A request is not an appointment. <a href="/how-we-work">See how we work</a>.</p>
-      </div>
-      <img
-        class="panel__photo"
-        src="/images/tim/tim-berry-shirt-600.webp"
-        srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w"
-        sizes="360px"
-        width="600"
-        height="714"
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        decoding="async"
-      />
-    </aside>
+  <section class="start-hero theme-dark">
+    <div class="container">
+      <p class="start-hero__eyebrow">Discuss My Situation</p>
+      <h1>Tell us what you are working on.</h1>
+      <p class="start-hero__lead">Share the decision, transaction, or concern you would like reviewed. You do not need to know which service applies.</p>
+    </div>
+  </section>
 
-    <div class="main">
+  <section class="start-body theme-light">
+    <div class="container start-grid">
       <form id="inquiry-form" class="inquiry" action="/api/inquiry" method="post">
-        <ol class="stepper" data-stepper hidden aria-label="Form progress">
-          <li data-stepper-item="0"><span class="stepper__dot" aria-hidden="true"><span>1</span><Icon name="tick" size={18} /></span>Your details</li>
-          <li class="stepper__line" aria-hidden="true"></li>
-          <li data-stepper-item="1"><span class="stepper__dot" aria-hidden="true"><span>2</span><Icon name="tick" size={18} /></span>Your situation</li>
-        </ol>
-        <p class="visually-hidden" aria-live="polite" data-step-label></p>
+        <div class="stepper" data-stepper hidden>
+          <p class="stepper__count" aria-live="polite" data-step-label>Step 1 of 2</p>
+          <ol aria-label="Form progress">
+            <li data-stepper-item="0"><span class="stepper__dot" aria-hidden="true"><span>1</span><Icon name="tick" size={16} /></span><span class="stepper__name">Your details</span></li>
+            <li data-stepper-item="1"><span class="stepper__dot" aria-hidden="true"><span>2</span><Icon name="tick" size={16} /></span><span class="stepper__name">Your situation</span></li>
+          </ol>
+          <div class="stepper__bar" aria-hidden="true"><span data-step-bar></span></div>
+        </div>
 
         <div class="form-alert" role="alert" tabindex="-1" hidden></div>
 
         <!-- Step 1: contact details -->
         <fieldset class="step" data-step="0">
-          <legend class="step__legend"><span class="step__num" aria-hidden="true">1</span> Your details</legend>
+          <legend class="step__legend">Your details</legend>
+          <p class="step__intro">How the team can reach you about your request.</p>
 
           <div class="field-row">
             <div class="field">
@@ -90,23 +75,26 @@ const STATES = [
               <p class="field-error" data-error-for="phone"></p>
             </div>
           </div>
-          <div class="field-row">
-            <fieldset class="field">
-              <legend>I am contacting you for</legend>
-              <label class="choice"><input type="radio" name="contacting_for" value="myself" required /> Myself</label>
-              <label class="choice"><input type="radio" name="contacting_for" value="business" /> My business</label>
-              <label class="choice"><input type="radio" name="contacting_for" value="client" /> A client</label>
-              <p class="field-error" data-error-for="contacting_for"></p>
-            </fieldset>
-            <fieldset class="field">
-              <legend>Preferred response</legend>
-              <label class="choice"><input type="radio" name="preferred_response" value="email" required checked /> Email</label>
-              <label class="choice"><input type="radio" name="preferred_response" value="phone" /> Phone</label>
-              <p class="field-error" data-error-for="preferred_response"></p>
-            </fieldset>
-          </div>
 
-          <div class="step__nav" data-js-only hidden>
+          <fieldset class="field">
+            <legend>I am contacting you for</legend>
+            <div class="tiles tiles--3">
+              <label class="tile"><input type="radio" name="contacting_for" value="myself" required /><span>Myself</span></label>
+              <label class="tile"><input type="radio" name="contacting_for" value="business" /><span>My business</span></label>
+              <label class="tile"><input type="radio" name="contacting_for" value="client" /><span>A client</span></label>
+            </div>
+            <p class="field-error" data-error-for="contacting_for"></p>
+          </fieldset>
+          <fieldset class="field">
+            <legend>Preferred response</legend>
+            <div class="tiles tiles--2">
+              <label class="tile"><input type="radio" name="preferred_response" value="email" required checked /><span>Email</span></label>
+              <label class="tile"><input type="radio" name="preferred_response" value="phone" /><span>Phone</span></label>
+            </div>
+            <p class="field-error" data-error-for="preferred_response"></p>
+          </fieldset>
+
+          <div class="actions" data-js-only hidden>
             <button type="button" class="btn btn--primary" data-next>Continue <Icon name="arrow" size={18} /></button>
           </div>
         </fieldset>
@@ -114,23 +102,24 @@ const STATES = [
         <!-- Summary of step 1, shown while on step 2 -->
         <div class="summary" data-summary hidden>
           <div class="summary__head">
-            <span class="summary__check" aria-hidden="true"><Icon name="tick" size={20} /></span>
+            <span class="summary__check" aria-hidden="true"><Icon name="tick" size={16} /></span>
             <h2>Your details</h2>
-            <button type="button" class="summary__edit" data-edit>Edit details</button>
+            <button type="button" class="summary__edit" data-edit>Edit</button>
           </div>
           <dl class="summary__grid">
             <div><dt>Name</dt><dd data-show="name"></dd></div>
-            <div><dt>Contacting you for</dt><dd data-show="contacting_for"></dd></div>
             <div><dt>Email</dt><dd data-show="email"></dd></div>
-            <div><dt>Preferred response</dt><dd data-show="preferred_response"></dd></div>
+            <div><dt>Contacting you for</dt><dd data-show="contacting_for"></dd></div>
             <div><dt>State or country</dt><dd data-show="region"></dd></div>
+            <div><dt>Preferred response</dt><dd data-show="preferred_response"></dd></div>
             <div><dt>Phone</dt><dd data-show="phone"></dd></div>
           </dl>
         </div>
 
         <!-- Step 2: the situation -->
         <fieldset class="step" data-step="1">
-          <legend class="step__legend"><span class="step__num" aria-hidden="true">2</span> Your situation</legend>
+          <legend class="step__legend">Your situation</legend>
+          <p class="step__intro">A short overview is enough. Please do not include account numbers or confidential details.</p>
 
           <div class="field">
             <label for="subject">Service or subject</label>
@@ -154,50 +143,51 @@ const STATES = [
 
           <div class="field">
             <label for="goal">What are you trying to accomplish?</label>
-            <span class="hint" id="goal-hint">A few sentences is enough. Please do not include account numbers or confidential details.</span>
-            <textarea id="goal" name="goal" required maxlength="600" rows="4" aria-describedby="goal-hint"></textarea>
+            <textarea id="goal" name="goal" required maxlength="600" rows="4" placeholder="For example, the decision you are weighing or the question you need answered."></textarea>
             <p class="field-error" data-error-for="goal"></p>
           </div>
 
           <div class="field">
             <label for="in_place">What is already in place? <span class="optional">(optional)</span></label>
-            <span class="hint" id="inplace-hint">For example, the general type of account, trust, or arrangement involved.</span>
-            <textarea id="in_place" name="in_place" maxlength="600" rows="3" aria-describedby="inplace-hint"></textarea>
+            <textarea id="in_place" name="in_place" maxlength="600" rows="3" placeholder="For example, the general type of account, trust, or arrangement involved."></textarea>
             <p class="field-error" data-error-for="in_place"></p>
           </div>
 
           <fieldset class="field">
             <legend>Timing</legend>
-            <div class="inline-choices">
-              <label class="choice"><input type="radio" name="timing" value="exploring" required /> Exploring</label>
-              <label class="choice"><input type="radio" name="timing" value="upcoming" /> Upcoming decision</label>
-              <label class="choice"><input type="radio" name="timing" value="deadline" /> Specific deadline</label>
+            <div class="tiles tiles--3">
+              <label class="tile"><input type="radio" name="timing" value="exploring" required /><span>Exploring options</span></label>
+              <label class="tile"><input type="radio" name="timing" value="upcoming" /><span>Upcoming decision</span></label>
+              <label class="tile"><input type="radio" name="timing" value="deadline" /><span>Specific deadline</span></label>
             </div>
             <p class="field-error" data-error-for="timing"></p>
           </fieldset>
 
-          <div class="field field--narrow" data-deadline>
-            <label for="deadline">Deadline date</label>
-            <input id="deadline" name="deadline" type="date" />
-            <p class="field-error" data-error-for="deadline"></p>
-          </div>
-
-          <div class="field">
-            <label for="amount_range">Approximate amount involved <span class="optional">(optional)</span></label>
-            <select id="amount_range" name="amount_range">
-              <option value="">Select a range</option>
-              <option value="under-250k">Under $250,000</option>
-              <option value="250k-1m">$250,000 to $1 million</option>
-              <option value="1m-5m">$1 million to $5 million</option>
-              <option value="over-5m">Over $5 million</option>
-              <option value="prefer-not">Prefer not to say</option>
-            </select>
+          <div class="field-row">
+            <div class="field" data-deadline>
+              <label for="deadline">Deadline date</label>
+              <input id="deadline" name="deadline" type="date" />
+              <p class="field-error" data-error-for="deadline"></p>
+            </div>
+            <div class="field">
+              <label for="amount_range">Approximate amount involved <span class="optional">(optional)</span></label>
+              <select id="amount_range" name="amount_range">
+                <option value="">Select a range</option>
+                <option value="under-250k">Under $250,000</option>
+                <option value="250k-1m">$250,000 to $1 million</option>
+                <option value="1m-5m">$1 million to $5 million</option>
+                <option value="over-5m">Over $5 million</option>
+                <option value="prefer-not">Prefer not to say</option>
+              </select>
+            </div>
           </div>
 
           <fieldset class="field optins">
-            <legend class="visually-hidden">Optional updates, separate from your request</legend>
-            <label class="choice"><input type="checkbox" name="marketing_email_optin" /> Send me occasional IRA Ideas emails with educational content and event information.</label>
-            <label class="choice"><input type="checkbox" name="sms_optin" /> Send me occasional IRA Ideas text messages. Message and data rates may apply.</label>
+            <legend>Optional updates <span class="optional">(separate from your request)</span></legend>
+            <div class="optins__box">
+              <label class="choice"><input type="checkbox" name="marketing_email_optin" /> Send me occasional IRA Ideas emails with educational content and event information.</label>
+              <label class="choice"><input type="checkbox" name="sms_optin" /> Send me occasional IRA Ideas text messages. Message and data rates may apply.</label>
+            </div>
           </fieldset>
 
           <Turnstile />
@@ -207,14 +197,33 @@ const STATES = [
             account information. The team will provide instructions if additional information is needed.
           </p>
 
-          <div class="step__nav step__nav--end">
-            <button type="button" class="back" data-back data-js-only hidden><Icon name="arrow" size={18} /> Back to your details</button>
+          <div class="actions actions--split">
+            <button type="button" class="back" data-back data-js-only hidden><Icon name="arrow" size={18} /> Back</button>
             <button type="submit" class="btn btn--primary">Send My Request <Icon name="arrow" size={18} /></button>
           </div>
         </fieldset>
       </form>
+
+      <aside class="side">
+        <div class="side__card">
+          <h2>What happens next</h2>
+          <ol role="list">
+            <li><span aria-hidden="true">1</span><div><strong>Review</strong>Our team reviews your request.</div></li>
+            <li><span aria-hidden="true">2</span><div><strong>Next step</strong>We contact you about the appropriate next step.</div></li>
+            <li><span aria-hidden="true">3</span><div><strong>Defined scope</strong>Any paid work has a defined scope and fee before it begins.</div></li>
+          </ol>
+        </div>
+        <div class="side__card side__card--note">
+          <Icon name="calendar" size={28} />
+          <p><strong>A request is not an appointment.</strong> Approved paid appointments are scheduled privately. <a href="/how-we-work">See how we work</a>.</p>
+        </div>
+        <div class="side__authority">
+          <img src="/images/tim/tim-berry-shirt-400.webp" width="400" height="476" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+          <p>Built on nearly 30 years of retirement-plan experience with attorney Tim Berry.</p>
+        </div>
+      </aside>
     </div>
-  </div>
+  </section>
 </Base>
 
 <script>
@@ -225,6 +234,7 @@ const STATES = [
   const steps = [...form.querySelectorAll<HTMLFieldSetElement>('[data-step]')];
   const stepper = form.querySelector<HTMLElement>('[data-stepper]')!;
   const label = form.querySelector<HTMLElement>('[data-step-label]')!;
+  const bar = form.querySelector<HTMLElement>('[data-step-bar]')!;
   const summary = form.querySelector<HTMLElement>('[data-summary]')!;
   const deadlineField = form.querySelector<HTMLElement>('[data-deadline]')!;
   const deadline = form.querySelector<HTMLInputElement>('#deadline')!;
@@ -268,6 +278,7 @@ const STATES = [
       else li.removeAttribute('aria-current');
     });
     label.textContent = `Step ${i + 1} of 2: ${titles[i]}`;
+    bar.style.width = i === 0 ? '50%' : '100%';
     if (focus) {
       stepper.scrollIntoView({ block: 'start', behavior: 'smooth' });
       steps[i].querySelector<HTMLElement>('input:not([type=hidden]), select, textarea')?.focus({ preventScroll: true });
@@ -324,72 +335,114 @@ const STATES = [
 </script>
 
 <style>
-  .start { display: grid; }
+  /* Hero */
+  .start-hero { background: linear-gradient(160deg, #0f504e 0%, var(--teal) 55%, var(--teal-deep) 100%); padding: clamp(40px, 5vw, 64px) 0 clamp(88px, 9vw, 120px); }
+  .start-hero__eyebrow { display: flex; align-items: center; gap: 16px; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; margin-bottom: 14px; }
+  .start-hero__eyebrow::after { content: ''; width: 56px; height: 1px; background: rgba(255, 255, 255, 0.6); }
+  .start-hero h1 { color: #fff; font-size: clamp(2.2rem, 4.6vw, 3.4rem); max-width: 760px; margin-bottom: 12px; }
+  .start-hero__lead { color: #e3eeed; font-size: 1.12rem; max-width: 640px; margin: 0; }
+
+  /* Layout: form card overlaps the hero */
+  .start-body { padding-bottom: clamp(48px, 6vw, 88px); }
+  .start-grid { display: grid; gap: 24px; align-items: start; margin-top: -64px; }
   @media (min-width: 1000px) {
-    .start { grid-template-columns: minmax(340px, 34%) 1fr; }
+    .start-grid { grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; }
+    .side { position: sticky; top: 24px; margin-top: 64px; }
   }
 
-  /* Left panel */
-  .panel { position: relative; overflow: hidden; background: linear-gradient(170deg, #0f504e 0%, var(--teal) 50%, var(--teal-deep) 100%); }
-  .panel__inner { position: relative; z-index: 1; padding: clamp(40px, 6vw, 72px) clamp(20px, 3vw, 40px) 32px; max-width: 520px; margin-left: auto; }
-  .panel h1 { color: #fff; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.05; }
-  .panel__lead { color: #e3eeed; font-size: 1.12rem; padding-bottom: 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.25); }
-  .panel h2 { color: #fff; font-size: 1.7rem; margin: 28px 0 18px; }
-  .panel ol { list-style: none; margin: 0; padding: 0; }
-  .panel ol li { display: flex; gap: 16px; align-items: flex-start; color: #fff; font-size: 1.05rem; margin: 0 0 18px; }
-  .panel ol li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #c9ddd8; color: var(--teal-deep); font-weight: 700; }
-  .panel__note { color: var(--mist); font-size: 0.92rem; margin: 8px 0 0; }
-  .panel__photo { display: none; }
-  @media (min-width: 1000px) {
-    .panel { min-height: 100%; }
-    .panel__inner { padding-bottom: 380px; }
-    .panel__photo { display: block; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(360px, 90%); height: auto; }
-  }
+  .inquiry { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: clamp(22px, 4vw, 44px); box-shadow: 0 18px 48px rgba(11, 27, 35, 0.1); }
 
-  /* Form */
-  .main { background: var(--light); padding: clamp(20px, 3vw, 32px) clamp(16px, 3vw, 32px) clamp(40px, 5vw, 64px); }
-  .inquiry { max-width: 820px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 36px); }
-  .stepper { list-style: none; display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0 0 28px; padding: 0; scroll-margin-top: 16px; }
+  /* Progress */
+  .stepper { margin-bottom: 32px; scroll-margin-top: 16px; }
   .stepper[hidden] { display: none; }
-  .stepper li { display: flex; align-items: center; gap: 12px; margin: 0; font-weight: 500; color: var(--slate); }
-  .stepper__line { flex: 0 1 140px; height: 1px; background: var(--line); }
-  .stepper__dot { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #9fb9b4; color: var(--teal-deep); font-weight: 700; }
+  .stepper__count { font-size: 0.82rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--slate); margin-bottom: 12px; }
+  .stepper ol { list-style: none; margin: 0 0 14px; padding: 0; display: flex; gap: 28px; }
+  .stepper li { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--slate); font-weight: 500; }
+  .stepper__dot { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #b8c2c0; font-size: 0.85rem; font-weight: 700; color: var(--slate); }
   .stepper__dot :global(svg) { display: none; }
   .is-current { color: var(--ink) !important; }
   .is-current .stepper__dot { background: var(--teal-deep); border-color: var(--teal-deep); color: #fff; }
-  .is-done .stepper__dot { background: var(--teal); border-color: var(--teal); color: #fff; }
-  .is-done .stepper__dot span { display: none; }
+  .is-done .stepper__dot { background: #e3eeec; border-color: var(--teal); color: var(--teal); }
+  .is-done .stepper__dot > span { display: none; }
   .is-done .stepper__dot :global(svg) { display: block; }
+  .stepper__bar { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
+  .stepper__bar span { display: block; height: 100%; width: 50%; background: var(--gold); transition: width 0.25s ease; }
 
+  /* Steps */
   .step[hidden] { display: none; }
-  .step__legend { display: flex; align-items: center; gap: 16px; font-family: var(--font-heading); font-weight: 700; font-size: clamp(1.6rem, 3vw, 2rem); margin-bottom: 22px; padding: 0; }
-  .step__num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--teal-deep); color: #fff; font-family: var(--font-body); font-size: 1.05rem; }
-  .field-row { display: grid; gap: 0 24px; }
+  .step__legend { font-family: var(--font-heading); font-weight: 700; font-size: clamp(1.7rem, 3vw, 2.1rem); padding: 0; margin-bottom: 4px; }
+  .step__intro { color: var(--slate); margin-bottom: 28px; }
+  .field-row { display: grid; gap: 0 20px; }
   @media (min-width: 640px) {
     .field-row { grid-template-columns: 1fr 1fr; }
   }
-  .field--narrow { max-width: 280px; }
+  .field label, .field legend { font-size: 0.95rem; }
   [data-deadline][hidden] { display: none; }
-  .inline-choices { display: flex; flex-wrap: wrap; gap: 4px 28px; }
-  .optins { margin-top: 8px; padding-top: 4px; }
-  .step__nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
-  .step__nav[hidden], [data-js-only][hidden] { display: none !important; }
-  .step__nav--end { justify-content: space-between; align-items: center; }
-  .step__nav--end .btn { margin-left: auto; }
-  .back { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; padding: 8px 0; font: inherit; font-weight: 500; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+  /* Option tiles (styled radio buttons) */
+  .tiles { display: grid; gap: 10px; }
+  @media (min-width: 560px) {
+    .tiles--3 { grid-template-columns: repeat(3, 1fr); }
+    .tiles--2 { grid-template-columns: repeat(2, 1fr); max-width: 66%; }
+  }
+  .tile { position: relative; display: flex !important; align-items: center; gap: 12px; min-height: 52px; padding: 12px 16px; margin: 0 !important; border: 1px solid #b8c2c0; border-radius: var(--radius); background: #fff; cursor: pointer; font-weight: 400 !important; transition: border-color 0.15s ease, background-color 0.15s ease; }
+  .tile:hover { border-color: var(--teal); }
+  .tile input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--teal-deep); }
+  .tile:has(input:checked) { border-color: var(--teal-deep); background: #eef5f3; box-shadow: inset 0 0 0 1px var(--teal-deep); font-weight: 500 !important; }
+  .tile:has(input:focus-visible) { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .optins { margin-top: 4px; }
+  .optins__box { padding: 14px 18px; background: var(--light); border-radius: var(--radius); }
+  .optins legend { margin-bottom: 6px; padding: 0; }
+  .notice { margin-top: 24px; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .actions[hidden], [data-js-only][hidden] { display: none !important; }
+  .actions--split { justify-content: space-between; align-items: center; }
+  .actions .btn { min-width: 200px; }
+  .back { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 10px 0; font: inherit; font-weight: 500; color: var(--teal); cursor: pointer; }
+  .back:hover { text-decoration: underline; }
   .back :global(svg) { transform: rotate(180deg); }
+  @media (max-width: 559px) {
+    .actions { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
+    .actions .btn { width: 100%; }
+    .back { justify-content: center; }
+  }
 
   /* Summary */
-  .summary { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 28px; overflow: hidden; }
+  .summary { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 32px; background: #fafbfb; }
   .summary[hidden] { display: none; }
-  .summary__head { display: flex; align-items: center; gap: 14px; background: #f3f5f4; padding: 14px 20px; border-bottom: 1px solid var(--line); }
-  .summary__check { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--teal); color: #fff; }
-  .summary__head h2 { flex: 1; font-size: 1.4rem; margin: 0; }
-  .summary__edit { background: none; border: 0; font: inherit; font-weight: 500; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 6px 0; }
-  .summary__grid { display: grid; gap: 14px 24px; margin: 0; padding: 18px 20px; }
-  @media (min-width: 640px) {
-    .summary__grid { grid-template-columns: 1fr 1fr; }
+  .summary__head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .summary__check { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #e3eeec; color: var(--teal); }
+  .summary__head h2 { flex: 1; font-family: var(--font-body); font-size: 1rem; font-weight: 700; margin: 0; }
+  .summary__edit { background: none; border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 14px; font: inherit; font-size: 0.9rem; font-weight: 500; color: var(--teal); cursor: pointer; }
+  .summary__edit:hover { border-color: var(--teal); }
+  .summary__grid { display: grid; gap: 12px 24px; margin: 0; padding: 16px 18px; }
+  @media (min-width: 560px) {
+    .summary__grid { grid-template-columns: repeat(3, 1fr); }
   }
-  .summary__grid dt { font-weight: 500; font-size: 0.92rem; }
-  .summary__grid dd { margin: 0; color: var(--slate); font-size: 0.92rem; overflow-wrap: anywhere; }
+  .summary__grid dt { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--slate); }
+  .summary__grid dd { margin: 2px 0 0; font-size: 0.95rem; overflow-wrap: anywhere; }
+
+  /* Sidebar */
+  .side { display: grid; gap: 16px; }
+  .side__card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
+  .side__card h2 { font-size: 1.4rem; margin-bottom: 16px; }
+  .side__card ol { list-style: none; margin: 0; padding: 0; }
+  .side__card li { position: relative; display: flex; gap: 14px; margin: 0; padding-bottom: 18px; }
+  .side__card li:last-child { padding-bottom: 0; }
+  .side__card li:not(:last-child)::before { content: ''; position: absolute; left: 14px; top: 32px; bottom: 4px; width: 1px; background: var(--line); }
+  .side__card li > span { flex: none; display: grid; place-items: center; width: 29px; height: 29px; border-radius: 50%; background: #e3eeec; color: var(--teal-deep); font-weight: 700; font-size: 0.85rem; }
+  .side__card li strong { display: block; font-size: 0.98rem; }
+  .side__card li div { color: var(--slate); font-size: 0.92rem; line-height: 1.5; }
+  .side__card--note { display: flex; gap: 14px; align-items: flex-start; background: #eef5f3; border-color: #cfe0dc; }
+  .side__card--note :global(svg) { flex: none; color: var(--teal); }
+  .side__card--note p { margin: 0; font-size: 0.92rem; color: var(--slate); }
+  .side__card--note strong { color: var(--ink); }
+  .side__authority { display: flex; gap: 14px; align-items: center; padding: 4px 6px; }
+  .side__authority img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; object-position: 50% 6%; background: #dfe8e6; flex: none; }
+  .side__authority p { margin: 0; font-size: 0.88rem; color: var(--slate); }
+  @media (max-width: 999px) {
+    .side__authority { display: none; }
+  }
 </style>

@@ -8,7 +8,7 @@ const nav = [
   { label: 'Advanced Learning', href: '/learn' },
   { label: 'About', href: '/about' },
 ];
-const path = Astro.url.pathname;
+const path = Astro.url.pathname.replace(/\.html$/, '');
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
@@ -30,7 +30,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
       </ul>
     </nav>
     <div class="site-header__actions">
-      <a class="btn btn--primary site-header__cta" href={site.primaryCta.href}>{site.primaryCta.label}</a>
+      {path !== site.primaryCta.href && <a class="btn btn--primary site-header__cta" href={site.primaryCta.href}>{site.primaryCta.label}</a>}
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav-list">
         <span class="menu-toggle__bars" aria-hidden="true"></span>
         <span class="menu-toggle__label">Menu</span>
