@@ -1,0 +1,6 @@
+{
+  "_note": "Set offered to false for any format the business is not actively offering. Only offered formats appear on the Conferences page.",
+  "live": { "offered": true },
+  "workshop": { "offered": true },
+  "private-session": { "offered": true }
+}

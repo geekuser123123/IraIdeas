@@ -1,74 +1,56 @@
 ---
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
 import EventCard from '../../components/EventCard.astro';
 import SignupForm from '../../components/SignupForm.astro';
-import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import formatSettings from '../../data/formats.json';
 import { listedEvents, isUpcoming, FORMAT_LABELS } from '../../lib/content';
+import { siteImage } from '../../lib/images';
 
 const events = await listedEvents();
 const upcoming = events.filter(isUpcoming);
 const past = events.filter((e) => e.data.status === 'completed').reverse();
 
-// Only describe formats that are actively offered (have a listed upcoming event).
-const FORMAT_COPY = {
-  live: 'Broader educational events.',
-  workshop: 'Focused, smaller-group advanced education.',
-  'private-session': 'A limited-participant experience with event-specific preparation and discussion.',
-} as const;
-const activeFormats = (Object.keys(FORMAT_COPY) as (keyof typeof FORMAT_COPY)[]).filter((f) => upcoming.some((e) => e.data.format === f));
+// Positioning lines come from the approved format definitions. The private
+// strategy intensive is offered only through an unlisted page, so it is not here.
+const FORMATS = [
+  { key: 'live', icon: 'people', positioning: 'Broader educational events', copy: 'Educational events on advanced retirement and tax-planning concepts.' },
+  { key: 'workshop', icon: 'book', positioning: 'Focused, smaller-group advanced education', copy: 'Smaller groups for focused, advanced education and discussion.' },
+  { key: 'private-session', icon: 'dots', positioning: 'Limited-participant experience', copy: 'Limited participation, with preparation and discussion specific to the event.' },
+] as const;
+const formats = FORMATS.filter((f) => formatSettings[f.key].offered);
+
+const heroImage = siteImage('conferences-hero');
+const priorityImage = siteImage('conferences-priority');
 ---
 
 <Base
   title="Conferences"
   description="IRA Ideas conferences, advanced workshops, and private planning sessions for business owners, investors, and the professionals who advise them."
 >
-  <PageHero
-    eyebrow="IRA Ideas Conferences"
-    title="Advanced ideas. Focused rooms. Practical discussion."
-    lead="Explore IRA Ideas conferences and planning experiences for business owners, investors, and the professionals who advise them."
-  >
-    <div class="btn-row"><a class="btn btn--primary" href="#events">View Upcoming Events</a></div>
-  </PageHero>
-
-  <section class="section" id="events" tabindex="-1">
-    <div class="container">
-      {
-        upcoming.length > 0 ? (
-          <>
-            <div class="section-head">
-              <h2>Upcoming events</h2>
-            </div>
-            <div class="event-list">
-              {upcoming.map((e) => (
-                <EventCard event={e} />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div class="reading" id="priority-list">
-            <h2>Be first to hear about the next event.</h2>
-            <p class="lead">Join the priority list for upcoming IRA Ideas conferences, workshops, and private planning sessions.</p>
-            <SignupForm list="priority" id="conferences-priority" />
-          </div>
-        )
-      }
+  <section class="conf-hero theme-darker" style={heroImage ? `--hero-image: url('${heroImage}')` : undefined}>
+    <div class:list={['conf-hero__bg', { 'conf-hero__bg--image': heroImage }]} aria-hidden="true"></div>
+    <div class="container conf-hero__inner">
+      <p class="conf-hero__eyebrow">Conferences</p>
+      <h1>Advanced ideas. Focused rooms. Practical discussion.</h1>
+      <p class="conf-hero__lead">
+        Explore IRA Ideas conferences and planning experiences for business owners, investors, and the professionals who advise them.
+      </p>
+      <a class="btn btn--primary" href={upcoming.length > 0 ? '#events' : '#priority-list'}>View Upcoming Events <Icon name="arrow" size={18} /></a>
     </div>
   </section>
 
   {
-    activeFormats.length > 0 && (
-      <section class="section theme-paper">
+    upcoming.length > 0 && (
+      <section class="section" id="events" tabindex="-1">
         <div class="container">
           <div class="section-head">
-            <h2>Event formats</h2>
+            <p class="eyebrow-line">Upcoming events</p>
+            <h2>Upcoming IRA Ideas events.</h2>
           </div>
-          <div class:list={['grid', activeFormats.length === 3 ? 'grid--3' : 'grid--2']}>
-            {activeFormats.map((f) => (
-              <article class="card">
-                <h3>{FORMAT_LABELS[f]}</h3>
-                <p>{FORMAT_COPY[f]}</p>
-              </article>
+          <div class="event-list">
+            {upcoming.map((e) => (
+              <EventCard event={e} />
             ))}
           </div>
         </div>
@@ -77,22 +59,46 @@ const activeFormats = (Object.keys(FORMAT_COPY) as (keyof typeof FORMAT_COPY)[])
   }
 
   {
-    upcoming.length > 0 && (
-      <section class="section section--tight">
+    formats.length > 0 && (
+      <section class="section">
         <div class="container">
-          <div class="reading" id="priority-list">
-            <h2>Hear about future events.</h2>
-            <p>Join the priority list for upcoming IRA Ideas conferences, workshops, and private planning sessions.</p>
-            <SignupForm list="priority" id="conferences-priority" />
+          <div class="section-head formats-head">
+            <p class="eyebrow-line">Event formats</p>
+            <h2>{formats.length === 3 ? 'Three ways to participate.' : 'Ways to participate.'}</h2>
+            <p class="lead">Each format is built around practical discussion and a deeper understanding of advanced retirement and tax strategies.</p>
+          </div>
+          <div class:list={['formats', `formats--${formats.length}`]}>
+            {formats.map((f) => (
+              <article class="format">
+                <Icon name={f.icon} size={44} class="format__icon" />
+                <h3>{FORMAT_LABELS[f.key]}</h3>
+                <p class="format__positioning">{f.positioning}</p>
+                <p class="format__copy">{f.copy}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
     )
   }
 
+  <section class="priority" id="priority-list" tabindex="-1" style={priorityImage ? `--priority-image: url('${priorityImage}')` : undefined}>
+    <div class:list={['priority__bg', { 'priority__bg--image': priorityImage }]} aria-hidden="true"></div>
+    <div class="container priority__grid">
+      <div class="priority__copy">
+        <h2>Be first to hear about the next event.</h2>
+        <p class="lead">Join the priority list for upcoming IRA Ideas conferences, workshops, and private planning sessions.</p>
+      </div>
+      <div class="priority__panel theme-dark">
+        <h2 class="priority__title"><Icon name="mail" size={34} /> Join the Priority List</h2>
+        <SignupForm list="priority" id="conferences-priority" stacked />
+      </div>
+    </div>
+  </section>
+
   {
     past.length > 0 && (
-      <section class="section theme-paper">
+      <section class="section theme-light">
         <div class="container">
           <div class="section-head">
             <h2>Past events</h2>
@@ -107,12 +113,128 @@ const activeFormats = (Object.keys(FORMAT_COPY) as (keyof typeof FORMAT_COPY)[])
     )
   }
 
-  <CtaBand heading="Have a planning need that cannot wait for an event?" copy="Tell our team what you are considering and we will identify the appropriate next step." />
+  <section class="cant-wait">
+    <div class="container cant-wait__grid">
+      <div class="cant-wait__media" aria-hidden="true">
+        <img
+          src="/images/tim/tim-berry-shirt-600.webp"
+          srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w"
+          sizes="(min-width: 900px) 300px, 60vw"
+          width="600"
+          height="714"
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div class="cant-wait__copy">
+        <h2>Have a planning need that cannot wait for an event?</h2>
+        <p>Tell the IRA Ideas team what you are considering, what is already in place, and any deadline. We will review the request and identify the appropriate next step.</p>
+        <a class="btn btn--primary" href="/start">Discuss My Situation <Icon name="arrow" size={18} /></a>
+      </div>
+    </div>
+  </section>
 </Base>
 
 <style>
+  .eyebrow-line {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .eyebrow-line::after { content: ''; width: 64px; height: 1px; background: var(--ink); }
+
+  /* Hero */
+  .conf-hero { position: relative; overflow: hidden; padding: clamp(56px, 8vw, 104px) 0; }
+  .conf-hero__bg { position: absolute; inset: 0; }
+  .conf-hero__bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 45% 70% at 80% 55%, rgba(255, 180, 0, 0.16), transparent 70%),
+      radial-gradient(ellipse 60% 90% at 85% 40%, rgba(12, 67, 66, 0.9), transparent 75%),
+      var(--navy);
+  }
+  .conf-hero__bg--image::before {
+    background:
+      linear-gradient(90deg, rgba(11, 27, 35, 0.96) 0%, rgba(11, 27, 35, 0.85) 38%, rgba(11, 27, 35, 0.15) 75%),
+      var(--hero-image) center / cover no-repeat;
+  }
+  .conf-hero__inner { position: relative; }
+  .conf-hero__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 18px;
+  }
+  .conf-hero__eyebrow::after { content: ''; width: 64px; height: 1px; background: rgba(255, 255, 255, 0.6); }
+  .conf-hero h1 { color: #fff; font-size: clamp(2.5rem, 5.6vw, 4.3rem); line-height: 1.04; letter-spacing: -0.02em; max-width: 760px; }
+  .conf-hero__lead { color: #e3eeed; font-size: 1.15rem; max-width: 560px; margin-bottom: 28px; }
+
+  /* Formats */
+  .formats-head { max-width: 820px; }
+  .formats-head h2 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+  .formats { display: grid; gap: 20px; }
+  @media (min-width: 900px) {
+    .formats--3 { grid-template-columns: repeat(3, 1fr); }
+    .formats--2 { grid-template-columns: repeat(2, 1fr); }
+  }
+  .format { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .format :global(.format__icon) { color: var(--teal); margin-bottom: 18px; }
+  .format h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin-bottom: 8px; }
+  .format__positioning { font-weight: 500; margin-bottom: 10px; }
+  .format__copy { color: var(--slate); margin: 0; }
+
   .event-list { display: grid; gap: 24px; }
   @media (min-width: 1000px) {
     .event-list { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Priority list */
+  .priority { position: relative; overflow: hidden; padding: clamp(48px, 6vw, 72px) 0; scroll-margin-top: 0; }
+  .priority__bg { position: absolute; inset: 0; background: radial-gradient(ellipse 50% 80% at 20% 70%, #ffffff 0%, transparent 70%), linear-gradient(160deg, #eef2f0 0%, #e2e9e6 100%); }
+  .priority__bg--image { background: linear-gradient(90deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.6) 45%, rgba(255, 255, 255, 0.1) 70%), var(--priority-image) center / cover no-repeat; }
+  .priority__grid { position: relative; display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .priority__grid { grid-template-columns: 1.2fr 1fr; gap: 64px; }
+  }
+  .priority__copy h2 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+  .priority__copy .lead { max-width: 520px; }
+  .priority__panel { background: var(--teal); border-radius: var(--radius); padding: clamp(24px, 4vw, 36px); box-shadow: 0 18px 40px rgba(11, 27, 35, 0.2); }
+  .priority__title { display: flex; align-items: center; gap: 16px; font-size: 1.8rem; color: #fff; margin-bottom: 20px; }
+  .priority__panel :global(.signup-form) { max-width: none; }
+  .priority__panel :global(.signup-form .btn) { width: 100%; }
+  .priority__panel :global(.signup-form .muted) { color: #d9e6e5; }
+
+  /* Planning need */
+  .cant-wait { background: #fff; overflow: hidden; }
+  .cant-wait__grid { display: grid; gap: 32px; align-items: end; }
+  @media (min-width: 900px) {
+    .cant-wait__grid { grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: center; }
+  }
+  .cant-wait__media { position: relative; align-self: end; display: flex; justify-content: center; padding-top: 32px; }
+  .cant-wait__media::before { content: ''; position: absolute; left: -10%; right: 10%; bottom: 0; top: 30%; background: #e3eeec; border-radius: 50% 50% 0 0; }
+  .cant-wait__media img { position: relative; width: min(300px, 70%); height: auto; }
+  .cant-wait__copy { padding: 0 0 48px; }
+  @media (min-width: 900px) {
+    .cant-wait__copy { padding: 48px 0; }
+  }
+  .cant-wait__copy h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+  .cant-wait__copy p { color: var(--slate); max-width: 560px; }
+  @media (max-width: 899px) {
+    .cant-wait__media { order: 2; }
+    .cant-wait__copy { padding-top: 48px; }
   }
 </style>

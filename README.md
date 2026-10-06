@@ -61,8 +61,12 @@ with the matching name (`.webp`, `.jpg` or `.png`; landscape, at least 1600px wi
 | `home-conference` | Homepage, "Go deeper in the room." |
 | `home-learning` | Homepage, "Free advanced learning is on the way." |
 | `about-how-we-work` | About page, "How we work." |
+| `conferences-hero` | Conferences hero background (right side shows through) |
+| `conferences-priority` | Conferences, background behind "Be first to hear about the next event." |
 
 Use real photos of IRA Ideas events where possible. Never use stock photos of people presented as clients or staff.
+
+Event formats shown on the Conferences page are switched on or off in `src/data/formats.json`.
 
 ## Deploying to Cloudflare
 

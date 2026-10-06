@@ -1,6 +1,5 @@
 ---
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { siteImage } from '../lib/images';
 import Icon from './Icon.astro';
 
 /**
@@ -15,7 +14,7 @@ interface Props {
   tone?: 'teal' | 'navy';
 }
 const { name, alt, icon, tone = 'teal' } = Astro.props;
-const file = ['webp', 'jpg', 'jpeg', 'png'].map((ext) => `/images/site/${name}.${ext}`).find((f) => existsSync(join(process.cwd(), 'public', f)));
+const file = siteImage(name);
 ---
 
 {
