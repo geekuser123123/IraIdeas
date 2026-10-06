@@ -1,19 +1,255 @@
 ---
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-// LAUNCH BLOCKER: replace with the professionally approved terms of use.
-// It must match the actual forms, tracking, embedded media, and third-party services in use.
-const approved = false;
+import PhotoHero from '../components/PhotoHero.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+
+/*
+ * Terms & Conditions. Drafted from how this website and its processes work.
+ * Have the responsible professional review it before launch, including
+ * governing law, liability limits, and any professional-service disclosures.
+ */
+const LAST_UPDATED = 'October 6, 2026';
+const LAST_UPDATED_ISO = '2026-10-06';
+const brand = site.legalEntityName ?? site.brand;
+
+const sections = [
+  { id: 'website-use', title: 'Website use' },
+  { id: 'educational-content', title: 'Educational content' },
+  { id: 'service-requests', title: 'Service requests' },
+  { id: 'engagement-scope-and-fees', title: 'Engagement scope & fees' },
+  { id: 'conference-participation', title: 'Conference participation' },
+  { id: 'external-services', title: 'External services' },
+  { id: 'limitations', title: 'Limitations' },
+  { id: 'contact', title: 'Contact' },
+];
 ---
 
-<Base title="Terms of Use" description="Terms of use for the IRA Ideas website." noindex={!approved}>
-  <PageHero eyebrow="Legal" title="Terms of Use" />
-  <section class="section">
+<Base title="Terms & Conditions" description="Terms for using the IRA Ideas website, educational resources, service requests, and events.">
+  <PhotoHero eyebrow="Legal" title="Terms & Conditions" lead="Website use, education, and service engagement." photo={false} angled={false} />
+
+  <section class="section theme-light">
+    <div class="container layout">
+      <nav class="toc" aria-labelledby="toc-title">
+        <h2 id="toc-title">Contents</h2>
+        <ol role="list">
+          {
+            sections.map((s, i) => (
+              <li>
+                <a href={`#${s.id}`} aria-current={i === 0 ? 'true' : undefined}>
+                  <span>{i + 1}.</span> {s.title}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="terms">
+        <p class="eyebrow-line">Policy</p>
+        <h2 class="terms__title">These terms govern your use of our website, educational resources, and service engagement process.</h2>
+        <p class="updated">Last updated: <time datetime={LAST_UPDATED_ISO}>{LAST_UPDATED}</time></p>
+
+        <div class="callout" role="note">
+          <span class="callout__icon" aria-hidden="true">i</span>
+          <div>
+            <strong>Submitting a request does not establish an attorney-client relationship.</strong>
+            <p>Any paid work begins only under a defined scope and agreed fee.</p>
+          </div>
+        </div>
+
+        <section id={sections[0].id}>
+          <h2><span>1.</span>{sections[0].title}</h2>
+          <div class="body">
+            <p>
+              This website is operated by {brand} ("IRA Ideas," "we," "us"). By using it, you agree to these terms and to our{' '}
+              <a href="/privacy">Privacy Policy</a>. If you do not agree, please do not use the website.
+            </p>
+            <p>You agree to use the website lawfully and not to:</p>
+            <ul>
+              <li>submit false information or information about another person without their permission;</li>
+              <li>send spam, automated submissions, or content that is unlawful or harmful;</li>
+              <li>interfere with the website's operation or security, or attempt to access it in unauthorized ways; or</li>
+              <li>copy or republish website content for commercial purposes without our written permission.</li>
+            </ul>
+            <p>The IRA Ideas name, logo, and website content belong to IRA Ideas or its licensors.</p>
+          </div>
+        </section>
+
+        <section id={sections[1].id}>
+          <h2><span>2.</span>{sections[1].title}</h2>
+          <div class="body">
+            <p>
+              Articles, videos, courses, and other educational materials are provided for general educational purposes. They are not
+              individualized legal, tax, or financial advice and do not take into account your specific circumstances. Reading or watching them
+              does not create an attorney-client or other professional relationship.
+            </p>
+            <p>Rules and their application change over time. Each resource shows when it was published and, where applicable, last reviewed.</p>
+            <p>You may view and share links to our free educational resources for personal, non-commercial use.</p>
+          </div>
+        </section>
+
+        <section id={sections[2].id}>
+          <h2><span>3.</span>{sections[2].title}</h2>
+          <div class="body">
+            <p>
+              Submitting a request does not establish an attorney-client relationship and does not obligate either party to proceed. A request is
+              not an appointment.
+            </p>
+            <p>
+              Please do not include confidential documents or sensitive account information. The team will provide instructions if additional
+              information is needed.
+            </p>
+            <p>
+              After reviewing a request, the team may ask for more detail, propose a paid consultation, assessment, or defined project, or let you
+              know that IRA Ideas is not the right fit. We are not required to accept any request.
+            </p>
+          </div>
+        </section>
+
+        <section id={sections[3].id}>
+          <h2><span>4.</span>{sections[3].title}</h2>
+          <div class="body">
+            <p>
+              Before paid work begins, the proposed engagement will identify the responsible provider, deliverables, exclusions, fee, and relevant
+              responsibilities. Required agreements and payment are completed before the applicable paid work or appointment begins.
+            </p>
+            <p>
+              Each engagement is governed by its own written agreement. If that agreement conflicts with these terms, the engagement agreement
+              controls for that work.
+            </p>
+            <p>Any additional work outside the agreed scope requires its own scope and a separate agreement.</p>
+          </div>
+        </section>
+
+        <section id={sections[4].id}>
+          <h2><span>5.</span>{sections[4].title}</h2>
+          <div class="body">
+            <ul>
+              <li>Joining a priority list does not reserve a seat or guarantee admission.</li>
+              <li>
+                For application-based events, submitting an application does not confirm a place. A place is confirmed only after acceptance and
+                the required payment.
+              </li>
+              <li>For direct-registration events, a place is confirmed only after payment has been verified.</li>
+              <li>
+                Each event page states its price, inclusions, and terms for admission, cancellation, refunds, transfers, guests, recording, and
+                confidentiality. Those event terms apply to that event.
+              </li>
+              <li>Participants are expected to respect the confidentiality of other attendees and of private discussions.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id={sections[5].id}>
+          <h2><span>6.</span>{sections[5].title}</h2>
+          <div class="body">
+            <p>
+              Some parts of the website rely on third-party services, such as Stripe for payments and video providers for embedded videos. Your use
+              of those services is subject to their own terms and privacy policies. Links to other websites are provided for convenience; we are
+              not responsible for their content.
+            </p>
+          </div>
+        </section>
+
+        <section id={sections[6].id}>
+          <h2><span>7.</span>{sections[6].title}</h2>
+          <div class="body">
+            <p>
+              The website and its content are provided "as is." We work to keep information accurate and current but do not guarantee that the
+              website will be error-free, uninterrupted, or complete. Nothing on the website promises eligibility, tax treatment, savings, approval,
+              or any particular outcome.
+            </p>
+            <p>
+              To the extent permitted by law, IRA Ideas is not liable for any indirect or consequential loss arising from use of the website or
+              reliance on its general educational content. This does not limit any responsibility under a signed engagement agreement or any
+              liability that cannot be limited by law.
+            </p>
+            <p>We may update these terms from time to time. The "Last updated" date shows when they last changed.</p>
+          </div>
+        </section>
+
+        <section id={sections[7].id}>
+          <h2><span>8.</span>{sections[7].title}</h2>
+          <div class="body">
+            <p>
+              Questions about these terms can be sent through our <a href="/contact">contact page</a>{site.contact.email && (
+                <>
+                  {' '}or to <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+                </>
+              )}.
+            </p>
+          </div>
+        </section>
+        <span hidden data-pending-legal></span>
+      </div>
+    </div>
+
     <div class="container">
-      <div class="prose">
-        <p data-pending-legal>The terms of use is being finalized and will be published here.</p>
-        <p>Questions can be sent through the <a href="/contact">contact page</a>.</p>
+      <div class="questions">
+        <div>
+          <h2>Questions about these terms?</h2>
+          <p>Contact the IRA Ideas team and we will respond as appropriate.</p>
+        </div>
+        <a class="btn btn--primary" href="/contact">Contact Us <Icon name="arrow" size={18} /></a>
       </div>
     </div>
   </section>
 </Base>
+
+<script>
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (hit) links.forEach((a) => (a.hash === `#${hit.target.id}` ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+    },
+    { rootMargin: '-15% 0px -65% 0px' },
+  );
+  links.forEach((a) => {
+    const el = document.getElementById(a.hash.slice(1));
+    if (el) observer.observe(el);
+  });
+</script>
+
+<style>
+  .layout { display: grid; gap: 32px; align-items: start; }
+  @media (min-width: 960px) {
+    .layout { grid-template-columns: 240px 1fr; gap: 0; }
+    .toc { position: sticky; top: 24px; padding-right: 24px; }
+    .terms { padding-left: 40px; border-left: 1px solid var(--line); }
+  }
+  .toc h2 { font-size: 1.6rem; margin-bottom: 12px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .toc a { display: flex; gap: 12px; padding: 11px 16px; color: var(--ink); text-decoration: none; font-size: 0.95rem; border-left: 3px solid transparent; border-radius: 0 var(--radius) var(--radius) 0; }
+  .toc a span { color: var(--teal); font-weight: 700; min-width: 18px; }
+  .toc a:hover { background: #fff; }
+  .toc a[aria-current='true'] { background: #e3eeec; border-left-color: var(--teal); }
+
+  .terms { max-width: 860px; }
+  .eyebrow-line { display: flex; align-items: center; gap: 16px; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 12px; }
+  .eyebrow-line::after { content: ''; width: 64px; height: 1px; background: var(--teal); }
+  .terms__title { font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.2; margin-bottom: 8px; }
+  .updated { color: var(--slate); font-size: 0.92rem; }
+  .callout { display: flex; gap: 22px; align-items: center; background: #e3eeec; border: 1px solid #b9cdc8; border-radius: var(--radius); padding: 20px 24px; margin: 24px 0 8px; }
+  .callout__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--teal); color: var(--teal); font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+  .callout strong { display: block; font-family: var(--font-heading); font-size: 1.15rem; }
+  .callout p { margin: 2px 0 0; color: var(--slate); }
+
+  .terms section { padding: 28px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
+  .terms section:last-of-type { border-bottom: 0; }
+  .terms section h2 { display: flex; gap: 28px; align-items: baseline; font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: 12px; }
+  .terms section h2 span { color: var(--teal); min-width: 40px; }
+  .body { padding-left: 68px; color: var(--slate); }
+  .body li + li { margin-top: 8px; }
+  .body p:last-child { margin-bottom: 0; }
+  @media (max-width: 640px) {
+    .terms section h2 { gap: 12px; }
+    .body { padding-left: 0; }
+  }
+
+  .questions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 40px; background: #e7eceb; border-radius: var(--radius); padding: 28px 36px; margin-top: 40px; }
+  .questions h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 4px; }
+  .questions p { color: var(--slate); margin: 0; }
+</style>
