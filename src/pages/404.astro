@@ -1,19 +1,52 @@
 ---
+import '../styles/confirm.css';
 import Base from '../layouts/Base.astro';
+import PhotoHero from '../components/PhotoHero.astro';
+import Icon from '../components/Icon.astro';
 ---
 
 <Base title="Page Not Found" description="The page you were looking for could not be found." noindex>
-  <section class="section">
+  <PhotoHero eyebrow="Error 404" title="Page not found." lead="It may have moved, or the link may be incomplete." photo={false} angled={false} />
+
+  <section class="confirm-wrap theme-light">
     <div class="container">
-      <div class="reading">
-        <p class="eyebrow">Page not found</p>
-        <h1>We could not find that page.</h1>
-        <p class="lead">It may have moved, or the link may be incomplete.</p>
-        <div class="btn-row">
-          <a class="btn btn--primary" href="/start">Discuss My Situation</a>
-          <a class="btn btn--secondary" href="/">Go to the homepage</a>
+      <div class="confirm-card confirm-card--overlap">
+        <div class="confirm-badge" aria-hidden="true"><span><Icon name="search" size={44} /></span></div>
+        <h2 class="confirm-title">We could not find that page.</h2>
+        <p class="confirm-lead">Try one of these instead, or start with the IRA Ideas team.</p>
+        <div class="confirm-actions">
+          <a class="btn btn--primary" href="/start">Discuss My Situation <Icon name="arrow" size={18} /></a>
+          <a class="btn btn--outline" href="/">Return Home</a>
+        </div>
+      </div>
+
+      <div class="wait">
+        <p class="wait__eyebrow">Popular pages</p>
+        <div class="wait__cards wait__cards--3">
+          <a class="wait__card" href="/advanced-services">
+            <Icon name="document" size={44} />
+            <span><strong>Advanced Services</strong><span>Specialized services for significant planning decisions.</span></span>
+            <Icon name="chevron" size={22} />
+          </a>
+          <a class="wait__card" href="/conferences">
+            <Icon name="people" size={44} />
+            <span><strong>Conferences</strong><span>Focused events and planning experiences.</span></span>
+            <Icon name="chevron" size={22} />
+          </a>
+          <a class="wait__card" href="/learn">
+            <Icon name="book" size={44} />
+            <span><strong>Advanced Learning</strong><span>Education on the questions behind important decisions.</span></span>
+            <Icon name="chevron" size={22} />
+          </a>
         </div>
       </div>
     </div>
   </section>
 </Base>
+
+<style>
+  .wait__eyebrow { margin-bottom: 24px; }
+  @media (min-width: 1000px) {
+    .wait__cards--3 { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
