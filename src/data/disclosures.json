@@ -1,0 +1,59 @@
+{
+  "_note": "Disclosure wording must be approved by the responsible professional. Only sections with approved: true appear on the live site; others show on staging previews only. Wording marked approved here is taken from the build instructions and already appears on the site's forms.",
+  "banner": "Submitting a request does not establish an attorney-client relationship.",
+  "sections": [
+    {
+      "id": "education",
+      "nav": "Education",
+      "title": "Educational information",
+      "icon": "book",
+      "approved": false,
+      "paragraphs": [
+        "DRAFT FOR REVIEW: IRA Ideas educational materials, presentations, and resources are provided for general informational purposes. They are not individualized advice and do not take into account any person's specific circumstances, objectives, or needs."
+      ]
+    },
+    {
+      "id": "service-inquiries",
+      "nav": "Service inquiries",
+      "title": "Service inquiries",
+      "icon": "people",
+      "approved": true,
+      "paragraphs": [
+        "Submitting a request does not establish an attorney-client relationship. Please do not include confidential documents or sensitive account information. The team will provide instructions if additional information is needed.",
+        "A request is not an appointment."
+      ]
+    },
+    {
+      "id": "professional-relationships",
+      "nav": "Professional relationships",
+      "title": "Professional relationships",
+      "icon": "document",
+      "approved": true,
+      "paragraphs": [
+        "Before paid work begins, the proposed engagement will identify the responsible provider, the work included, and the fee."
+      ]
+    },
+    {
+      "id": "events",
+      "nav": "Events",
+      "title": "Events",
+      "icon": "calendar",
+      "approved": true,
+      "paragraphs": [
+        "A priority-list signup does not reserve a seat or guarantee admission.",
+        "For application-based events, a place is not confirmed until the required acceptance and payment steps are complete. For direct-registration events, a place is confirmed only after payment is verified."
+      ]
+    },
+    {
+      "id": "additional-work",
+      "nav": "Additional work",
+      "title": "Additional work",
+      "icon": "list",
+      "approved": true,
+      "paragraphs": [
+        "Any additional implementation work has its own scope and requires a separate agreement.",
+        "Any proposed paid work will have a defined scope and fee before it begins."
+      ]
+    }
+  ]
+}

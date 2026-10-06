@@ -1,0 +1,159 @@
+---
+import Base from '../layouts/Base.astro';
+import PhotoHero from '../components/PhotoHero.astro';
+import Icon from '../components/Icon.astro';
+import data from '../data/disclosures.json';
+import { site } from '../data/site';
+import { SHOW_DRAFTS } from '../lib/content';
+
+type IconName = 'book' | 'people' | 'document' | 'calendar' | 'list';
+const sections = (data.sections as { id: string; nav: string; title: string; icon: IconName; approved: boolean; paragraphs: string[] }[]).filter(
+  (s) => s.approved || SHOW_DRAFTS,
+);
+const pending = data.sections.some((s) => !s.approved);
+---
+
+<Base title="Disclosures" description="Important disclosures about IRA Ideas education, service inquiries, professional relationships, and events.">
+  <PhotoHero
+    eyebrow="Disclosures"
+    title="Important Disclosures"
+    lead="Understand the role of education, inquiries, and defined engagements."
+    photo={false}
+    angled={false}
+  />
+
+  <section class="section">
+    <div class="container layout">
+      <nav class="toc" aria-label="Disclosure topics">
+        <ul role="list">
+          {
+            sections.map((s, i) => (
+              <li>
+                <a href={`#${s.id}`} aria-current={i === 0 ? 'true' : undefined}>
+                  {s.nav} <Icon name="chevron" size={16} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="content">
+        <div class="banner" role="note">
+          <span class="banner__icon" aria-hidden="true">i</span>
+          <p>{data.banner}</p>
+        </div>
+
+        {
+          sections.map((s) => (
+            <article class="item" id={s.id}>
+              <Icon name={s.icon} size={52} class="item__icon" />
+              <div class="item__body">
+                {!s.approved && (
+                  <p class="draft-flag" role="note">
+                    Staging preview: this section is awaiting professional approval and is not published on the live site.
+                  </p>
+                )}
+                <h2>{s.title}</h2>
+                {s.paragraphs.map((p) => (
+                  <p>{p}</p>
+                ))}
+                {s.id === 'professional-relationships' && site.legalEntityName && <p>Services are provided through {site.legalEntityName}.</p>}
+              </div>
+            </article>
+          ))
+        }
+        {pending && <span hidden data-pending-legal></span>}
+      </div>
+    </div>
+
+    <div class="container related">
+      <a class="related__card" href="/privacy">
+        <Icon name="shield" size={40} />
+        <span>
+          <strong>Read Privacy Policy</strong>
+          <span>How information submitted through this website is handled.</span>
+        </span>
+        <Icon name="chevron" size={22} class="related__chevron" />
+      </a>
+      <a class="related__card" href="/terms">
+        <Icon name="document" size={40} />
+        <span>
+          <strong>Read Terms of Use</strong>
+          <span>The terms that govern use of this website.</span>
+        </span>
+        <Icon name="chevron" size={22} class="related__chevron" />
+      </a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Highlight the topic currently on screen.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (hit) links.forEach((a) => (a.hash === `#${hit.target.id}` ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+    },
+    { rootMargin: '-20% 0px -60% 0px' },
+  );
+  links.forEach((a) => {
+    const el = document.getElementById(a.hash.slice(1));
+    if (el) observer.observe(el);
+  });
+</script>
+
+<style>
+  .layout { display: grid; gap: 32px; align-items: start; }
+  @media (min-width: 960px) {
+    .layout { grid-template-columns: 220px 1fr; gap: 0; }
+    .toc { position: sticky; top: 24px; padding-right: 24px; border-right: 1px solid var(--line); min-height: 100%; }
+    .content { padding-left: 24px; }
+  }
+  .toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  @media (min-width: 960px) {
+    .toc ul { flex-direction: column; }
+  }
+  .toc li + li { margin-top: 0; }
+  .toc a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius); color: var(--ink); text-decoration: none; font-weight: 500; }
+  .toc a:hover { background: var(--light); }
+  .toc a[aria-current='true'] { background: #e3eeec; }
+  .toc :global(svg) { flex: none; color: var(--teal); }
+  @media (max-width: 959px) {
+    .toc a { border: 1px solid var(--line); }
+    .toc :global(svg) { display: none; }
+  }
+
+  .banner { display: flex; align-items: center; gap: 24px; background: var(--teal); border-radius: var(--radius); padding: 24px 32px; margin-bottom: 16px; }
+  .banner__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fff; color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+  .banner p { margin: 0; padding-left: 24px; border-left: 1px solid rgba(255, 255, 255, 0.3); color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: clamp(1.3rem, 2.4vw, 1.75rem); line-height: 1.25; }
+  @media (max-width: 600px) {
+    .banner { padding: 20px; gap: 16px; }
+    .banner p { padding-left: 16px; }
+  }
+
+  .item { display: flex; gap: 32px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 32px; scroll-margin-top: 24px; }
+  .item + .item { margin-top: 16px; }
+  .item :global(.item__icon) { flex: none; color: var(--teal); margin: 8px 8px 0; }
+  .item__body { flex: 1; padding-left: 32px; border-left: 1px solid var(--line); }
+  .item h2 { font-size: clamp(1.6rem, 2.8vw, 2.1rem); }
+  .item p { color: var(--slate); }
+  .item p:last-child { margin-bottom: 0; }
+  @media (max-width: 700px) {
+    .item { flex-direction: column; gap: 12px; padding: 24px; }
+    .item__body { padding-left: 0; border-left: 0; }
+    .item :global(.item__icon) { margin: 0; }
+  }
+
+  .related { display: grid; gap: 16px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+  @media (min-width: 800px) {
+    .related { grid-template-columns: 1fr 1fr; }
+  }
+  .related__card { display: flex; align-items: center; gap: 24px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 26px; color: var(--ink); text-decoration: none; }
+  .related__card:hover { border-color: var(--teal); }
+  .related__card :global(svg) { flex: none; color: var(--teal); }
+  .related__card > span { flex: 1; }
+  .related__card strong { display: block; font-size: 1.05rem; }
+  .related__card span span { display: block; color: var(--slate); font-size: 0.92rem; }
+</style>
