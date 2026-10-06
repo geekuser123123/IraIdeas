@@ -1,78 +1,122 @@
 ---
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PhotoHero from '../components/PhotoHero.astro';
+import Icon from '../components/Icon.astro';
 
 const steps = [
-  { title: 'Tell us what you are working on', copy: 'Share your objective, the general situation, and any deadline.' },
+  { title: 'Tell us what you are working on.', copy: 'Share your objective, the general situation, and any deadline.' },
   {
-    title: 'The team reviews the request',
+    title: 'The team reviews the request.',
     copy: 'We review the information and determine whether more detail, a paid consultation, an assessment, or a defined project is appropriate.',
   },
   {
-    title: 'Understand the proposed work',
+    title: 'Understand the proposed work.',
     copy: 'The proposal identifies the responsible provider, deliverables, exclusions, fee, and relevant responsibilities.',
   },
   {
-    title: 'Approve and fund the engagement',
+    title: 'Approve and fund the engagement.',
     copy: 'Required agreements and payment are completed before the applicable paid work or appointment begins.',
   },
   {
-    title: 'Move forward with an organized next step',
+    title: 'Move forward with an organized next step.',
     copy: 'The assigned professional handles the agreed work, supported by coordinated communication and follow-through.',
   },
 ];
 
+const defined = [
+  { icon: 'people', title: 'Responsible provider', copy: 'Who is responsible for the work.' },
+  { icon: 'document', title: 'Deliverables', copy: 'What the engagement will produce.' },
+  { icon: 'ban', title: 'Exclusions', copy: 'What is not included in the scope.' },
+  { icon: 'tag', title: 'Fee', copy: 'The fee, agreed before paid work begins.' },
+  { icon: 'check', title: 'Responsibilities', copy: 'What each side is responsible for.' },
+] as const;
+
 const types = [
-  { title: 'Paid consultation or assessment', copy: 'A defined question or evaluation.' },
-  { title: 'Defined project', copy: 'An agreed objective, deliverables, fee, and completion point.' },
-  { title: 'Continuing support', copy: 'Ongoing work provided under its own scope, access terms, and review period.' },
-];
+  { icon: 'chat', title: 'Paid consultation or assessment', copy: 'A defined question or evaluation.' },
+  { icon: 'document', title: 'Defined project', copy: 'An agreed objective, deliverables, fee, and completion point.' },
+  { icon: 'refresh', title: 'Continuing support', copy: 'Ongoing work provided under its own scope, access terms, and review period.' },
+] as const;
 ---
 
 <Base title="How We Work" description="How IRA Ideas handles advanced planning requests: inquiry, review, a defined proposal, engagement, and organized delivery.">
-  <PageHero
+  <PhotoHero
     eyebrow="How We Work"
     title="A clear process for complex work."
     lead="Start with the situation. We organize the information, review the fit, and define the next step before paid work begins."
+    photo={false}
+    angled={false}
   >
-    <div class="btn-row"><a class="btn btn--primary" href="/start">Discuss My Situation</a></div>
-  </PageHero>
+    <Fragment slot="actions">
+      <a class="btn btn--primary" href="/start">Discuss My Situation <Icon name="arrow" size={18} /></a>
+    </Fragment>
+  </PhotoHero>
 
-  <section class="section">
-    <div class="container">
-      <div class="section-head"><h2>The process</h2></div>
-      <ol class="process" role="list">
-        {
-          steps.map((s, i) => (
-            <li class="process__step">
-              <span class="process__num" aria-hidden="true">{i + 1}</span>
-              <div>
-                <h3>
-                  <span class="visually-hidden">Step {i + 1}: </span>
-                  {s.title}
-                </h3>
-                <p>{s.copy}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
+  <!-- Process and what the proposal defines -->
+  <section class="section theme-light">
+    <div class="container process">
+      <div>
+        <h2>Our process from question to next step.</h2>
+        <p class="lead">A structured approach to the right fit and a clear path forward.</p>
+        <ol class="steps" role="list">
+          {
+            steps.map((s, i) => (
+              <li>
+                <span class="steps__num" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>
+                  <h3>
+                    <span class="visually-hidden">Step {i + 1}: </span>
+                    {s.title}
+                  </h3>
+                  <p>{s.copy}</p>
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <aside class="defined" aria-labelledby="defined-title">
+        <div class="defined__head">
+          <Icon name="document" size={48} />
+          <div>
+            <h2 id="defined-title">Defined before work begins.</h2>
+            <p>The proposal sets out these details before any paid work begins.</p>
+          </div>
+        </div>
+        <ul role="list">
+          {
+            defined.map((d) => (
+              <li>
+                <Icon name={d.icon} size={32} />
+                <span>
+                  <strong>{d.title}</strong>
+                  <span>{d.copy}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
     </div>
   </section>
 
-  <section class="section theme-light">
+  <!-- Engagement types -->
+  <section class="section">
     <div class="container">
-      <div class="section-head">
-        <h2>Types of engagement</h2>
+      <div class="section-head section-head--center">
+        <h2>Different situations. Defined engagements.</h2>
         <p class="lead">The proposed work is matched to what the situation requires.</p>
       </div>
-      <div class="grid grid--3">
+      <div class="types">
         {
           types.map((t) => (
-            <article class="card">
-              <h3>{t.title}</h3>
-              <p>{t.copy}</p>
+            <article class="type">
+              <Icon name={t.icon} size={44} class="type__icon" />
+              <div>
+                <h3>{t.title}</h3>
+                <p>{t.copy}</p>
+              </div>
             </article>
           ))
         }
@@ -80,40 +124,83 @@ const types = [
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="reading">
+  <!-- Access rule -->
+  <section class="appointment theme-darker">
+    <div class="container appointment__inner">
+      <span class="appointment__icon" aria-hidden="true">
+        <Icon name="calendar" size={60} />
+        <span class="appointment__lock"><Icon name="lock" size={22} /></span>
+      </span>
+      <div>
         <h2>A request is not an appointment.</h2>
-        <p>
-          Submitting a request starts a review by the IRA Ideas team. Approved paid appointments are scheduled privately after the
-          applicable approval and payment requirements are met.
-        </p>
+        <p>Approved paid appointments are scheduled privately after the applicable approval and payment requirements are met.</p>
       </div>
     </div>
   </section>
 
-  <CtaBand
-    heading="Bring us the situation. We will help identify the next step."
-    copy="Tell our team what you are considering, what is already in place, and any deadline."
-    note="Any proposed paid work will have a defined scope and fee before it begins."
-  />
+  <!-- Final action -->
+  <section class="section section--tight theme-light final">
+    <div class="container">
+      <h2>Start with the situation.</h2>
+      <p class="lead">Tell us what you are working on and we will help identify the next step.</p>
+      <a class="btn btn--primary" href="/start">Discuss My Situation <Icon name="arrow" size={18} /></a>
+      <p class="small muted final__note">Any proposed paid work will have a defined scope and fee before it begins.</p>
+    </div>
+  </section>
 </Base>
 
 <style>
-  .process { list-style: none; padding: 0; margin: 0; max-width: 820px; }
-  .process__step { display: grid; grid-template-columns: 56px 1fr; gap: 20px; padding: 28px 0; border-top: 1px solid var(--line); }
-  .process__step:last-child { border-bottom: 1px solid var(--line); }
-  .process li + li { margin-top: 0; }
-  .process__num {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid var(--gold);
-    display: grid;
-    place-items: center;
-    font-family: var(--font-heading);
-    font-size: 1.3rem;
-    color: var(--gold-deep);
+  /* Process */
+  .process { display: grid; gap: 48px; align-items: start; }
+  @media (min-width: 960px) {
+    .process { grid-template-columns: 1.1fr 1fr; gap: 64px; }
   }
-  .process__step p { margin: 0; color: var(--slate); }
+  .process h2 { font-size: clamp(2rem, 3.8vw, 2.8rem); }
+  .steps { list-style: none; margin: 32px 0 0; padding: 0; }
+  .steps li { position: relative; display: flex; gap: 24px; padding-bottom: 32px; margin: 0; }
+  .steps li:last-child { padding-bottom: 0; }
+  .steps li:not(:last-child)::before { content: ''; position: absolute; left: 25px; top: 52px; bottom: 0; width: 2px; background: var(--teal); }
+  .steps__num { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--gold); color: var(--ink); font-weight: 700; font-size: 1.05rem; }
+  .steps h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; margin: 10px 0 4px; }
+  .steps p { color: var(--slate); margin: 0; }
+
+  .defined { background: #e3eeec; border-radius: var(--radius); padding: clamp(24px, 3vw, 32px); }
+  .defined__head { display: flex; gap: 20px; align-items: flex-start; padding-bottom: 20px; }
+  .defined__head :global(svg) { flex: none; color: var(--teal); }
+  .defined__head h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); margin-bottom: 6px; }
+  .defined__head p { color: var(--slate); margin: 0; font-size: 0.95rem; }
+  .defined ul { list-style: none; margin: 0; padding: 0; }
+  .defined li { display: flex; gap: 20px; align-items: flex-start; padding: 18px 0; border-top: 1px solid #c5d6d2; margin: 0; }
+  .defined li :global(svg) { flex: none; color: var(--teal); margin-top: 2px; }
+  .defined li strong { display: block; font-family: var(--font-heading); font-size: 1.15rem; }
+  .defined li span span { display: block; color: var(--slate); font-size: 0.95rem; }
+
+  /* Engagement types */
+  .section-head--center h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .types { display: grid; gap: 20px; }
+  @media (min-width: 900px) {
+    .types { grid-template-columns: repeat(3, 1fr); }
+  }
+  .type { display: flex; gap: 20px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .type :global(.type__icon) { flex: none; color: var(--teal); }
+  .type h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+  .type p { color: var(--slate); margin: 0; }
+
+  /* Appointment band */
+  .appointment { padding: clamp(36px, 4vw, 48px) 0; }
+  .appointment__inner { display: flex; gap: 32px; align-items: center; justify-content: center; }
+  .appointment__icon { position: relative; flex: none; color: #fff; padding-right: 32px; border-right: 1px solid rgba(255, 255, 255, 0.25); }
+  .appointment__lock { position: absolute; right: 20px; bottom: -4px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 6px; background: var(--gold); color: var(--ink); }
+  .appointment h2 { color: #fff; font-size: clamp(1.7rem, 3vw, 2.3rem); margin-bottom: 6px; }
+  .appointment p { color: #d9e3e6; margin: 0; max-width: 620px; }
+  @media (max-width: 640px) {
+    .appointment__inner { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .appointment__icon { border-right: 0; padding-right: 0; }
+  }
+
+  /* Final */
+  .final { text-align: center; }
+  .final h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 8px; }
+  .final .lead { margin-bottom: 24px; }
+  .final__note { margin: 16px 0 0; }
 </style>
