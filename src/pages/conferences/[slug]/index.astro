@@ -1,10 +1,14 @@
 ---
 import { getEntry } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
-import TimPhoto from '../../../components/TimPhoto.astro';
+import PhotoHero from '../../../components/PhotoHero.astro';
+import PageHero from '../../../components/PageHero.astro';
 import SignupForm from '../../../components/SignupForm.astro';
+import CtaBand from '../../../components/CtaBand.astro';
 import DraftFlag from '../../../components/DraftFlag.astro';
+import Icon from '../../../components/Icon.astro';
 import { visible, eventAction, formatDates, formatPrice, formatDay, FORMAT_LABELS, STATUS_LABELS } from '../../../lib/content';
+import { bands, bandClass } from '../../../lib/bands';
 
 export async function getStaticPaths() {
   const events = await visible('events');
@@ -19,6 +23,39 @@ const action = eventAction(event);
 const dates = formatDates(d.startDate, d.endDate, d.timezone);
 const showPriority = d.status === 'announced' || d.status === 'sold-out';
 const notice = (d.status === 'postponed' || d.status === 'canceled') && d.statusNotice;
+const heroAction = showPriority ? { label: 'Join the Priority List', href: '#priority-list' } : action;
+
+// "Who the workshop is for", "How the session works", and so on.
+const NOUN = { live: 'event', workshop: 'workshop', 'private-session': 'session', 'private-intensive': 'intensive' } as const;
+const noun = NOUN[d.format];
+
+type Point = string | { title: string; text: string };
+const asPoint = (p: Point) => (typeof p === 'string' ? { title: '', text: p } : p);
+const AUDIENCE_ICONS = ['person', 'people', 'briefcase'] as const;
+const INCLUDE_ICONS = ['document', 'book', 'shield'] as const;
+
+const phases = [
+  d.experience.preparation && { title: 'Preparation', text: d.experience.preparation },
+  d.experience.event && { title: `The ${noun}`, text: d.experience.event },
+  d.experience.followUp && { title: 'Included follow-up', text: d.experience.followUp },
+].filter(Boolean) as { title: string; text: string }[];
+
+const logistics = [
+  { icon: 'calendar', label: 'Dates', value: `${dates} (Central Time unless noted)` },
+  { icon: 'pin', label: 'Location', value: d.logistics.venue ? `${d.logistics.venue}, ${d.location}` : d.location },
+  d.capacity && { icon: 'people', label: 'Capacity', value: d.capacity },
+  d.logistics.arrival && { icon: 'clock', label: 'Arrival', value: d.logistics.arrival },
+  d.logistics.accommodation && { icon: 'briefcase', label: 'Accommodation', value: d.logistics.accommodation },
+  d.logistics.bring && { icon: 'document', label: 'What to bring', value: d.logistics.bring },
+].filter(Boolean) as { icon: 'calendar' | 'pin' | 'people' | 'clock' | 'briefcase' | 'document'; label: string; value: string }[];
+
+const bg = bands([
+  'who',
+  d.topics.length > 0 && 'topics',
+  d.inclusions.length > 0 && 'included',
+  (phases.length > 0 || instructor) && 'how',
+  'details',
+]);
 
 // Structured data only for real, published, listed events.
 const eventStatus = { postponed: 'EventPostponed', canceled: 'EventCancelled' } as Record<string, string>;
@@ -33,7 +70,8 @@ const jsonLd =
         endDate: d.endDate ?? d.startDate,
         eventStatus: `https://schema.org/${eventStatus[d.status] ?? 'EventScheduled'}`,
         eventAttendanceMode: `https://schema.org/${d.delivery === 'virtual' ? 'OnlineEventAttendanceMode' : d.delivery === 'hybrid' ? 'MixedEventAttendanceMode' : 'OfflineEventAttendanceMode'}`,
-        location: d.delivery === 'virtual' ? { '@type': 'VirtualLocation', url: Astro.url.href } : { '@type': 'Place', name: d.logistics.venue ?? d.location, address: d.location },
+        location:
+          d.delivery === 'virtual' ? { '@type': 'VirtualLocation', url: Astro.url.href } : { '@type': 'Place', name: d.logistics.venue ?? d.location, address: d.location },
         organizer: { '@type': 'Organization', name: 'IRA Ideas', url: Astro.site?.href },
         performer: instructor ? { '@type': 'Person', name: instructor.data.name } : undefined,
         ...(d.price != null && ['applications-open', 'registration-open'].includes(d.status)
@@ -44,144 +82,400 @@ const jsonLd =
 ---
 
 <Base title={d.title} description={d.summary} noindex={d.unlisted || d.publication !== 'published'} jsonLd={jsonLd}>
-  <section class="event-hero theme-dark">
-    <div class="container event-hero__grid">
-      <div>
-        <nav aria-label="Breadcrumb" class="crumbs small"><a href="/conferences">Conferences</a> <span aria-hidden="true">/</span> {FORMAT_LABELS[d.format]}</nav>
+  {
+    isTim ? (
+      <PhotoHero eyebrow={FORMAT_LABELS[d.format]} title={d.title} lead={d.summary}>
+        <Fragment slot="top">
+          <nav aria-label="Breadcrumb" class="crumbs">
+            <a href="/conferences">Conferences</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{d.title}</span>
+          </nav>
+          <DraftFlag state={d.publication} />
+        </Fragment>
+        <Fragment slot="actions">
+          {notice ? (
+            <p class="hero-notice" role="note">
+              {notice}
+            </p>
+          ) : (
+            heroAction && (
+              <a class="btn btn--primary" href={heroAction.href}>
+                {heroAction.label} <Icon name="arrow" size={18} />
+              </a>
+            )
+          )}
+        </Fragment>
+      </PhotoHero>
+    ) : (
+      <PageHero eyebrow={FORMAT_LABELS[d.format]} title={d.title} lead={d.summary}>
         <DraftFlag state={d.publication} />
-        <p class="eyebrow">{FORMAT_LABELS[d.format]}</p>
-        <h1>{d.title}</h1>
-        <p class="lead">{d.summary}</p>
-        <dl class="facts">
-          <div><dt>Dates</dt><dd>{dates}</dd></div>
-          <div><dt>Location</dt><dd>{d.location}</dd></div>
-          <div><dt>Instructor</dt><dd>{instructor ? `${instructor.data.name}, ${instructor.data.role}` : 'To be announced'}</dd></div>
-          <div><dt>Price</dt><dd>{formatPrice(d.price)}</dd></div>
-          <div><dt>Availability</dt><dd>{STATUS_LABELS[d.status]}{d.capacity && <span class="muted"> &middot; {d.capacity}</span>}</dd></div>
-        </dl>
-        {notice && <p class="status-notice" role="note">{notice}</p>}
-        {action && <div class="btn-row"><a class="btn btn--primary" href={action.href}>{action.label}</a></div>}
-      </div>
-      {isTim && <div class="event-hero__photo"><TimPhoto eager sizes="(min-width: 900px) 340px, 60vw" /></div>}
-    </div>
-  </section>
-
-  <div class="container"><div class="event-body">
-    {d.audience.length > 0 && (
-      <section>
-        <h2>Who the event is for</h2>
-        <ul class="checklist">{d.audience.map((x) => <li>{x}</li>)}</ul>
-      </section>
-    )}
-    {d.topics.length > 0 && (
-      <section>
-        <h2>What participants will work through</h2>
-        <ul>{d.topics.map((x) => <li>{x}</li>)}</ul>
-      </section>
-    )}
-    {d.inclusions.length > 0 && (
-      <section>
-        <h2>What is included</h2>
-        <ul class="checklist">{d.inclusions.map((x) => <li>{x}</li>)}</ul>
-      </section>
-    )}
-    {(d.experience.preparation || d.experience.event || d.experience.followUp) && (
-      <section>
-        <h2>How the experience works</h2>
-        <div class="phases">
-          {d.experience.preparation && <div class="card"><h3>Preparation</h3><p>{d.experience.preparation}</p></div>}
-          {d.experience.event && <div class="card"><h3>The event</h3><p>{d.experience.event}</p></div>}
-          {d.experience.followUp && <div class="card"><h3>Follow-up</h3><p>{d.experience.followUp}</p></div>}
-        </div>
-      </section>
-    )}
-    {instructor && (
-      <section>
-        <h2>Instructor</h2>
-        <p><strong>{instructor.data.name}</strong>, {instructor.data.role}</p>
-        <p><a href={isTim ? '/about/tim-berry' : '/about'}>Read the full professional biography</a></p>
-      </section>
-    )}
-    {(d.schedule.length > 0 || Object.values(d.logistics).some(Boolean)) && (
-      <section>
-        <h2>Schedule and logistics</h2>
-        <p><strong>Dates:</strong> {dates} (Central Time unless noted)</p>
-        {d.schedule.length > 0 && (
-          <table class="schedule">
-            <thead><tr><th scope="col">Day</th><th scope="col">Time</th><th scope="col">Session</th></tr></thead>
-            <tbody>{d.schedule.map((s) => <tr><td>{s.day}</td><td>{s.time}</td><td>{s.detail}</td></tr>)}</tbody>
-          </table>
+        {notice ? (
+          <p class="hero-notice" role="note">
+            {notice}
+          </p>
+        ) : (
+          heroAction && (
+            <div class="btn-row">
+              <a class="btn btn--primary" href={heroAction.href}>
+                {heroAction.label} <Icon name="arrow" size={18} />
+              </a>
+            </div>
+          )
         )}
-        <dl class="logistics">
-          {d.logistics.venue && <><dt>Venue</dt><dd>{d.logistics.venue}</dd></>}
-          {d.logistics.arrival && <><dt>Arrival</dt><dd>{d.logistics.arrival}</dd></>}
-          {d.logistics.accommodation && <><dt>Accommodation</dt><dd>{d.logistics.accommodation}</dd></>}
-          {d.logistics.bring && <><dt>What to bring</dt><dd>{d.logistics.bring}</dd></>}
-        </dl>
-      </section>
-    )}
-    <section>
-      <h2>Participation price</h2>
-      <p class="price">{formatPrice(d.price)}</p>
-      {d.installments && (
-        <ul>
-          <li>Deposit: {formatPrice(d.installments.deposit)}</li>
-          <li>Remaining balance: {formatPrice(d.installments.balance)}, due {formatDay(d.installments.balanceDue)}</li>
-          <li>{d.installments.conditions}</li>
-        </ul>
-      )}
-      {d.guestPolicy && <p class="muted">{d.guestPolicy}</p>}
-    </section>
-    {d.terms.length > 0 && (
-      <section>
-        <h2>Terms and questions</h2>
-        <div class="faqs">
-          {d.terms.map((t) => <details><summary>{t.question}</summary><p>{t.answer}</p></details>)}
-        </div>
-      </section>
-    )}
-  </div></div>
+      </PageHero>
+    )
+  }
 
-  <section class="section theme-dark">
+  <!-- Key facts, then who the event is for -->
+  <section class:list={['section', 'who', bandClass(bg.who)]}>
     <div class="container">
-      <div class="reading">
-        {showPriority ? (
-          <div id="priority-list">
-            <h2>{d.status === 'sold-out' ? 'This event is sold out.' : 'Be first to hear when this event opens.'}</h2>
-            <p class="lead">Join the priority list and we will contact you when relevant event information becomes available.</p>
-            <SignupForm list="priority" id="event-priority" />
-          </div>
-        ) : notice ? (
-          <><h2>Event update</h2><p class="lead">{notice}</p></>
-        ) : action ? (
-          <><h2>{d.title}</h2><p class="lead">{dates} &middot; {d.location} &middot; {formatPrice(d.price)}</p><div class="btn-row"><a class="btn btn--primary" href={action.href}>{action.label}</a></div></>
-        ) : null}
-      </div>
+      <dl class="facts">
+        <div>
+          <Icon name="calendar" size={30} />
+          <span><dt>Dates</dt><dd>{dates}</dd></span>
+        </div>
+        <div>
+          <Icon name="pin" size={30} />
+          <span><dt>Location</dt><dd>{d.location}</dd></span>
+        </div>
+        <div>
+          <Icon name="tag" size={30} />
+          <span><dt>Full participation price</dt><dd>{formatPrice(d.price)}</dd></span>
+        </div>
+        <div>
+          <Icon name="people" size={30} />
+          <span><dt>Status</dt><dd>{STATUS_LABELS[d.status]}</dd></span>
+        </div>
+      </dl>
+
+      {
+        d.audience.length > 0 && (
+          <>
+            <div class="section-head section-head--center who__head">
+              <h2>Who the {noun} is for.</h2>
+            </div>
+            <ul class="cards cards--3" role="list">
+              {d.audience.map(asPoint).map((p, i) => (
+                <li class="card-item">
+                  <Icon name={AUDIENCE_ICONS[i % AUDIENCE_ICONS.length]} size={40} class="card-item__icon" />
+                  {p.title && <h3>{p.title}</h3>}
+                  <p>{p.text}</p>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
     </div>
   </section>
+
+  {
+    d.topics.length > 0 && (
+      <section class:list={['section', bandClass(bg.topics)]}>
+        <div class="container">
+          <div class="section-head section-head--center">
+            <h2>What participants will work through.</h2>
+          </div>
+          <ol class="cards cards--3" role="list">
+            {d.topics.map(asPoint).map((p, i) => (
+              <li class="card-item card-item--numbered">
+                <span class="card-item__num" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>
+                  {p.title && <h3>{p.title}</h3>}
+                  <p>{p.text}</p>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    d.inclusions.length > 0 && (
+      <section class:list={['section', bandClass(bg.included)]}>
+        <div class="container">
+          <div class="section-head section-head--center">
+            <h2>What is included.</h2>
+            <p class="lead">Only the items listed here are part of the participation price.</p>
+          </div>
+          <ul class="cards cards--3" role="list">
+            {d.inclusions.map(asPoint).map((p, i) => (
+              <li class="card-item card-item--row">
+                <Icon name={INCLUDE_ICONS[i % INCLUDE_ICONS.length]} size={38} class="card-item__icon" />
+                <span>
+                  {p.title && <h3>{p.title}</h3>}
+                  <p>{p.text}</p>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    (phases.length > 0 || instructor) && (
+      <section class:list={['section', bandClass(bg.how)]}>
+        <div class="container how">
+          {isTim && (
+            <div class="how__media">
+              <img
+                src="/images/tim/tim-berry-shirt-600.webp"
+                srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w, /images/tim/tim-berry-shirt-861.webp 861w"
+                sizes="(min-width: 900px) 380px, 70vw"
+                width="600"
+                height="714"
+                alt="Tim Berry, attorney"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          )}
+          <div class="how__copy">
+            {phases.length > 0 && (
+              <>
+                <h2>How the {noun} works.</h2>
+                <ol class="phases" role="list">
+                  {phases.map((ph, i) => (
+                    <li>
+                      <span class="phases__num" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                      <span>
+                        <strong>{ph.title}</strong>
+                        <span>{ph.text}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+            {instructor && (
+              <div class="instructor">
+                <p>
+                  <strong>Instructor:</strong> {instructor.data.name}, {instructor.data.role}
+                </p>
+                {isTim && (
+                  <a href="/about/tim-berry">
+                    View Tim Berry's profile <Icon name="arrow" size={16} />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Schedule, logistics, price, and terms -->
+  <section class:list={['section', bandClass(bg.details)]}>
+    <div class="container details">
+      <div>
+        <h2>Schedule &amp; logistics.</h2>
+        <table class="logistics">
+          <tbody>
+            {
+              logistics.map((row) => (
+                <tr>
+                  <th scope="row">
+                    <Icon name={row.icon} size={22} /> {row.label}
+                  </th>
+                  <td>{row.value}</td>
+                </tr>
+              ))
+            }
+            <tr>
+              <th scope="row"><Icon name="tag" size={22} /> Full price</th>
+              <td>{formatPrice(d.price)}</td>
+            </tr>
+            {
+              d.installments && (
+                <>
+                  <tr>
+                    <th scope="row">
+                      <Icon name="tag" size={22} /> Deposit
+                    </th>
+                    <td>{formatPrice(d.installments.deposit)}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <Icon name="calendar" size={22} /> Balance
+                    </th>
+                    <td>
+                      {formatPrice(d.installments.balance)}, due {formatDay(d.installments.balanceDue)}
+                    </td>
+                  </tr>
+                </>
+              )
+            }
+          </tbody>
+        </table>
+        {d.installments && <p class="small muted">{d.installments.conditions}</p>}
+        {d.guestPolicy && <p class="small muted">{d.guestPolicy}</p>}
+        {
+          d.schedule.length > 0 && (
+            <>
+              <h3 class="details__sub">Schedule</h3>
+              <table class="logistics logistics--schedule">
+                <thead>
+                  <tr>
+                    <th scope="col">Day</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Session</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.schedule.map((row) => (
+                    <tr>
+                      <td>{row.day}</td>
+                      <td>{row.time}</td>
+                      <td>{row.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )
+        }
+      </div>
+      {
+        d.terms.length > 0 && (
+          <div>
+            <h2>Frequently asked questions.</h2>
+            <div class="faqs">
+              {d.terms.map((t) => (
+                <details>
+                  <summary>
+                    {t.question}
+                    <Icon name="chevron" size={18} class="faqs__chevron" />
+                  </summary>
+                  <p>{t.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    showPriority ? (
+      <section class="priority-band theme-dark" id="priority-list" tabindex="-1">
+        <div class="container priority-band__grid">
+          <div>
+            <h2>{d.status === 'sold-out' ? 'This event is sold out.' : 'Join the Priority List.'}</h2>
+            <p>Be first to know when event details are announced and registration opens. Joining the priority list does not reserve a seat.</p>
+          </div>
+          <SignupForm list="priority" id="event-priority" stacked />
+        </div>
+      </section>
+    ) : notice ? (
+      <CtaBand heading="Event update" copy={notice} href="/conferences" label="View Conferences" layout="split" tone="teal" />
+    ) : action ? (
+      <CtaBand heading={d.title} copy={`${dates} · ${d.location} · ${formatPrice(d.price)}`} href={action.href} label={action.label} layout="split" tone="teal" />
+    ) : null
+  }
 </Base>
 
 <style>
-  .event-hero { padding: clamp(48px, 7vw, 88px) 0; }
-  .event-hero__grid { display: grid; gap: 40px; align-items: center; }
-  @media (min-width: 900px) { .event-hero__grid { grid-template-columns: 1fr 340px; gap: 64px; } }
-  .event-hero__photo { max-width: 340px; }
-  .crumbs { margin-bottom: 24px; color: var(--mist); }
-  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; margin: 28px 0; }
-  .facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mist); }
-  .facts dd { margin: 2px 0 0; font-weight: 500; }
-  .status-notice { border-left: 3px solid var(--gold); padding-left: 14px; }
-  .event-body { padding: var(--space-section) 0; max-width: var(--reading); }
-  .event-body section + section { margin-top: 56px; }
-  .phases { display: grid; gap: 16px; }
-  @media (min-width: 700px) { .phases { grid-template-columns: repeat(3, 1fr); } }
-  .schedule { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.95rem; }
-  .schedule th, .schedule td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .logistics dt { font-weight: 500; margin-top: 12px; }
-  .logistics dd { margin: 0; }
-  .price { font-family: var(--font-heading); font-size: 2rem; margin-bottom: 12px; }
-  .faqs details { border-top: 1px solid var(--line); padding: 16px 0; }
-  .faqs details:last-child { border-bottom: 1px solid var(--line); }
-  .faqs summary { cursor: pointer; font-weight: 500; }
-  .faqs details p { margin: 12px 0 0; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; margin-bottom: 20px; color: var(--mist); }
+  .crumbs a { color: #fff !important; text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  .hero-notice { border-left: 3px solid var(--gold); padding-left: 14px; color: #fff; margin: 0; }
+
+  /* Key facts bar */
+  .who { padding-top: 32px; }
+  .facts { display: grid; gap: 16px; margin: 0; background: #e7f0ee; border-radius: var(--radius); padding: 20px 24px; }
+  @media (min-width: 800px) {
+    .facts { grid-template-columns: repeat(4, 1fr); gap: 0; }
+    .facts > div + div { border-left: 1px solid #c5d6d2; }
+    .facts > div { padding: 0 24px; }
+    .facts > div:first-child { padding-left: 0; }
+  }
+  .facts > div { display: flex; gap: 16px; align-items: center; }
+  .facts :global(svg) { flex: none; color: var(--teal); }
+  .facts dt { font-weight: 700; font-size: 0.95rem; }
+  .facts dd { margin: 0; color: var(--slate); font-size: 0.92rem; }
+  .who__head { margin-top: clamp(48px, 6vw, 72px); }
+
+  /* Card grids */
+  .section-head--center h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  @media (min-width: 800px) {
+    .cards--3 { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  }
+  .cards li + li { margin-top: 0; }
+  .card-item { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .card-item :global(.card-item__icon) { color: var(--teal); flex: none; }
+  .card-item h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; margin: 14px 0 6px; }
+  .card-item p { color: var(--slate); font-size: 0.97rem; margin: 0; }
+  .card-item--row, .card-item--numbered { display: flex; gap: 18px; align-items: flex-start; }
+  .card-item--row h3, .card-item--numbered h3 { margin-top: 0; }
+  .card-item__num { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #e3eeec; font-size: 1.1rem; color: var(--ink); }
+
+  /* How it works */
+  .how { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .how { grid-template-columns: 0.9fr 1.1fr; gap: 64px; }
+  }
+  .how__media {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    background: radial-gradient(ellipse 60% 70% at 50% 35%, #ffffff 0%, transparent 70%), linear-gradient(160deg, #e8eeed 0%, #d5e1df 100%);
+  }
+  .how__media img { width: 64%; height: auto; margin-bottom: -4%; }
+  .how__copy h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+  .phases { list-style: none; padding: 0; margin: 0 0 24px; }
+  .phases li { display: flex; gap: 18px; align-items: flex-start; margin: 0 0 18px; }
+  .phases__num { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #e3eeec; font-weight: 500; }
+  .phases strong { display: block; font-family: var(--font-heading); font-size: 1.15rem; }
+  .phases span span { display: block; color: var(--slate); font-size: 0.95rem; }
+  .instructor { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .instructor p { margin: 0; }
+  .instructor a { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--teal); }
+
+  /* Details */
+  .details { display: grid; gap: 48px; }
+  @media (min-width: 900px) {
+    .details { grid-template-columns: 1fr 1fr; gap: 64px; }
+    .details > div + div { border-left: 1px solid var(--line); padding-left: 64px; }
+  }
+  .details h2 { font-size: clamp(1.8rem, 3.2vw, 2.4rem); }
+  .details__sub { margin-top: 28px; }
+  .logistics { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 0.95rem; margin-bottom: 12px; }
+  .logistics th, .logistics td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .logistics th { font-weight: 500; white-space: nowrap; width: 40%; }
+  .logistics th :global(svg) { color: var(--teal); vertical-align: -5px; margin-right: 8px; }
+  .logistics td { color: var(--slate); }
+  .logistics--schedule th { width: auto; }
+  .faqs details { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+  .faqs details + details { margin-top: 10px; }
+  .faqs summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 18px; cursor: pointer; font-weight: 500; list-style: none; }
+  .faqs summary::-webkit-details-marker { display: none; }
+  .faqs :global(.faqs__chevron) { flex: none; transform: rotate(90deg); transition: transform 0.15s ease; color: var(--teal); }
+  .faqs details[open] :global(.faqs__chevron) { transform: rotate(-90deg); }
+  .faqs details p { padding: 0 18px 16px; margin: 0; color: var(--slate); }
+
+  /* Priority band */
+  .priority-band { background: var(--teal); padding: clamp(40px, 5vw, 56px) 0; }
+  .priority-band__grid { display: grid; gap: 32px; align-items: center; }
+  @media (min-width: 900px) {
+    .priority-band__grid { grid-template-columns: 1.1fr 1fr; gap: 64px; }
+  }
+  .priority-band h2 { color: #fff; font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+  .priority-band p { color: #e3eeed; }
+  .priority-band :global(.signup-form .btn) { width: 100%; }
+  .priority-band :global(.signup-form .muted) { color: #d9e6e5; }
 </style>

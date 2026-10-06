@@ -1,9 +1,11 @@
 ---
 # TEMPLATE EXAMPLE. Stays in draft. Copy for each real event and replace all
 # PLACEHOLDER values with approved details before publishing.
+# Try other states by changing status: announced, applications-open,
+# registration-open, sold-out, completed, postponed, canceled.
 title: "PLACEHOLDER: IRA Ideas Advanced Workshop"
 format: workshop
-status: applications-open
+status: announced
 summary: "PLACEHOLDER: a clear description of the event."
 startDate: "2027-03-10"
 endDate: "2027-03-11"
@@ -14,14 +16,29 @@ instructor: tim-berry
 price: null
 capacity: "PLACEHOLDER: approved participant capacity"
 audience:
-  - "PLACEHOLDER: intended participant"
+  - title: "PLACEHOLDER: participant type"
+    text: "PLACEHOLDER: who this event is designed for."
+  - title: "PLACEHOLDER: participant type"
+    text: "PLACEHOLDER: who this event is designed for."
+  - title: "PLACEHOLDER: participant type"
+    text: "PLACEHOLDER: who this event is designed for."
 topics:
-  - "PLACEHOLDER: topic and discussion format"
+  - title: "PLACEHOLDER: approved topic"
+    text: "PLACEHOLDER: what participants will work through."
+  - title: "PLACEHOLDER: approved topic"
+    text: "PLACEHOLDER: what participants will work through."
+  - title: "PLACEHOLDER: approved topic"
+    text: "PLACEHOLDER: what participants will work through."
 inclusions:
-  - "PLACEHOLDER: an actual purchased inclusion"
+  - title: "PLACEHOLDER: inclusion"
+    text: "PLACEHOLDER: an actual purchased inclusion."
+  - title: "PLACEHOLDER: inclusion"
+    text: "PLACEHOLDER: an actual purchased inclusion."
+  - title: "PLACEHOLDER: inclusion"
+    text: "PLACEHOLDER: an actual purchased inclusion."
 experience:
   preparation: "PLACEHOLDER: preparation"
-  event: "PLACEHOLDER: the event itself"
+  event: "PLACEHOLDER: the format and flow of the event"
   followUp: "PLACEHOLDER: included follow-up, if any"
 schedule:
   - day: "Day 1"
@@ -33,9 +50,13 @@ logistics:
   accommodation: "PLACEHOLDER: accommodation responsibilities"
   bring: "PLACEHOLDER: what to bring"
 terms:
-  - question: Admission
+  - question: "Admission"
     answer: "PLACEHOLDER: approved admission terms"
-  - question: Cancellation and refunds
+  - question: "Cancellation and refunds"
+    answer: "PLACEHOLDER: approved terms"
+  - question: "Guests"
+    answer: "PLACEHOLDER: approved guest policy"
+  - question: "Recording and confidentiality"
     answer: "PLACEHOLDER: approved terms"
 featured: true
 publication: draft

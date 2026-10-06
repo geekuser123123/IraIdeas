@@ -67,9 +67,9 @@ const events = defineCollection({
       .optional(),
     capacity: z.string().optional(), // paid participant capacity, worded as approved
     guestPolicy: z.string().optional(), // accompanying professionals, kept separate from capacity
-    audience: z.array(z.string()).default([]),
-    topics: z.array(z.string()).default([]),
-    inclusions: z.array(z.string()).default([]),
+    audience: z.array(point).default([]),
+    topics: z.array(point).default([]),
+    inclusions: z.array(point).default([]),
     experience: z
       .object({ preparation: z.string().optional(), event: z.string().optional(), followUp: z.string().optional() })
       .default({}),
