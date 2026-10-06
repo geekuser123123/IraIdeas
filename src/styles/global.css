@@ -1,5 +1,5 @@
 /* IRA Ideas design tokens
-   Headings: Georgia (system font, no download)
+   Headings: Source Serif 4 (self-hosted variable font)
    Subheadings, body, buttons: Roboto (self-hosted) */
 
 :root {
@@ -22,7 +22,7 @@
   --error: #a3281e;
   --success: #2f6b3a;
 
-  --font-heading: Georgia, 'Times New Roman', serif;
+  --font-heading: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
   --font-body: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --content: 1350px;
@@ -61,7 +61,7 @@ h1, h2 {
   font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   margin: 0 0 0.5em;
   text-wrap: balance;
 }

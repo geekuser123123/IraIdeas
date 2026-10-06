@@ -17,7 +17,7 @@ Public website for **IRA Ideas, Advanced Retirement & Tax Strategies**: Advanced
 | Ink (text) | `#1F1F22` |
 | Muted gold (accent, buttons) | `#B8975A` |
 | Deep gold (gold text on light) | `#8C6F3B` |
-| Headings | Georgia |
+| Headings | Source Serif 4 (self-hosted) |
 | Subheadings, body, buttons | Roboto (self-hosted) |
 
 House style: no em dashes or en dashes anywhere. `npm run build` fails if one appears in a page.
