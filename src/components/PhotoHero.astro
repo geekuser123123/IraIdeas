@@ -5,7 +5,7 @@ interface Props {
   title: string;
   lead: string;
   eyebrow?: string;
-  photo?: 'shirt' | 'suit';
+  photo?: 'shirt' | 'suit' | false; // false: compact text-only hero
   authority?: boolean; // show the "nearly 30 years" line under the buttons
   subtitle?: string; // short line between the title and the lead
   label?: boolean; // the "Tim Berry, Attorney" name tag on the photo
@@ -20,12 +20,13 @@ const PHOTOS = {
   shirt: { widths: [400, 600, 861], w: 861, h: 1024, alt: 'Tim Berry, attorney, in a striped shirt with arms crossed' },
   suit: { widths: [400, 600, 768], w: 768, h: 800, alt: 'Tim Berry, attorney, in a dark suit with arms crossed' },
 };
-const p = PHOTOS[photo];
+const p = photo ? PHOTOS[photo] : null;
 const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
+const showVisual = Boolean(p) || hasPanel;
 ---
 
-<!-- Large photo hero with the angled bottom edge. Used on the homepage and About. -->
-<section class:list={['hero', 'theme-dark', { 'hero--panel': hasPanel, 'hero--large': large, 'hero--flat': !angled }]}>
+<!-- Shared page hero: Tim's photo on the right, or text only when photo={false}. -->
+<section class:list={['hero', 'theme-dark', { 'hero--panel': hasPanel, 'hero--large': large, 'hero--flat': !angled, 'hero--text': !p, 'hero--solo': !showVisual }]}>
   <div class="container hero__grid">
     <div class="hero__copy">
       <slot name="top" />
@@ -44,7 +45,9 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
         )
       }
     </div>
+    {showVisual && (
     <div class="hero__visual">
+      {p && (
       <img
         class="hero__photo"
         src={src(p.widths[2])}
@@ -55,8 +58,9 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
         alt={p.alt}
         fetchpriority="high"
       />
+      )}
       {
-        label && (
+        p && label && (
           <p class="hero__label">
             {labelPrefix && <span class="hero__label-prefix">{labelPrefix}</span>}
             <span class="hero__label-name">Tim Berry</span>
@@ -66,6 +70,7 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
       }
       {hasPanel && <div class="hero__panel"><slot name="panel" /></div>}
     </div>
+    )}
   </div>
 </section>
 
@@ -134,6 +139,17 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
   .hero__label-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; }
   .hero__label-role { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
   .hero__subtitle { color: #fff; font-size: 1.25rem; margin: -4px 0 12px; }
+  /* Text-only hero: compact, centred vertically, no empty space */
+  .hero--text { padding-bottom: clamp(56px, 7vw, 88px); }
+  .hero--text:not(.hero--flat) { padding-bottom: clamp(96px, 12vw, 150px); }
+  .hero--text .hero__copy, .hero--text.hero--flat .hero__copy { padding-bottom: 0; }
+  .hero--text .hero__grid { align-items: center; }
+  .hero--solo .hero__grid { grid-template-columns: 1fr; }
+  .hero--solo .hero__copy { max-width: 820px; }
+  .hero--text .btn-row:empty { display: none; }
+  .hero--text.hero--panel .hero__visual { max-width: 380px; }
+  .hero--text.hero--panel .hero__panel { position: static; transform: none; width: 100%; margin: 0; }
+
   /* Straight bottom edge */
   .hero--flat, .hero.hero--flat { clip-path: none; }
   .hero--flat .hero__copy { padding-bottom: clamp(56px, 7vw, 96px); }

@@ -74,7 +74,7 @@ const jsonLd = [
 ---
 
 <Base title={d.name} description={`${d.subtitle}. ${d.summary}`} noindex={d.publication !== 'published'} jsonLd={jsonLd}>
-  <PhotoHero title={d.name} subtitle={d.subtitle} lead={d.summary} label={false}>
+  <PhotoHero title={d.name} subtitle={d.subtitle} lead={d.summary} photo={false}>
     <Fragment slot="top">
       <nav aria-label="Breadcrumb" class="crumbs">
         <a href="/">Home</a>
