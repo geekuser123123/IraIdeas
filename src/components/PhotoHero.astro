@@ -12,8 +12,9 @@ interface Props {
   rule?: boolean; // short gold line under the subtitle
   large?: boolean; // oversized title, for a person's name
   angled?: boolean; // angled bottom edge (default on)
+  labelPrefix?: string; // small line above the name on the photo tag, e.g. "Instructor"
 }
-const { title, lead, eyebrow, photo = 'shirt', authority = false, subtitle, label = true, rule = false, large = false, angled = true } = Astro.props;
+const { title, lead, eyebrow, photo = 'shirt', authority = false, subtitle, label = true, rule = false, large = false, angled = true, labelPrefix } = Astro.props;
 const hasPanel = Astro.slots.has('panel');
 const PHOTOS = {
   shirt: { widths: [400, 600, 861], w: 861, h: 1024, alt: 'Tim Berry, attorney, in a striped shirt with arms crossed' },
@@ -57,6 +58,7 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
       {
         label && (
           <p class="hero__label">
+            {labelPrefix && <span class="hero__label-prefix">{labelPrefix}</span>}
             <span class="hero__label-name">Tim Berry</span>
             <span class="hero__label-role">Attorney</span>
           </p>
@@ -128,6 +130,7 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
     padding: 12px 18px;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
   }
+  .hero__label-prefix { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mist); }
   .hero__label-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; }
   .hero__label-role { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
   .hero__subtitle { color: #fff; font-size: 1.25rem; margin: -4px 0 12px; }
@@ -152,6 +155,7 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
     .hero { clip-path: polygon(0 0, 100% 0, 100% 96%, 0 100%); }
     .hero__copy { padding-bottom: 8px; }
     .hero--flat .hero__copy { padding-bottom: 8px; }
+    .hero--flat .hero__label { bottom: 30%; }
     .hero__avatar { display: block; }
     .hero__eyebrow::after { display: none; }
     .hero__visual { max-width: 420px; justify-self: center; }

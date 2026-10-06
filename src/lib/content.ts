@@ -17,6 +17,14 @@ export const FORMAT_LABELS = {
   'private-intensive': 'Private Strategy Intensive with Tim Berry',
 } as const;
 
+/** Approved one-line positioning for each event format. */
+export const FORMAT_POSITIONING = {
+  live: 'Broader educational events',
+  workshop: 'Focused, smaller-group advanced education',
+  'private-session': 'Limited-participant experience',
+  'private-intensive': 'Individually scoped private engagement',
+} as const;
+
 export const STATUS_LABELS = {
   announced: 'Announced',
   'applications-open': 'Applications open',

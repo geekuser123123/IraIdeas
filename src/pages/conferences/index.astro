@@ -4,7 +4,7 @@ import EventCard from '../../components/EventCard.astro';
 import SignupForm from '../../components/SignupForm.astro';
 import Icon from '../../components/Icon.astro';
 import formatSettings from '../../data/formats.json';
-import { listedEvents, isUpcoming, FORMAT_LABELS } from '../../lib/content';
+import { listedEvents, isUpcoming, FORMAT_LABELS, FORMAT_POSITIONING } from '../../lib/content';
 import { siteImage } from '../../lib/images';
 import { bands, bandClass } from '../../lib/bands';
 
@@ -16,10 +16,10 @@ const past = events.filter((e) => e.data.status === 'completed').reverse();
 // expects the private strategy intensive to be shared through an unlisted page;
 // it is shown here for now and can be switched off in formats.json.
 const FORMATS = [
-  { key: 'live', icon: 'people', positioning: 'Broader educational events', copy: 'Educational events on advanced retirement and tax-planning concepts.' },
-  { key: 'workshop', icon: 'book', positioning: 'Focused, smaller-group advanced education', copy: 'Smaller groups for focused, advanced education and discussion.' },
-  { key: 'private-session', icon: 'dots', positioning: 'Limited-participant experience', copy: 'Limited participation, with preparation and discussion specific to the event.' },
-  { key: 'private-intensive', icon: 'person', positioning: 'Individually scoped private engagement', copy: 'A private engagement with its scope defined for the individual participant.' },
+  { key: 'live', icon: 'people', positioning: FORMAT_POSITIONING['live'], copy: 'Educational events on advanced retirement and tax-planning concepts.' },
+  { key: 'workshop', icon: 'book', positioning: FORMAT_POSITIONING['workshop'], copy: 'Smaller groups for focused, advanced education and discussion.' },
+  { key: 'private-session', icon: 'dots', positioning: FORMAT_POSITIONING['private-session'], copy: 'Limited participation, with preparation and discussion specific to the event.' },
+  { key: 'private-intensive', icon: 'person', positioning: FORMAT_POSITIONING['private-intensive'], copy: 'A private engagement with its scope defined for the individual participant.' },
 ] as const;
 const formats = FORMATS.filter((f) => formatSettings[f.key].offered);
 

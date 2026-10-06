@@ -7,7 +7,7 @@ import SignupForm from '../../../components/SignupForm.astro';
 import CtaBand from '../../../components/CtaBand.astro';
 import DraftFlag from '../../../components/DraftFlag.astro';
 import Icon from '../../../components/Icon.astro';
-import { visible, eventAction, formatDates, formatPrice, formatDay, FORMAT_LABELS, STATUS_LABELS } from '../../../lib/content';
+import { visible, eventAction, formatDates, formatPrice, formatDay, FORMAT_POSITIONING } from '../../../lib/content';
 import { bands, bandClass } from '../../../lib/bands';
 
 export async function getStaticPaths() {
@@ -23,7 +23,7 @@ const action = eventAction(event);
 const dates = formatDates(d.startDate, d.endDate, d.timezone);
 const showPriority = d.status === 'announced' || d.status === 'sold-out';
 const notice = (d.status === 'postponed' || d.status === 'canceled') && d.statusNotice;
-const heroAction = showPriority ? { label: 'Join the Priority List', href: '#priority-list' } : action;
+const primary = showPriority ? { label: 'Join the Priority List', href: '#priority-list' } : action;
 
 // "Who the workshop is for", "How the session works", and so on.
 const NOUN = { live: 'event', workshop: 'workshop', 'private-session': 'session', 'private-intensive': 'intensive' } as const;
@@ -31,29 +31,31 @@ const noun = NOUN[d.format];
 
 type Point = string | { title: string; text: string };
 const asPoint = (p: Point) => (typeof p === 'string' ? { title: '', text: p } : p);
-const AUDIENCE_ICONS = ['person', 'people', 'briefcase'] as const;
-const INCLUDE_ICONS = ['document', 'book', 'shield'] as const;
+const AUDIENCE_ICONS = ['people', 'person', 'briefcase'] as const;
+const TOPIC_ICONS = ['document', 'chart', 'people'] as const;
+const INCLUDE_ICONS = ['shield', 'document', 'book'] as const;
 
 const phases = [
-  d.experience.preparation && { title: 'Preparation', text: d.experience.preparation },
-  d.experience.event && { title: `The ${noun}`, text: d.experience.event },
-  d.experience.followUp && { title: 'Included follow-up', text: d.experience.followUp },
-].filter(Boolean) as { title: string; text: string }[];
+  d.experience.preparation && { icon: 'document', title: 'Preparation', text: d.experience.preparation },
+  d.experience.event && { icon: 'people', title: `At the ${noun}`, text: d.experience.event },
+  d.experience.followUp && { icon: 'mail', title: 'Included follow-up', text: d.experience.followUp },
+].filter(Boolean) as { icon: 'document' | 'people' | 'mail'; title: string; text: string }[];
 
 const logistics = [
-  { icon: 'calendar', label: 'Dates', value: `${dates} (Central Time unless noted)` },
-  { icon: 'pin', label: 'Location', value: d.logistics.venue ? `${d.logistics.venue}, ${d.location}` : d.location },
+  { icon: 'calendar', label: 'Date', value: `${dates} (Central Time unless noted)` },
+  { icon: 'pin', label: 'Venue', value: d.logistics.venue ? `${d.logistics.venue}, ${d.location}` : d.location },
   d.capacity && { icon: 'people', label: 'Capacity', value: d.capacity },
-  d.logistics.arrival && { icon: 'clock', label: 'Arrival', value: d.logistics.arrival },
-  d.logistics.accommodation && { icon: 'briefcase', label: 'Accommodation', value: d.logistics.accommodation },
-  d.logistics.bring && { icon: 'document', label: 'What to bring', value: d.logistics.bring },
-].filter(Boolean) as { icon: 'calendar' | 'pin' | 'people' | 'clock' | 'briefcase' | 'document'; label: string; value: string }[];
+  d.logistics.arrival && { icon: 'car', label: 'Arrival', value: d.logistics.arrival },
+  d.logistics.accommodation && { icon: 'bed', label: 'Accommodation', value: d.logistics.accommodation },
+  d.logistics.bring && { icon: 'document', label: 'Bring with you', value: d.logistics.bring },
+].filter(Boolean) as { icon: 'calendar' | 'pin' | 'people' | 'car' | 'bed' | 'document'; label: string; value: string }[];
 
 const bg = bands([
-  'who',
+  d.audience.length > 0 && 'who',
   d.topics.length > 0 && 'topics',
   d.inclusions.length > 0 && 'included',
-  (phases.length > 0 || instructor) && 'how',
+  phases.length > 0 && 'how',
+  instructor && 'instructor',
   'details',
 ]);
 
@@ -84,7 +86,7 @@ const jsonLd =
 <Base title={d.title} description={d.summary} noindex={d.unlisted || d.publication !== 'published'} jsonLd={jsonLd}>
   {
     isTim ? (
-      <PhotoHero eyebrow={FORMAT_LABELS[d.format]} title={d.title} lead={d.summary}>
+      <PhotoHero eyebrow="Conferences" title={d.title} subtitle={`${FORMAT_POSITIONING[d.format]}.`} lead={d.summary} angled={false} labelPrefix="Instructor">
         <Fragment slot="top">
           <nav aria-label="Breadcrumb" class="crumbs">
             <a href="/conferences">Conferences</a>
@@ -94,41 +96,27 @@ const jsonLd =
           <DraftFlag state={d.publication} />
         </Fragment>
         <Fragment slot="actions">
-          {notice ? (
+          {notice && (
             <p class="hero-notice" role="note">
               {notice}
             </p>
-          ) : (
-            heroAction && (
-              <a class="btn btn--primary" href={heroAction.href}>
-                {heroAction.label} <Icon name="arrow" size={18} />
-              </a>
-            )
           )}
         </Fragment>
       </PhotoHero>
     ) : (
-      <PageHero eyebrow={FORMAT_LABELS[d.format]} title={d.title} lead={d.summary}>
+      <PageHero eyebrow="Conferences" title={d.title} lead={d.summary}>
         <DraftFlag state={d.publication} />
-        {notice ? (
+        {notice && (
           <p class="hero-notice" role="note">
             {notice}
           </p>
-        ) : (
-          heroAction && (
-            <div class="btn-row">
-              <a class="btn btn--primary" href={heroAction.href}>
-                {heroAction.label} <Icon name="arrow" size={18} />
-              </a>
-            </div>
-          )
         )}
       </PageHero>
     )
   }
 
-  <!-- Key facts, then who the event is for -->
-  <section class:list={['section', 'who', bandClass(bg.who)]}>
+  <!-- Key facts bar, overlapping the hero -->
+  <div class="facts-wrap overlay">
     <div class="container">
       <dl class="facts">
         <div>
@@ -141,75 +129,55 @@ const jsonLd =
         </div>
         <div>
           <Icon name="tag" size={30} />
-          <span><dt>Full participation price</dt><dd>{formatPrice(d.price)}</dd></span>
+          <span><dt>Price</dt><dd>{formatPrice(d.price)}</dd></span>
         </div>
-        <div>
+        <div class="facts__action">
           <Icon name="people" size={30} />
-          <span><dt>Status</dt><dd>{STATUS_LABELS[d.status]}</dd></span>
+          <span>
+            <dt>{showPriority ? 'Get notified' : notice ? 'Status' : 'Participate'}</dt>
+            <dd>
+              {showPriority
+                ? 'Join the priority list for updates.'
+                : notice
+                  ? d.status === 'canceled'
+                    ? 'Canceled'
+                    : 'Postponed'
+                  : d.status === 'applications-open'
+                    ? 'Applications are open.'
+                    : d.status === 'registration-open'
+                      ? 'Registration is open.'
+                      : 'This event has ended.'}
+            </dd>
+          </span>
+          {
+            primary && !notice && (
+              <a class="btn btn--primary facts__btn" href={primary.href}>
+                {primary.label} <Icon name="arrow" size={16} />
+              </a>
+            )
+          }
         </div>
       </dl>
-
-      {
-        d.audience.length > 0 && (
-          <>
-            <div class="section-head section-head--center who__head">
-              <h2>Who the {noun} is for.</h2>
-            </div>
-            <ul class="cards cards--3" role="list">
-              {d.audience.map(asPoint).map((p, i) => (
-                <li class="card-item">
-                  <Icon name={AUDIENCE_ICONS[i % AUDIENCE_ICONS.length]} size={40} class="card-item__icon" />
-                  {p.title && <h3>{p.title}</h3>}
-                  <p>{p.text}</p>
-                </li>
-              ))}
-            </ul>
-          </>
-        )
-      }
     </div>
-  </section>
+  </div>
 
   {
-    d.topics.length > 0 && (
-      <section class:list={['section', bandClass(bg.topics)]}>
-        <div class="container">
-          <div class="section-head section-head--center">
-            <h2>What participants will work through.</h2>
+    d.audience.length > 0 && (
+      <section class:list={['section', bandClass(bg.who)]}>
+        <div class="container two-col">
+          <div>
+            <h2>Who the {noun} is for.</h2>
+            <p class="lead">
+              {FORMAT_POSITIONING[d.format]} for business owners, investors, and the professionals who advise them.
+            </p>
           </div>
-          <ol class="cards cards--3" role="list">
-            {d.topics.map(asPoint).map((p, i) => (
-              <li class="card-item card-item--numbered">
-                <span class="card-item__num" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+          <ul class="stack" role="list">
+            {d.audience.map(asPoint).map((p, i) => (
+              <li class="row-card">
+                <Icon name={AUDIENCE_ICONS[i % AUDIENCE_ICONS.length]} size={40} class="row-card__icon" />
                 <span>
-                  {p.title && <h3>{p.title}</h3>}
-                  <p>{p.text}</p>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-    )
-  }
-
-  {
-    d.inclusions.length > 0 && (
-      <section class:list={['section', bandClass(bg.included)]}>
-        <div class="container">
-          <div class="section-head section-head--center">
-            <h2>What is included.</h2>
-            <p class="lead">Only the items listed here are part of the participation price.</p>
-          </div>
-          <ul class="cards cards--3" role="list">
-            {d.inclusions.map(asPoint).map((p, i) => (
-              <li class="card-item card-item--row">
-                <Icon name={INCLUDE_ICONS[i % INCLUDE_ICONS.length]} size={38} class="card-item__icon" />
-                <span>
-                  {p.title && <h3>{p.title}</h3>}
-                  <p>{p.text}</p>
+                  {p.title && <strong class="row-card__title">{p.title}</strong>}
+                  <span class="row-card__text">{p.text}</span>
                 </span>
               </li>
             ))}
@@ -220,15 +188,86 @@ const jsonLd =
   }
 
   {
-    (phases.length > 0 || instructor) && (
+    d.topics.length > 0 && (
+      <section class:list={['section', bandClass(bg.topics)]}>
+        <div class="container">
+          <div class="section-head section-head--center">
+            <h2>What participants will work through.</h2>
+          </div>
+          <ul class="grid-3" role="list">
+            {d.topics.map(asPoint).map((p, i) => (
+              <li class="row-card">
+                <Icon name={TOPIC_ICONS[i % TOPIC_ICONS.length]} size={40} class="row-card__icon" />
+                <span>
+                  {p.title && <strong class="row-card__title">{p.title}</strong>}
+                  <span class="row-card__text">{p.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    d.inclusions.length > 0 && (
+      <section class:list={['section', bandClass(bg.included)]}>
+        <div class="container two-col">
+          <div>
+            <h2>What is included.</h2>
+            <p class="lead">Only the items listed here are part of the participation price.</p>
+          </div>
+          <ul class="stack" role="list">
+            {d.inclusions.map(asPoint).map((p, i) => (
+              <li class="row-card">
+                <Icon name={INCLUDE_ICONS[i % INCLUDE_ICONS.length]} size={38} class="row-card__icon" />
+                <span>
+                  {p.title && <strong class="row-card__title">{p.title}</strong>}
+                  <span class="row-card__text">{p.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    phases.length > 0 && (
       <section class:list={['section', bandClass(bg.how)]}>
-        <div class="container how">
+        <div class="container">
+          <div class="section-head section-head--center">
+            <h2>How the experience works.</h2>
+          </div>
+          <ol class:list={['phases', `phases--${phases.length}`]} role="list">
+            {phases.map((ph, i) => (
+              <li class="row-card">
+                <Icon name={ph.icon} size={40} class="row-card__icon" />
+                <span>
+                  <strong class="row-card__title">{ph.title}</strong>
+                  <span class="row-card__text">{ph.text}</span>
+                </span>
+                {i < phases.length - 1 && <Icon name="chevron" size={24} class="phases__chevron" />}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    instructor && (
+      <section class:list={['section', bandClass(bg.instructor)]}>
+        <div class="container instructor">
           {isTim && (
-            <div class="how__media">
+            <div class="instructor__media">
               <img
                 src="/images/tim/tim-berry-shirt-600.webp"
                 srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w, /images/tim/tim-berry-shirt-861.webp 861w"
-                sizes="(min-width: 900px) 380px, 70vw"
+                sizes="(min-width: 900px) 420px, 70vw"
                 width="600"
                 height="714"
                 alt="Tim Berry, attorney"
@@ -237,37 +276,14 @@ const jsonLd =
               />
             </div>
           )}
-          <div class="how__copy">
-            {phases.length > 0 && (
-              <>
-                <h2>How the {noun} works.</h2>
-                <ol class="phases" role="list">
-                  {phases.map((ph, i) => (
-                    <li>
-                      <span class="phases__num" aria-hidden="true">
-                        {i + 1}
-                      </span>
-                      <span>
-                        <strong>{ph.title}</strong>
-                        <span>{ph.text}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </>
-            )}
-            {instructor && (
-              <div class="instructor">
-                <p>
-                  <strong>Instructor:</strong> {instructor.data.name}, {instructor.data.role}
-                </p>
-                {isTim && (
-                  <a href="/about/tim-berry">
-                    View Tim Berry's profile <Icon name="arrow" size={16} />
-                  </a>
-                )}
-              </div>
-            )}
+          <div class="instructor__copy">
+            <p class="instructor__eyebrow">Your instructor</p>
+            <h2>{instructor.data.name}</h2>
+            <p class="instructor__role">{instructor.data.role}</p>
+            {isTim && <p>Attorney Tim Berry's nearly 30 years of retirement-plan experience are central to IRA Ideas and its events.</p>}
+            <a class="btn btn--primary" href={isTim ? '/about/tim-berry' : '/about'}>
+              View {isTim ? "Tim's" : 'Full'} Profile <Icon name="arrow" size={18} />
+            </a>
           </div>
         </div>
       </section>
@@ -279,7 +295,7 @@ const jsonLd =
     <div class="container details">
       <div>
         <h2>Schedule &amp; logistics.</h2>
-        <table class="logistics">
+        <table class="table">
           <tbody>
             {
               logistics.map((row) => (
@@ -291,96 +307,76 @@ const jsonLd =
                 </tr>
               ))
             }
-            <tr>
-              <th scope="row"><Icon name="tag" size={22} /> Full price</th>
-              <td>{formatPrice(d.price)}</td>
-            </tr>
             {
-              d.installments && (
-                <>
-                  <tr>
-                    <th scope="row">
-                      <Icon name="tag" size={22} /> Deposit
-                    </th>
-                    <td>{formatPrice(d.installments.deposit)}</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">
-                      <Icon name="calendar" size={22} /> Balance
-                    </th>
-                    <td>
-                      {formatPrice(d.installments.balance)}, due {formatDay(d.installments.balanceDue)}
-                    </td>
-                  </tr>
-                </>
-              )
+              d.schedule.map((row) => (
+                <tr>
+                  <th scope="row">
+                    <Icon name="clock" size={22} /> {row.day}
+                  </th>
+                  <td>
+                    {row.time}: {row.detail}
+                  </td>
+                </tr>
+              ))
             }
           </tbody>
         </table>
-        {d.installments && <p class="small muted">{d.installments.conditions}</p>}
-        {d.guestPolicy && <p class="small muted">{d.guestPolicy}</p>}
+      </div>
+      <div>
+        <h2>Participation price.</h2>
+        <div class="price-box">
+          <Icon name="tag" size={28} />
+          <div>
+            <p class="price-box__amount">{formatPrice(d.price)}</p>
+            {
+              d.installments && (
+                <ul>
+                  <li>Deposit: {formatPrice(d.installments.deposit)}</li>
+                  <li>
+                    Remaining balance: {formatPrice(d.installments.balance)}, due {formatDay(d.installments.balanceDue)}
+                  </li>
+                  <li>{d.installments.conditions}</li>
+                </ul>
+              )
+            }
+            {d.guestPolicy && <p class="price-box__note">{d.guestPolicy}</p>}
+          </div>
+        </div>
         {
-          d.schedule.length > 0 && (
+          d.terms.length > 0 && (
             <>
-              <h3 class="details__sub">Schedule</h3>
-              <table class="logistics logistics--schedule">
-                <thead>
-                  <tr>
-                    <th scope="col">Day</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Session</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {d.schedule.map((row) => (
-                    <tr>
-                      <td>{row.day}</td>
-                      <td>{row.time}</td>
-                      <td>{row.detail}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <h2 class="details__terms">Terms &amp; questions.</h2>
+              <div class="faqs">
+                {d.terms.map((t) => (
+                  <details>
+                    <summary>
+                      {t.question}
+                      <Icon name="chevron" size={18} class="faqs__chevron" />
+                    </summary>
+                    <p>{t.answer}</p>
+                  </details>
+                ))}
+              </div>
             </>
           )
         }
       </div>
-      {
-        d.terms.length > 0 && (
-          <div>
-            <h2>Frequently asked questions.</h2>
-            <div class="faqs">
-              {d.terms.map((t) => (
-                <details>
-                  <summary>
-                    {t.question}
-                    <Icon name="chevron" size={18} class="faqs__chevron" />
-                  </summary>
-                  <p>{t.answer}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        )
-      }
     </div>
   </section>
 
   {
     showPriority ? (
       <section class="priority-band theme-dark" id="priority-list" tabindex="-1">
-        <div class="container priority-band__grid">
-          <div>
-            <h2>{d.status === 'sold-out' ? 'This event is sold out.' : 'Join the Priority List.'}</h2>
-            <p>Be first to know when event details are announced and registration opens. Joining the priority list does not reserve a seat.</p>
-          </div>
-          <SignupForm list="priority" id="event-priority" stacked />
+        <div class="container priority-band__inner">
+          <h2>{d.status === 'sold-out' ? 'This event is sold out.' : 'Be the first to know.'}</h2>
+          <p>Join the priority list to receive updates when event details are announced. Joining does not reserve a seat.</p>
+          <SignupForm list="priority" id="event-priority" />
         </div>
       </section>
     ) : notice ? (
-      <CtaBand heading="Event update" copy={notice} href="/conferences" label="View Conferences" layout="split" tone="teal" />
+      <CtaBand heading="Event update" copy={notice} href="/conferences" label="View Conferences" tone="teal" />
     ) : action ? (
-      <CtaBand heading={d.title} copy={`${dates} · ${d.location} · ${formatPrice(d.price)}`} href={action.href} label={action.label} layout="split" tone="teal" />
+      <CtaBand heading={d.title} copy={`${dates} · ${d.location} · ${formatPrice(d.price)}`} href={action.href} label={action.label} tone="teal" />
     ) : null
   }
 </Base>
@@ -391,43 +387,55 @@ const jsonLd =
   .crumbs a:hover { text-decoration: underline; }
   .hero-notice { border-left: 3px solid var(--gold); padding-left: 14px; color: #fff; margin: 0; }
 
-  /* Key facts bar */
-  .who { padding-top: 32px; }
-  .facts { display: grid; gap: 16px; margin: 0; background: #e7f0ee; border-radius: var(--radius); padding: 20px 24px; }
-  @media (min-width: 800px) {
-    .facts { grid-template-columns: repeat(4, 1fr); gap: 0; }
-    .facts > div + div { border-left: 1px solid #c5d6d2; }
-    .facts > div { padding: 0 24px; }
+  /* Facts bar overlapping the bottom of the hero */
+  .facts-wrap { position: relative; z-index: 2; margin-top: -56px; }
+  .facts { display: grid; gap: 18px; margin: 0; background: #fff; border-radius: var(--radius); padding: 22px 24px; box-shadow: 0 16px 40px rgba(11, 27, 35, 0.14); }
+  @media (min-width: 1000px) {
+    .facts { grid-template-columns: 1fr 1fr 1fr 1.7fr; gap: 0; }
+    .facts > div { padding: 0 22px; }
     .facts > div:first-child { padding-left: 0; }
+    .facts > div + div { border-left: 1px solid var(--line); }
   }
-  .facts > div { display: flex; gap: 16px; align-items: center; }
+  .facts > div { display: flex; gap: 14px; align-items: center; }
   .facts :global(svg) { flex: none; color: var(--teal); }
-  .facts dt { font-weight: 700; font-size: 0.95rem; }
-  .facts dd { margin: 0; color: var(--slate); font-size: 0.92rem; }
-  .who__head { margin-top: clamp(48px, 6vw, 72px); }
-
-  /* Card grids */
-  .section-head--center h2 { font-size: clamp(2rem, 4vw, 3rem); }
-  .cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-  @media (min-width: 800px) {
-    .cards--3 { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .facts dt { font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; }
+  .facts dd { margin: 0; color: var(--slate); font-size: 0.9rem; line-height: 1.35; }
+  .facts__action > span { flex: 1; }
+  .facts__btn { flex: none; min-height: 44px; padding: 10px 18px; font-size: 0.9rem; }
+  .facts__btn :global(svg) { color: var(--navy) !important; }
+  @media (max-width: 599px) {
+    .facts__action { flex-wrap: wrap; }
+    .facts__btn { width: 100%; }
   }
-  .cards li + li { margin-top: 0; }
-  .card-item { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
-  .card-item :global(.card-item__icon) { color: var(--teal); flex: none; }
-  .card-item h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; margin: 14px 0 6px; }
-  .card-item p { color: var(--slate); font-size: 0.97rem; margin: 0; }
-  .card-item--row, .card-item--numbered { display: flex; gap: 18px; align-items: flex-start; }
-  .card-item--row h3, .card-item--numbered h3 { margin-top: 0; }
-  .card-item__num { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #e3eeec; font-size: 1.1rem; color: var(--ink); }
 
-  /* How it works */
-  .how { display: grid; gap: 40px; align-items: center; }
+  /* Shared layouts */
+  .two-col { display: grid; gap: 32px 64px; align-items: start; }
   @media (min-width: 900px) {
-    .how { grid-template-columns: 0.9fr 1.1fr; gap: 64px; }
+    .two-col { grid-template-columns: 1fr 1fr; }
   }
-  .how__media {
-    aspect-ratio: 4 / 3;
+  .two-col h2, .section-head h2, .details h2, .instructor h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+  .stack, .grid-3, .phases { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .stack li + li, .grid-3 li + li, .phases li + li { margin-top: 0; }
+  @media (min-width: 800px) {
+    .grid-3, .phases--3 { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .phases--2 { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  }
+  .row-card { position: relative; display: flex; gap: 20px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+  .row-card :global(.row-card__icon) { flex: none; color: var(--teal); }
+  .row-card__title { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; margin-bottom: 2px; }
+  .row-card__text { display: block; color: var(--slate); font-size: 0.95rem; line-height: 1.5; }
+  .phases :global(.phases__chevron) { display: none; }
+  @media (min-width: 800px) {
+    .phases :global(.phases__chevron) { display: block; position: absolute; right: -22px; top: 50%; transform: translateY(-50%); color: var(--ink); background: transparent; }
+  }
+
+  /* Instructor */
+  .instructor { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .instructor { grid-template-columns: 1fr 1.1fr; gap: 64px; }
+  }
+  .instructor__media {
+    aspect-ratio: 3 / 2;
     border-radius: var(--radius);
     overflow: hidden;
     display: flex;
@@ -435,16 +443,12 @@ const jsonLd =
     align-items: flex-end;
     background: radial-gradient(ellipse 60% 70% at 50% 35%, #ffffff 0%, transparent 70%), linear-gradient(160deg, #e8eeed 0%, #d5e1df 100%);
   }
-  .how__media img { width: 64%; height: auto; margin-bottom: -4%; }
-  .how__copy h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
-  .phases { list-style: none; padding: 0; margin: 0 0 24px; }
-  .phases li { display: flex; gap: 18px; align-items: flex-start; margin: 0 0 18px; }
-  .phases__num { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #e3eeec; font-weight: 500; }
-  .phases strong { display: block; font-family: var(--font-heading); font-size: 1.15rem; }
-  .phases span span { display: block; color: var(--slate); font-size: 0.95rem; }
-  .instructor { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; border-top: 1px solid var(--line); padding-top: 16px; }
-  .instructor p { margin: 0; }
-  .instructor a { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--teal); }
+  .instructor__media img { width: 56%; height: auto; margin-bottom: -4%; }
+  .instructor__eyebrow { display: flex; align-items: center; gap: 12px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--slate); margin-bottom: 8px; }
+  .instructor__eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--slate); }
+  .instructor h2 { font-size: clamp(2.4rem, 5vw, 3.6rem); margin-bottom: 4px; }
+  .instructor__role { color: var(--slate); margin-bottom: 20px; }
+  .instructor__copy > p:not([class]) { color: var(--slate); max-width: 520px; }
 
   /* Details */
   .details { display: grid; gap: 48px; }
@@ -452,30 +456,33 @@ const jsonLd =
     .details { grid-template-columns: 1fr 1fr; gap: 64px; }
     .details > div + div { border-left: 1px solid var(--line); padding-left: 64px; }
   }
-  .details h2 { font-size: clamp(1.8rem, 3.2vw, 2.4rem); }
-  .details__sub { margin-top: 28px; }
-  .logistics { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 0.95rem; margin-bottom: 12px; }
-  .logistics th, .logistics td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .logistics th { font-weight: 500; white-space: nowrap; width: 40%; }
-  .logistics th :global(svg) { color: var(--teal); vertical-align: -5px; margin-right: 8px; }
-  .logistics td { color: var(--slate); }
-  .logistics--schedule th { width: auto; }
-  .faqs details { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
-  .faqs details + details { margin-top: 10px; }
+  .table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); font-size: 0.95rem; }
+  .table th, .table td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .table th { font-weight: 500; white-space: nowrap; width: 42%; }
+  .table th :global(svg) { color: var(--teal); vertical-align: -5px; margin-right: 10px; }
+  .table td { color: var(--slate); }
+  .price-box { display: flex; gap: 18px; align-items: flex-start; background: #eef2f1; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+  .price-box :global(svg) { flex: none; color: var(--teal); }
+  .price-box__amount { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; margin: 0; }
+  .price-box ul { margin: 8px 0 0; color: var(--slate); font-size: 0.95rem; }
+  .price-box__note { margin: 8px 0 0; color: var(--slate); font-size: 0.92rem; }
+  .details__terms { margin-top: 36px; }
+  .faqs details { border: 1px solid var(--line); background: #fff; }
+  .faqs details + details { border-top: 0; }
+  .faqs details:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+  .faqs details:last-child { border-radius: 0 0 var(--radius) var(--radius); }
   .faqs summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 18px; cursor: pointer; font-weight: 500; list-style: none; }
   .faqs summary::-webkit-details-marker { display: none; }
-  .faqs :global(.faqs__chevron) { flex: none; transform: rotate(90deg); transition: transform 0.15s ease; color: var(--teal); }
-  .faqs details[open] :global(.faqs__chevron) { transform: rotate(-90deg); }
+  .faqs :global(.faqs__chevron) { flex: none; transition: transform 0.15s ease; color: var(--teal); }
+  .faqs details[open] :global(.faqs__chevron) { transform: rotate(90deg); }
   .faqs details p { padding: 0 18px 16px; margin: 0; color: var(--slate); }
 
   /* Priority band */
-  .priority-band { background: var(--teal); padding: clamp(40px, 5vw, 56px) 0; }
-  .priority-band__grid { display: grid; gap: 32px; align-items: center; }
-  @media (min-width: 900px) {
-    .priority-band__grid { grid-template-columns: 1.1fr 1fr; gap: 64px; }
-  }
-  .priority-band h2 { color: #fff; font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
-  .priority-band p { color: #e3eeed; }
-  .priority-band :global(.signup-form .btn) { width: 100%; }
+  .priority-band { background: var(--teal); padding: clamp(44px, 5vw, 64px) 0; }
+  .priority-band__inner { text-align: center; }
+  .priority-band h2 { color: #fff; font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin-bottom: 8px; }
+  .priority-band p { color: #e3eeed; max-width: 680px; margin: 0 auto 24px; }
+  .priority-band :global(.signup-form) { max-width: 760px; margin: 0 auto; text-align: left; }
   .priority-band :global(.signup-form .muted) { color: #d9e6e5; }
+  .priority-band :global(.signup-form .btn) { display: flex; margin: 0 auto; }
 </style>

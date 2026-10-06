@@ -36,7 +36,7 @@ function sectionBackgrounds(html) {
     if (closing) { depth--; continue; }
     if (depth === 1 && ['section', 'nav', 'div', 'article', 'header'].includes(name)) {
       const cls = (attrs.match(/class="([^"]*)"/) || [, ''])[1].split(/\s+/);
-      if (!cls.includes('anchor')) {
+      if (!cls.includes('anchor') && !cls.includes('overlay')) {
         const bg = cls.includes('theme-darker') || cls.includes('conf-hero') ? 'navy'
           : cls.includes('theme-dark') || cls.includes('hero') ? 'teal'
           : cls.includes('theme-light') || cls.includes('priority') ? 'light'
