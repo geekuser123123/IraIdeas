@@ -302,3 +302,8 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .theme-dark .form-alert, .theme-darker .form-alert { background: #4a1f1b; color: var(--light); }
 .theme-dark .field .hint, .theme-darker .field .hint { color: var(--mist); }
 .field .choice { display: flex; font-weight: 400; margin-bottom: 0; }
+
+/* Outlined button on light backgrounds */
+.btn--outline { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); }
+.btn--outline:hover { background: var(--ink); color: #fff; }
+.btn svg { flex: none; }

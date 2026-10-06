@@ -57,7 +57,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 </script>
 
 <style>
-  .site-header { background: var(--teal-deep); color: #fff; position: relative; z-index: 20; }
+  .site-header { background: var(--navy); color: #fff; position: relative; z-index: 20; }
   .site-header__inner {
     display: flex;
     align-items: center;
@@ -72,15 +72,12 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
   .site-nav a {
     color: #fff;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 0.82rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 0.95rem;
     padding: 8px 0;
     border-bottom: 2px solid transparent;
   }
   .site-nav a:hover, .site-nav a[aria-current='page'] { color: var(--gold); }
-  .site-header__cta { text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.06em; }
   .site-header__actions { display: flex; align-items: center; gap: 12px; }
   .menu-toggle { display: none; }
 
