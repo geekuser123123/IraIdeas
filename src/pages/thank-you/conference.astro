@@ -1,36 +1,144 @@
 ---
+import '../../styles/confirm.css';
 import Base from '../../layouts/Base.astro';
-import Confirmation from '../../components/Confirmation.astro';
+import PhotoHero from '../../components/PhotoHero.astro';
+import Icon from '../../components/Icon.astro';
+
+// One page, three confirmations: ?type=application (default), registration, or priority.
+const flows = {
+  application: [
+    { title: 'Application received', text: 'We have received your conference application.' },
+    { title: 'Team review', text: 'Our team will review your application and contact you about the next step.' },
+    { title: 'Acceptance', text: 'If your application is accepted, you will receive further instructions.' },
+    { title: 'Required payment', text: 'You will be asked to complete the required payment step.' },
+    { title: 'Confirmed participation', text: 'After acceptance and payment are complete, your participation will be confirmed.' },
+  ],
+  registration: [
+    { title: 'Registration received', text: 'We have received your registration details.' },
+    { title: 'Required payment', text: 'Complete payment through the secure payment page.' },
+    { title: 'Confirmed participation', text: 'Your place is confirmed once payment is verified and any other admission conditions are met.' },
+  ],
+};
 ---
 
 <Base title="Conference Confirmation" description="Your IRA Ideas conference submission has been received." noindex>
-  <Confirmation eyebrow="IRA Ideas Conferences">
-    <div data-type="application">
-      <h1>Your application has been received.</h1>
-      <p>
-        Our team will review it and contact you about the next step. Your place is not confirmed until the required acceptance and
-        payment steps are complete.
-      </p>
-    </div>
-    <div data-type="registration" hidden>
-      <h1>Your registration details have been received.</h1>
-      <p>
-        Your place is confirmed only after your payment has been verified and any other admission conditions for the event are met. You
-        will receive a confirmation email from the team at that point.
-      </p>
-    </div>
-    <div data-type="priority" hidden>
-      <h1>You have joined the priority list.</h1>
-      <p>
-        You have joined the priority list for future IRA Ideas events. We will contact you when relevant event information becomes
-        available. This does not reserve a seat.
-      </p>
-    </div>
-    <div class="btn-row">
-      <a class="btn btn--secondary" href="/conferences">Back to Conferences</a>
-      <a class="btn btn--secondary" href="/start">Discuss My Situation</a>
-    </div>
-  </Confirmation>
+  <!-- Application (default without JavaScript) and registration -->
+  {
+    (['application', 'registration'] as const).map((type) => (
+      <div class="variant" data-type={type} hidden={type !== 'application'}>
+        <section class="confirm-wrap theme-light">
+          <div class="container">
+            <div class="confirm-top">
+              <div class="confirm-badge confirm-badge--ring" aria-hidden="true">
+                <span>
+                  <Icon name="tick" size={52} />
+                </span>
+              </div>
+              {type === 'application' ? (
+                <>
+                  <h1 class="confirm-title">Your application has been received.</h1>
+                  <p class="confirm-lead">
+                    Our team will review it and contact you about the next step. Your place is not confirmed until the required acceptance and
+                    payment steps are complete.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 class="confirm-title">Your registration details have been received.</h1>
+                  <p class="confirm-lead">
+                    Your place is confirmed only after your payment has been verified and any other admission conditions for the event are met.
+                  </p>
+                </>
+              )}
+            </div>
+            <div class="timeline-card">
+              <h2>What happens next.</h2>
+              <p>Your {type} will go through the following steps.</p>
+              <ol class="timeline" role="list">
+                {flows[type].map((s, i) => (
+                  <li class:list={{ 'is-done': i === 0 }}>
+                    <span class="timeline__num" aria-hidden="true">
+                      {i === 0 ? <Icon name="tick" size={24} /> : i + 1}
+                    </span>
+                    <span>
+                      <strong>{s.title}</strong>
+                      <span>{s.text}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div class="notice-panel" role="note">
+              <span class="confirm-note__icon" aria-hidden="true">
+                i
+              </span>
+              <div>
+                <h2>Your place is not yet confirmed.</h2>
+                <p>
+                  {type === 'application'
+                    ? 'Your application is under review. The required acceptance and payment steps must be complete before your participation is confirmed.'
+                    : 'Your participation is confirmed only after payment has been verified. You will receive a confirmation email from the team at that point.'}
+                </p>
+              </div>
+            </div>
+            <div class="confirm-actions">
+              <a class="btn btn--primary" href="/conferences">
+                Explore Conferences <Icon name="arrow" size={18} />
+              </a>
+              <a class="btn btn--outline" href="/">
+                Return Home
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    ))
+  }
+
+  <!-- Priority list -->
+  <div class="variant" data-type="priority" hidden>
+    <PhotoHero eyebrow="IRA Ideas" title="Conferences" lead="Advanced ideas. Focused rooms. Practical discussion." photo={false} angled={false} />
+    <section class="confirm-wrap theme-light">
+      <div class="container">
+        <div class="confirm-card confirm-card--lift">
+          <div class="confirm-badge confirm-badge--mail" aria-hidden="true">
+            <Icon name="mail" size={96} />
+            <span class="confirm-badge__tick"><Icon name="tick" size={22} /></span>
+          </div>
+          <h2 class="confirm-title">You are on the priority list.</h2>
+          <p class="confirm-lead">
+            You have joined the priority list for future IRA Ideas events. We will contact you when relevant event information becomes available.
+          </p>
+          <div class="confirm-note confirm-note--compact" role="note">
+            <span class="confirm-note__icon" aria-hidden="true">i</span>
+            <p>This does not reserve a seat.</p>
+          </div>
+          <div class="confirm-actions">
+            <a class="btn btn--primary" href="/conferences">Return to Conferences <Icon name="arrow" size={18} /></a>
+            <a class="btn btn--outline" href="/">Return Home</a>
+          </div>
+        </div>
+
+        <div class="wait">
+          <p class="wait__eyebrow">While you wait</p>
+          <h2>Explore more ways to stay informed.</h2>
+          <p>Browse IRA Ideas services and education while you are on the priority list.</p>
+          <div class="wait__cards">
+            <a class="wait__card" href="/advanced-services">
+              <Icon name="document" size={48} />
+              <span><strong>Explore Advanced Services</strong><span>Specialized services for retirement planning, trusts, ownership structures, and complex transactions.</span></span>
+              <Icon name="chevron" size={24} />
+            </a>
+            <a class="wait__card" href="/learn#learning-signup">
+              <Icon name="book" size={48} />
+              <span><strong>Get Learning Updates</strong><span>New educational resources and learning announcements as they are released.</span></span>
+              <Icon name="chevron" size={24} />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </Base>
 
 <script>
@@ -39,3 +147,10 @@ import Confirmation from '../../components/Confirmation.astro';
     document.querySelectorAll<HTMLElement>('[data-type]').forEach((el) => (el.hidden = el.dataset.type !== type));
   }
 </script>
+
+<style>
+  .confirm-top { text-align: center; padding-top: clamp(40px, 6vw, 72px); margin-bottom: 32px; }
+  .confirm-card--lift { margin-top: clamp(32px, 4vw, 48px); }
+  .confirm-note--compact { max-width: 440px; margin-left: auto; margin-right: auto; padding: 16px 24px; }
+  .confirm-note--compact p { font-weight: 700; }
+</style>

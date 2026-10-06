@@ -1,0 +1,71 @@
+/* Shared styles for the thank-you / confirmation pages. */
+.confirm-card { position: relative; z-index: 2; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 56px); text-align: center; box-shadow: 0 12px 32px rgba(11, 27, 35, 0.06); }
+.confirm-card--overlap { margin-top: -72px; }
+.confirm-wrap { padding-bottom: clamp(48px, 6vw, 80px); }
+.confirm-badge { display: grid; place-items: center; width: 120px; height: 120px; margin: 0 auto 24px; border-radius: 50%; background: #e3eeec; }
+.confirm-badge > span:not(.confirm-badge__tick) { display: grid; place-items: center; width: 92px; height: 92px; border-radius: 50%; background: var(--teal-deep); color: #fff; }
+.confirm-badge--ring > span { background: transparent; border: 3px solid var(--teal-deep); color: var(--teal-deep); }
+.confirm-badge--mail { background: transparent; position: relative; color: var(--teal-deep); }
+.confirm-badge--mail::before { content: ''; position: absolute; top: 4px; right: 14px; width: 80px; height: 80px; border-radius: 50%; background: #e3eeec; z-index: 0; }
+.confirm-badge--mail > svg { position: relative; z-index: 1; }
+.confirm-badge__tick { position: absolute; z-index: 2; right: 12px; bottom: 18px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 2.5px solid var(--teal-deep); color: var(--teal-deep); }
+.confirm-title { font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.05; margin: 0 auto 16px; max-width: 900px; }
+.confirm-lead { color: var(--slate); font-size: clamp(1.05rem, 1.6vw, 1.25rem); max-width: 720px; margin: 0 auto 28px; }
+.confirm-note { display: flex; align-items: center; justify-content: center; gap: 24px; background: #e3eeec; border-radius: var(--radius); padding: 22px 28px; margin: 0 0 32px; text-align: left; }
+.confirm-note__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--teal); color: var(--teal); font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+.confirm-note p { margin: 0; font-weight: 500; font-size: 1.1rem; }
+.confirm-note--split p { padding-left: 24px; border-left: 1px solid #b9cdc8; }
+.confirm-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.confirm-actions .btn { min-width: 220px; }
+.confirm-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; color: var(--teal); font-weight: 500; }
+
+/* Three-step row */
+.confirm-steps { list-style: none; margin: 0 0 32px; padding: 0 0 32px; border-bottom: 1px solid var(--line); display: grid; gap: 24px; }
+@media (min-width: 760px) {
+  .confirm-steps { grid-template-columns: repeat(3, 1fr); gap: 40px; }
+}
+.confirm-steps li { position: relative; margin: 0; }
+.confirm-steps__icon { display: grid; place-items: center; width: 88px; height: 88px; margin: 0 auto 16px; border-radius: 50%; background: #e3eeec; color: var(--teal); }
+.confirm-steps strong { display: block; font-size: 1.15rem; margin-bottom: 4px; }
+.confirm-steps span:last-child { color: var(--slate); }
+@media (min-width: 760px) {
+  .confirm-steps li:not(:last-child)::after { content: '›'; position: absolute; right: -28px; top: 26px; font-size: 2rem; color: var(--ink); }
+}
+
+/* Vertical timeline */
+.timeline-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 4vw, 36px); text-align: left; margin-bottom: 20px; }
+.timeline-card h2 { font-size: clamp(1.9rem, 3.6vw, 2.6rem); margin-bottom: 4px; }
+.timeline-card > p { color: var(--slate); }
+.timeline { list-style: none; margin: 24px 0 0; padding: 0; }
+.timeline li { position: relative; display: flex; gap: 24px; padding-bottom: 28px; margin: 0; }
+.timeline li:last-child { padding-bottom: 0; }
+.timeline li:not(:last-child)::before { content: ''; position: absolute; left: 24px; top: 52px; bottom: 4px; border-left: 2px dashed #b9cdc8; }
+.timeline__num { flex: none; display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: #e3eeec; color: var(--teal-deep); font-weight: 700; font-size: 1.1rem; }
+.timeline .is-done .timeline__num { background: var(--teal-deep); color: #fff; }
+.timeline strong { display: block; font-family: var(--font-heading); font-size: 1.3rem; margin: 8px 0 2px; }
+.timeline span span { color: var(--slate); }
+
+.notice-panel { display: flex; gap: 28px; align-items: flex-start; background: #e3eeec; border-radius: var(--radius); padding: 28px 36px; text-align: left; margin-bottom: 28px; }
+.notice-panel h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 6px; }
+.notice-panel p { margin: 0; color: var(--slate); }
+@media (max-width: 600px) {
+  .confirm-note, .notice-panel { flex-direction: column; text-align: center; }
+  .confirm-note--split p { border-left: 0; padding-left: 0; }
+}
+
+/* "While you wait" cards */
+.wait { text-align: center; padding-top: clamp(48px, 6vw, 72px); }
+.wait__eyebrow { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--slate); }
+.wait__eyebrow::before, .wait__eyebrow::after { content: ''; width: 64px; height: 1px; background: var(--slate); }
+.wait h2 { font-size: clamp(2rem, 4vw, 3rem); margin: 12px 0 6px; }
+.wait > p { color: var(--slate); margin-bottom: 28px; }
+.wait__cards { display: grid; gap: 20px; text-align: left; }
+@media (min-width: 800px) {
+  .wait__cards { grid-template-columns: 1fr 1fr; }
+}
+.wait__card { display: flex; gap: 24px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 28px; color: var(--ink); text-decoration: none; }
+.wait__card:hover { border-color: var(--teal); }
+.wait__card > svg { flex: none; color: var(--teal); }
+.wait__card > span { flex: 1; }
+.wait__card strong { display: block; font-family: var(--font-heading); font-size: 1.35rem; margin-bottom: 4px; }
+.wait__card span span { color: var(--slate); }

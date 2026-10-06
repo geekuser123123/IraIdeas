@@ -1,12 +1,23 @@
 ---
+import '../../styles/confirm.css';
 import Base from '../../layouts/Base.astro';
-import Confirmation from '../../components/Confirmation.astro';
+import PhotoHero from '../../components/PhotoHero.astro';
+import Icon from '../../components/Icon.astro';
 ---
 
 <Base title="Message Received" description="Your message to the IRA Ideas team has been received." noindex>
-  <Confirmation eyebrow="Contact">
-    <h1>Your message has been received.</h1>
-    <p>The IRA Ideas team will review your message and respond as appropriate.</p>
-    <div class="btn-row"><a class="btn btn--secondary" href="/">Return to the homepage</a></div>
-  </Confirmation>
+  <PhotoHero eyebrow="Contact" title="Thank you for your message." lead="We appreciate your interest in IRA Ideas." photo={false} angled={false} />
+  <section class="confirm-wrap theme-light">
+    <div class="container">
+      <div class="confirm-card confirm-card--overlap">
+        <div class="confirm-badge" aria-hidden="true"><span><Icon name="tick" size={48} /></span></div>
+        <h2 class="confirm-title">Your message has been received.</h2>
+        <p class="confirm-lead">The IRA Ideas team will review your message and respond as appropriate.</p>
+        <div class="confirm-actions">
+          <a class="btn btn--primary" href="/">Return Home <Icon name="arrow" size={18} /></a>
+          <a class="btn btn--outline" href="/start">Discuss My Situation</a>
+        </div>
+      </div>
+    </div>
+  </section>
 </Base>

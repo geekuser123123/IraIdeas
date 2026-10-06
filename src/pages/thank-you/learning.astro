@@ -1,15 +1,26 @@
 ---
+import '../../styles/confirm.css';
 import Base from '../../layouts/Base.astro';
-import Confirmation from '../../components/Confirmation.astro';
+import PhotoHero from '../../components/PhotoHero.astro';
+import Icon from '../../components/Icon.astro';
 ---
 
 <Base title="Learning List Confirmation" description="You have joined the IRA Ideas learning list." noindex>
-  <Confirmation eyebrow="IRA Ideas Advanced Learning">
-    <h1>You are on the learning list.</h1>
-    <p>We will send new educational resources and learning announcements as they are released.</p>
-    <div class="btn-row">
-      <a class="btn btn--secondary" href="/learn">Back to Advanced Learning</a>
-      <a class="btn btn--secondary" href="/start">Discuss My Situation</a>
+  <PhotoHero eyebrow="IRA Ideas" title="Advanced Learning" lead="Advanced education for better-informed decisions." photo={false} angled={false} />
+  <section class="confirm-wrap theme-light">
+    <div class="container">
+      <div class="confirm-card confirm-card--overlap">
+        <div class="confirm-badge confirm-badge--mail" aria-hidden="true">
+          <Icon name="mail" size={96} />
+          <span class="confirm-badge__tick"><Icon name="tick" size={22} /></span>
+        </div>
+        <h2 class="confirm-title">You are on the learning list.</h2>
+        <p class="confirm-lead">We will send new educational resources and learning announcements as they are released.</p>
+        <div class="confirm-actions">
+          <a class="btn btn--primary" href="/learn">Back to Advanced Learning <Icon name="arrow" size={18} /></a>
+          <a class="btn btn--outline" href="/">Return Home</a>
+        </div>
+      </div>
     </div>
-  </Confirmation>
+  </section>
 </Base>
