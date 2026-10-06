@@ -195,6 +195,8 @@ const services = (await visible('services')).sort((a, b) => a.data.name.localeCo
   // Preselect the service or subject from the link, while leaving it changeable.
   const params = new URLSearchParams(location.search);
   const wanted = params.get('service') || params.get('subject');
+  // The private intensive is unlisted, so its option only appears when linked from its page.
+  if (wanted === 'private-strategy-intensive') subject.add(new Option('Private Strategy Intensive', wanted), 1);
   if (wanted && [...subject.options].some((o) => o.value === wanted)) subject.value = wanted;
 
   // Two steps with a visible progress indicator. Without JavaScript, both show.

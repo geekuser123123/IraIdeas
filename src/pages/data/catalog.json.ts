@@ -12,7 +12,7 @@ export const GET: APIRoute = async () => {
   return new Response(
     JSON.stringify({
       services: services.map((s) => ({ slug: s.id, name: s.data.name })),
-      subjects: [...CATEGORY_SLUGS],
+      subjects: [...CATEGORY_SLUGS, 'private-strategy-intensive'],
       events: events.map((e) => ({
         slug: e.id,
         title: e.data.title,

@@ -1,0 +1,243 @@
+---
+import Base from '../layouts/Base.astro';
+import PhotoHero from '../components/PhotoHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+/*
+ * Unlisted, team-shared page for the Private Strategy Intensive with Tim
+ * Berry. Not linked from navigation, excluded from the sitemap, and marked
+ * noindex. An unlisted page is not private: never put confidential
+ * information here.
+ */
+const DISCUSS = '/start?subject=private-strategy-intensive';
+
+const defines = [
+  { icon: 'people', title: 'Responsible provider', copy: 'Who is responsible for the work.' },
+  { icon: 'target', title: 'Objectives', copy: 'The specific questions and goals the engagement addresses.' },
+  { icon: 'document', title: 'Deliverables', copy: 'What the engagement will produce.' },
+  { icon: 'ban', title: 'Exclusions', copy: 'What is outside the scope of the engagement.' },
+  { icon: 'coins', title: 'Fee', copy: 'The fee for the agreed scope, set before paid work begins.' },
+  { icon: 'handshake', title: 'Responsibilities', copy: 'What each side is responsible for.' },
+] as const;
+
+const steps = [
+  { icon: 'chat', title: 'Team review', copy: 'Tell the team what you are considering. The team reviews the request and may ask for more detail.' },
+  { icon: 'document', title: 'Proposed scope', copy: 'If an intensive is appropriate, the team prepares a proposed engagement covering the items above.' },
+  { icon: 'check', title: 'Agreements and payment', copy: 'Required agreements and payment are completed before the engagement is scheduled.' },
+  { icon: 'calendar', title: 'Private scheduling', copy: 'The intensive is then scheduled privately with Tim Berry.' },
+] as const;
+
+const faqs = [
+  { label: 'Scope', question: 'How is the scope determined?', answer: 'Each intensive is individually scoped. The proposed engagement identifies the responsible provider, objectives, deliverables, exclusions, fee, and responsibilities before paid work begins.' },
+  { label: 'Scheduling', question: 'How is the intensive scheduled?', answer: 'A request is not an appointment. The intensive is scheduled privately after the required agreements and payment are complete.' },
+  { label: 'Additional work', question: 'What if additional work is needed?', answer: 'Any additional work outside the agreed scope requires its own scope and a separate agreement.' },
+];
+---
+
+<Base
+  title="Private Strategy Intensive with Tim Berry"
+  description="An individually scoped private engagement with attorney Tim Berry, arranged through the IRA Ideas team."
+  noindex
+>
+  <PhotoHero eyebrow="Private Engagement Overview" title="Private Strategy Intensive" subtitle="With Tim Berry" lead="An individually scoped private engagement." angled={false}>
+    <Fragment slot="actions">
+      <a class="btn btn--primary" href={DISCUSS}>Discuss This Engagement <Icon name="arrow" size={18} /></a>
+    </Fragment>
+  </PhotoHero>
+
+  <section class="section">
+    <div class="container intro">
+      <div>
+        <h2>Start with the situation.</h2>
+        <p class="lead">
+          The Private Strategy Intensive is an individually scoped private engagement with attorney Tim Berry. It begins with a request to the
+          IRA Ideas team, and its scope, fee, and format are defined for each participant before any paid work begins.
+        </p>
+      </div>
+      <div class="intro__card">
+        <Icon name="chat" size={48} />
+        <div>
+          <h3>Defined around your situation.</h3>
+          <p>Share your objective, what is already in place, and any deadline. The team reviews the request and identifies whether an intensive is the appropriate next step.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section theme-light">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <h2>What the proposed engagement defines.</h2>
+        <p class="lead">Each Private Strategy Intensive is individually scoped. The proposed engagement will define:</p>
+      </div>
+      <ul class="defines" role="list">
+        {
+          defines.map((d) => (
+            <li class="row-card">
+              <Icon name={d.icon} size={44} class="row-card__icon" />
+              <span>
+                <strong class="row-card__title">{d.title}</strong>
+                <span class="row-card__text">{d.copy}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <h2>Preparation and next steps.</h2>
+        <p class="lead">From your initial request to a privately scheduled engagement.</p>
+      </div>
+      <ol class="steps" role="list">
+        {
+          steps.map((s, i) => (
+            <li>
+              <span class="steps__num" aria-hidden="true">{i + 1}</span>
+              <Icon name={s.icon} size={40} class="steps__icon" />
+              <h3>
+                <span class="visually-hidden">Step {i + 1}: </span>
+                {s.title}
+              </h3>
+              <p>{s.copy}</p>
+              {i < steps.length - 1 && <Icon name="arrow" size={18} class="steps__arrow" />}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <CtaBand
+    heading="Details are defined for the individual engagement."
+    copy="The scope, objectives, and other details are determined through a direct conversation and set out in a proposed engagement for your review."
+    href={DISCUSS}
+    label="Discuss This Engagement"
+    tone="teal"
+  />
+
+  <section class="section">
+    <div class="container tim">
+      <div class="tim__media">
+        <img
+          src="/images/tim/tim-berry-suit-600.webp"
+          srcset="/images/tim/tim-berry-suit-400.webp 400w, /images/tim/tim-berry-suit-600.webp 600w"
+          sizes="(min-width: 900px) 360px, 70vw"
+          width="600"
+          height="625"
+          alt="Tim Berry, attorney"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div>
+        <h2>Tim Berry</h2>
+        <p class="tim__role">Attorney</p>
+        <p>Attorney Tim Berry's nearly 30 years of retirement-plan experience are central to IRA Ideas.</p>
+        <a class="btn btn--outline" href="/about/tim-berry">View Profile <Icon name="arrow" size={18} /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section theme-light">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <h2>Frequently asked questions.</h2>
+      </div>
+      <div class="faqs">
+        {
+          faqs.map((f) => (
+            <details>
+              <summary>
+                <strong>{f.label}</strong>
+                <span>{f.question}</span>
+                <Icon name="chevron" size={20} class="faqs__chevron" />
+              </summary>
+              <p>{f.answer}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    heading="Ready to discuss your situation?"
+    copy="Start with the IRA Ideas team to see whether a Private Strategy Intensive is the appropriate next step."
+    href={DISCUSS}
+    label="Discuss This Engagement"
+    note="Any proposed paid work will have a defined scope and fee before it begins."
+  />
+</Base>
+
+<style>
+  .section-head--center h2, .intro h2, .tim h2 { font-size: clamp(2rem, 3.8vw, 2.8rem); }
+
+  .intro { display: grid; gap: 32px; align-items: center; }
+  @media (min-width: 900px) {
+    .intro { grid-template-columns: 1.1fr 1fr; gap: 56px; }
+  }
+  .intro__card { display: flex; gap: 22px; align-items: flex-start; background: #e7eeed; border-radius: var(--radius); padding: 28px; }
+  .intro__card :global(svg) { flex: none; color: var(--teal); }
+  .intro__card h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+  .intro__card p { color: var(--slate); margin: 0; }
+
+  .defines { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  @media (min-width: 700px) {
+    .defines { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .defines { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  }
+  .defines li + li { margin-top: 0; }
+  .row-card { display: flex; gap: 20px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .row-card :global(.row-card__icon) { flex: none; color: var(--teal); }
+  .row-card__title { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; }
+  .row-card__text { display: block; color: var(--slate); font-size: 0.95rem; line-height: 1.5; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
+  @media (min-width: 700px) {
+    .steps { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .steps { grid-template-columns: repeat(4, 1fr); gap: 36px; }
+  }
+  .steps li { position: relative; margin: 0; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 22px 24px; text-align: center; }
+  .steps__num { position: absolute; top: -18px; left: 18px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--teal-deep); color: #fff; font-weight: 700; }
+  .steps li :global(.steps__icon) { color: var(--teal); margin: 0 auto 12px; }
+  .steps h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .steps p { color: var(--slate); font-size: 0.95rem; margin: 0; }
+  .steps li :global(.steps__arrow) { display: none; }
+  @media (min-width: 1000px) {
+    .steps li :global(.steps__arrow) { display: block; position: absolute; right: -28px; top: 50%; color: var(--ink); }
+  }
+
+  .tim { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .tim { grid-template-columns: 0.8fr 1fr; gap: 56px; }
+  }
+  .tim__media { aspect-ratio: 16 / 10; border-radius: var(--radius); overflow: hidden; display: flex; justify-content: center; align-items: flex-end; background: radial-gradient(ellipse 60% 70% at 50% 35%, #ffffff 0%, transparent 70%), linear-gradient(160deg, #e8eeed 0%, #d5e1df 100%); }
+  .tim__media img { width: 52%; height: auto; margin-bottom: -4%; }
+  .tim h2 { margin-bottom: 2px; }
+  .tim__role { color: var(--slate); margin-bottom: 14px; }
+  .tim p:not(.tim__role) { color: var(--slate); max-width: 520px; }
+
+  .faqs { max-width: 960px; margin: 0 auto; }
+  .faqs details { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+  .faqs details + details { margin-top: 12px; }
+  .faqs summary { display: grid; grid-template-columns: 180px 1fr auto; gap: 16px; align-items: center; padding: 16px 22px; cursor: pointer; list-style: none; }
+  .faqs summary::-webkit-details-marker { display: none; }
+  .faqs summary strong { font-family: var(--font-heading); font-size: 1.1rem; }
+  .faqs summary span { color: var(--slate); }
+  .faqs :global(.faqs__chevron) { color: var(--teal); transform: rotate(90deg); transition: transform 0.15s ease; }
+  .faqs details[open] :global(.faqs__chevron) { transform: rotate(-90deg); }
+  .faqs details p { padding: 0 22px 18px; margin: 0; color: var(--slate); }
+  @media (max-width: 600px) {
+    .faqs summary { grid-template-columns: 1fr auto; }
+    .faqs summary span { grid-column: 1; }
+  }
+</style>
