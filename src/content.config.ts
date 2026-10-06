@@ -10,6 +10,8 @@ import { CATEGORY_SLUGS } from './data/categories';
  */
 const publication = z.enum(['draft', 'review', 'published']).default('draft');
 const faq = z.object({ question: z.string(), answer: z.string() });
+// A list item written either as plain text or as a short title with supporting text.
+const point = z.union([z.string(), z.object({ title: z.string(), text: z.string() })]);
 
 const services = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/services' }),
@@ -18,9 +20,9 @@ const services = defineCollection({
     subtitle: z.string(), // plain-English subtitle
     category: z.enum(CATEGORY_SLUGS),
     summary: z.string(), // one sentence: the situation it addresses
-    relevance: z.array(z.string()).default([]),
+    relevance: z.array(point).default([]),
     questions: z.array(z.string()).default([]),
-    includes: z.array(z.string()).default([]),
+    includes: z.array(point).default([]),
     exclusions: z.array(z.string()).default([]),
     howToBegin: z.array(z.string()).optional(),
     faqs: z.array(faq).max(5).default([]),

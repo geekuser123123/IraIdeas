@@ -6,17 +6,31 @@ subtitle: "PLACEHOLDER: plain-English subtitle"
 category: retirement-roth
 summary: "PLACEHOLDER: one sentence describing the situation this service addresses."
 relevance:
-  - "PLACEHOLDER: a situation that makes this service worth considering"
-  - "PLACEHOLDER: another approved situation"
+  - title: "PLACEHOLDER: situation title"
+    text: "PLACEHOLDER: when this service may be worth considering."
+  - title: "PLACEHOLDER: situation title"
+    text: "PLACEHOLDER: another approved situation."
+  - title: "PLACEHOLDER: situation title"
+    text: "PLACEHOLDER: another approved situation."
 questions:
-  - "PLACEHOLDER: a specific question within the approved scope"
-  - "PLACEHOLDER: another specific question"
+  - "PLACEHOLDER: a specific question within the approved scope?"
+  - "PLACEHOLDER: another approved question?"
+  - "PLACEHOLDER: another approved question?"
 includes:
-  - "PLACEHOLDER: an actual deliverable, review, document, analysis, or coordination step"
+  - title: "PLACEHOLDER: deliverable"
+    text: "PLACEHOLDER: an actual review, document, analysis, or coordination step."
+  - title: "PLACEHOLDER: deliverable"
+    text: "PLACEHOLDER: another approved deliverable."
+  - title: "PLACEHOLDER: deliverable"
+    text: "PLACEHOLDER: another approved deliverable."
 exclusions:
   - "PLACEHOLDER: an important exclusion or work requiring a separate agreement"
 faqs:
   - question: "PLACEHOLDER: a service-specific question"
+    answer: "PLACEHOLDER: approved answer"
+  - question: "PLACEHOLDER: another service-specific question"
+    answer: "PLACEHOLDER: approved answer"
+  - question: "PLACEHOLDER: another service-specific question"
     answer: "PLACEHOLDER: approved answer"
 fee:
   display: none

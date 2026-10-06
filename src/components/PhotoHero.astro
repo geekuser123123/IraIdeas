@@ -7,8 +7,11 @@ interface Props {
   eyebrow?: string;
   photo?: 'shirt' | 'suit';
   authority?: boolean; // show the "nearly 30 years" line under the buttons
+  subtitle?: string; // short line between the title and the lead
+  label?: boolean; // the "Tim Berry, Attorney" name tag on the photo
 }
-const { title, lead, eyebrow, photo = 'shirt', authority = false } = Astro.props;
+const { title, lead, eyebrow, photo = 'shirt', authority = false, subtitle, label = true } = Astro.props;
+const hasPanel = Astro.slots.has('panel');
 const PHOTOS = {
   shirt: { widths: [400, 600, 861], w: 861, h: 1024, alt: 'Tim Berry, attorney, in a striped shirt with arms crossed' },
   suit: { widths: [400, 600, 768], w: 768, h: 800, alt: 'Tim Berry, attorney, in a dark suit with arms crossed' },
@@ -18,11 +21,13 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
 ---
 
 <!-- Large photo hero with the angled bottom edge. Used on the homepage and About. -->
-<section class="hero theme-dark">
+<section class:list={['hero', 'theme-dark', { 'hero--panel': hasPanel }]}>
   <div class="container hero__grid">
     <div class="hero__copy">
+      <slot name="top" />
       {eyebrow && <p class="hero__eyebrow">{eyebrow}</p>}
       <h1>{title}</h1>
+      {subtitle && <p class="hero__subtitle">{subtitle}</p>}
       <p class="hero__lead">{lead}</p>
       <div class="btn-row"><slot name="actions" /></div>
       {
@@ -45,10 +50,15 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
         alt={p.alt}
         fetchpriority="high"
       />
-      <p class="hero__label">
-        <span class="hero__label-name">Tim Berry</span>
-        <span class="hero__label-role">Attorney</span>
-      </p>
+      {
+        label && (
+          <p class="hero__label">
+            <span class="hero__label-name">Tim Berry</span>
+            <span class="hero__label-role">Attorney</span>
+          </p>
+        )
+      }
+      {hasPanel && <div class="hero__panel"><slot name="panel" /></div>}
     </div>
   </div>
 </section>
@@ -116,6 +126,17 @@ const src = (w: number) => `/images/tim/tim-berry-${photo}-${w}.webp`;
   }
   .hero__label-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; }
   .hero__label-role { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+  .hero__subtitle { color: #fff; font-size: 1.25rem; margin: -4px 0 12px; }
+
+  /* Optional information panel beside the photo */
+  @media (min-width: 900px) {
+    .hero--panel .hero__visual { max-width: none; }
+    .hero--panel .hero__photo { width: 72%; }
+    .hero__panel { position: absolute; right: 0; top: 50%; transform: translateY(-58%); width: min(320px, 52%); }
+  }
+  @media (max-width: 899px) {
+    .hero__panel { margin: 8px 0 64px; }
+  }
   @media (max-width: 899px) {
     .hero { clip-path: polygon(0 0, 100% 0, 100% 96%, 0 100%); }
     .hero__copy { padding-bottom: 8px; }
