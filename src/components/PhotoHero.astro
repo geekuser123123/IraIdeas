@@ -1,5 +1,6 @@
 ---
 import { site } from '../data/site';
+import { siteImage } from '../lib/images';
 
 interface Props {
   title: string;
@@ -13,8 +14,10 @@ interface Props {
   large?: boolean; // oversized title, for a person's name
   angled?: boolean; // angled bottom edge (default on)
   labelPrefix?: string; // small line above the name on the photo tag, e.g. "Instructor"
+  background?: string; // optional site photo name shown behind a text-only hero
 }
-const { title, lead, eyebrow, photo = 'shirt', authority = false, subtitle, label = true, rule = false, large = false, angled = true, labelPrefix } = Astro.props;
+const { title, lead, eyebrow, photo = 'shirt', authority = false, subtitle, label = true, rule = false, large = false, angled = true, labelPrefix, background } = Astro.props;
+const bgImage = background ? siteImage(background) : null;
 const hasPanel = Astro.slots.has('panel');
 const PHOTOS = {
   shirt: { widths: [400, 600, 861], w: 861, h: 1024, alt: 'Tim Berry, attorney, in a striped shirt with arms crossed' },
@@ -26,7 +29,7 @@ const showVisual = Boolean(p) || hasPanel;
 ---
 
 <!-- Shared page hero: Tim's photo on the right, or text only when photo={false}. -->
-<section class:list={['hero', 'theme-dark', { 'hero--panel': hasPanel, 'hero--large': large, 'hero--flat': !angled, 'hero--text': !p, 'hero--solo': !showVisual }]}>
+<section class:list={['hero', 'theme-dark', { 'hero--panel': hasPanel, 'hero--large': large, 'hero--flat': !angled, 'hero--text': !p, 'hero--solo': !showVisual, 'hero--image': bgImage }]} style={bgImage ? `--hero-image: url('${bgImage}')` : undefined}>
   <div class="container hero__grid">
     <div class="hero__copy">
       <slot name="top" />
@@ -149,6 +152,13 @@ const showVisual = Boolean(p) || hasPanel;
   .hero--text .btn-row:empty { display: none; }
   .hero--text.hero--panel .hero__visual { max-width: 380px; }
   .hero--text.hero--panel .hero__panel { position: static; transform: none; width: 100%; margin: 0; }
+
+  /* Background photo behind a text-only hero, faded into the dark side */
+  .hero--image {
+    background:
+      linear-gradient(90deg, rgba(11, 27, 35, 0.97) 0%, rgba(11, 27, 35, 0.88) 40%, rgba(11, 27, 35, 0.2) 75%),
+      var(--hero-image) center / cover no-repeat;
+  }
 
   /* Straight bottom edge */
   .hero--flat, .hero.hero--flat { clip-path: none; }

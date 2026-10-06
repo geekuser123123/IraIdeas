@@ -1,32 +1,41 @@
 ---
 import { getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
+import PhotoHero from '../../components/PhotoHero.astro';
 import SignupForm from '../../components/SignupForm.astro';
+import CtaBand from '../../components/CtaBand.astro';
 import DraftFlag from '../../components/DraftFlag.astro';
+import Icon from '../../components/Icon.astro';
 import { CATEGORIES, CATEGORY_SLUGS } from '../../data/categories';
 import { visible } from '../../lib/content';
+import { bands, bandClass } from '../../lib/bands';
 
 const resources = (await visible('resources')).sort((a, b) => b.data.publishedDate.localeCompare(a.data.publishedDate));
 const authors = await Promise.all(resources.map((r) => getEntry(r.data.author)));
 const courses = await visible('courses');
+const hasLibrary = resources.length > 0 || courses.length > 0;
 const topics = CATEGORY_SLUGS.filter((c) => resources.some((r) => r.data.topic === c));
 const formats = [...new Set(resources.map((r) => r.data.format))];
+
+const bg = bands([hasLibrary && 'library', 'signup', 'topics', 'tim']);
 ---
 
 <Base
   title="Advanced Learning"
   description="Advanced education on the concepts, structures, and questions behind retirement and tax planning, from attorney Tim Berry and IRA Ideas."
 >
-  <PageHero
+  <PhotoHero
     eyebrow="IRA Ideas Advanced Learning"
     title="Advanced education for better-informed decisions."
     lead="Explore the concepts, structures, and questions behind advanced retirement and tax planning. Learn from attorney Tim Berry and other approved contributors as the IRA Ideas library grows."
+    photo={false}
+    angled={false}
+    background="learn-hero"
   />
 
   {
-    resources.length > 0 || courses.length > 0 ? (
-      <section class="section">
+    hasLibrary && (
+      <section class:list={['section', bandClass(bg.library)]}>
         <div class="container">
           {courses.length > 0 && (
             <div class="block">
@@ -36,7 +45,9 @@ const formats = [...new Set(resources.map((r) => r.data.format))];
                   <article class="card">
                     <DraftFlag state={c.data.publication} />
                     {c.data.entirelyFree && <span class="badge free">Free</span>}
-                    <h3><a href={`/learn/courses/${c.id}`}>{c.data.title}</a></h3>
+                    <h3>
+                      <a href={`/learn/courses/${c.id}`}>{c.data.title}</a>
+                    </h3>
                     <p>{c.data.description}</p>
                   </article>
                 ))}
@@ -51,14 +62,18 @@ const formats = [...new Set(resources.map((r) => r.data.format))];
                   <span class="visually-hidden">Topic</span>
                   <select data-filter="topic">
                     <option value="">All topics</option>
-                    {topics.map((t) => <option value={t}>{CATEGORIES[t].label}</option>)}
+                    {topics.map((t) => (
+                      <option value={t}>{CATEGORIES[t].label}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span class="visually-hidden">Format</span>
                   <select data-filter="format">
                     <option value="">All formats</option>
-                    {formats.map((f) => <option value={f}>{f[0].toUpperCase() + f.slice(1)}</option>)}
+                    {formats.map((f) => (
+                      <option value={f}>{f[0].toUpperCase() + f.slice(1)}</option>
+                    ))}
                   </select>
                 </label>
               </div>
@@ -66,10 +81,17 @@ const formats = [...new Set(resources.map((r) => r.data.format))];
                 {resources.map((r, i) => (
                   <li class="card" data-topic={r.data.topic} data-format={r.data.format}>
                     <DraftFlag state={r.data.publication} />
-                    <p class="eyebrow">{CATEGORIES[r.data.topic].label} &middot; {r.data.format}</p>
-                    <h3><a href={`/learn/${r.id}`}>{r.data.title}</a></h3>
+                    <p class="eyebrow">
+                      {CATEGORIES[r.data.topic].label} &middot; {r.data.format}
+                    </p>
+                    <h3>
+                      <a href={`/learn/${r.id}`}>{r.data.title}</a>
+                    </h3>
                     <p>{r.data.description}</p>
-                    <p class="small muted">{authors[i]?.data.name}{r.data.duration && <> &middot; {r.data.duration}</>}</p>
+                    <p class="small muted">
+                      {authors[i]?.data.name}
+                      {r.data.duration && <> &middot; {r.data.duration}</>}
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -77,27 +99,89 @@ const formats = [...new Set(resources.map((r) => r.data.format))];
           )}
         </div>
       </section>
-    ) : (
-      <section class="section">
-        <div class="container">
-          <div class="reading">
-            <h2>Free advanced learning is on the way.</h2>
-            <p class="lead">Join the IRA Ideas learning list for new educational resources and announcements as they are released.</p>
-          </div>
-        </div>
-      </section>
     )
   }
 
-  <section class="section theme-light" id="learning-signup" tabindex="-1">
-    <div class="container">
-      <div class="reading">
+  <!-- Learning list signup -->
+  <section class:list={['section', bandClass(bg.signup)]} id="learning-signup" tabindex="-1">
+    <div class="container intro">
+      <div class="intro__copy">
+        {
+          hasLibrary ? (
+            <>
+              <h2>New resources, as they are released.</h2>
+              <p class="lead">Join the IRA Ideas learning list for new educational resources and announcements.</p>
+            </>
+          ) : (
+            <>
+              <h2>Free advanced learning is on the way.</h2>
+              <p class="lead">Join the IRA Ideas learning list for new educational resources and announcements as they are released.</p>
+              <p>Only completed, professionally reviewed resources are published here.</p>
+            </>
+          )
+        }
+      </div>
+      <div class="signup-panel theme-dark">
         <h2>Get new advanced learning from IRA Ideas.</h2>
         <p>Receive new educational resources and learning announcements as they are released.</p>
-        <SignupForm list="learning" id="learn-signup" />
+        <SignupForm list="learning" id="learn-signup" stacked />
       </div>
     </div>
   </section>
+
+  <!-- Topics -->
+  <section class:list={['section', bandClass(bg.topics)]}>
+    <div class="container">
+      <div class="section-head">
+        <h2>Topics you can explore.</h2>
+        <p class="lead">{hasLibrary ? 'Browse resources by planning area.' : 'Be the first to know when new resources are available in these areas.'}</p>
+      </div>
+      <ul class="topics" role="list">
+        {
+          CATEGORY_SLUGS.map((c) => (
+            <li class="topic">
+              <Icon name={CATEGORIES[c].icon} size={44} class="topic__icon" />
+              <h3>{CATEGORIES[c].label}</h3>
+              <p>{CATEGORIES[c].description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Tim -->
+  <section class:list={['section', bandClass(bg.tim)]}>
+    <div class="container tim">
+      <div class="tim__media">
+        <img
+          src="/images/tim/tim-berry-shirt-600.webp"
+          srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w, /images/tim/tim-berry-shirt-861.webp 861w"
+          sizes="(min-width: 900px) 440px, 80vw"
+          width="600"
+          height="714"
+          alt="Tim Berry, attorney"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div class="tim__copy">
+        <h2>Learn from attorney Tim Berry.</h2>
+        <p class="tim__role">Attorney</p>
+        <p>
+          Tim Berry's nearly 30 years of retirement-plan experience are central to IRA Ideas. Learn from Tim and other approved contributors as the
+          IRA Ideas library grows.
+        </p>
+        <a class="btn btn--outline" href="/about/tim-berry">Meet Tim Berry <Icon name="arrow" size={18} /></a>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    heading="Bring us the situation. We will help identify the next step."
+    copy="Tell our team what you are considering, what is already in place, and any deadline."
+    tone="teal"
+  />
 </Base>
 
 <script>
@@ -122,4 +206,51 @@ const formats = [...new Set(resources.map((r) => r.data.format))];
   .resource-list li + li { margin-top: 0; }
   .resource-list li[hidden] { display: none; }
   .free { color: var(--success); align-self: flex-start; margin-bottom: 12px; }
+
+  /* Intro and signup */
+  .intro { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .intro { grid-template-columns: 1fr 1fr; gap: 64px; }
+  }
+  .intro__copy h2 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+  .intro__copy p:not(.lead) { color: var(--slate); }
+  .signup-panel { background: var(--teal); border-radius: var(--radius); padding: clamp(24px, 4vw, 40px); box-shadow: 0 18px 40px rgba(11, 27, 35, 0.18); }
+  .signup-panel h2 { color: #fff; font-size: clamp(1.6rem, 2.8vw, 2.1rem); margin-bottom: 8px; }
+  .signup-panel > p { color: #e3eeed; margin-bottom: 20px; }
+  .signup-panel :global(.signup-form) { max-width: none; }
+  .signup-panel :global(.signup-form .btn) { width: 100%; }
+
+  /* Topics */
+  .section-head h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .topics { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; }
+  @media (min-width: 700px) {
+    .topics { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1100px) {
+    .topics { grid-template-columns: repeat(4, 1fr); }
+  }
+  .topics li + li { margin-top: 0; }
+  .topic { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .topic :global(.topic__icon) { color: var(--teal); margin-bottom: 16px; }
+  .topic h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; }
+  .topic p { color: var(--slate); margin: 0; font-size: 0.97rem; }
+
+  /* Tim */
+  .tim { display: grid; gap: 40px; align-items: center; }
+  @media (min-width: 900px) {
+    .tim { grid-template-columns: 1fr 1fr; gap: 64px; }
+  }
+  .tim__media {
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    background: radial-gradient(ellipse 60% 70% at 50% 35%, #ffffff 0%, transparent 70%), linear-gradient(160deg, #e8eeed 0%, #d5e1df 100%);
+  }
+  .tim__media img { width: 52%; height: auto; margin-bottom: -4%; }
+  .tim__copy h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 8px; }
+  .tim__role { font-size: 0.8rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate); margin-bottom: 18px; }
+  .tim__copy p:not(.tim__role) { color: var(--slate); max-width: 520px; }
 </style>
