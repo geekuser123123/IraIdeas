@@ -2,21 +2,32 @@
 import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import DraftFlag from '../../components/DraftFlag.astro';
-import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
 import { CATEGORIES } from '../../data/categories';
 import { visible, formatDay } from '../../lib/content';
 
 export async function getStaticPaths() {
   const resources = await visible('resources');
-  return resources.map((resource) => ({ params: { slug: resource.id }, props: { resource } }));
+  return resources.map((resource) => ({ params: { slug: resource.id }, props: { resource, all: resources } }));
 }
 
-const { resource } = Astro.props;
+const { resource, all } = Astro.props;
 const d = resource.data;
 const author = await getEntry(d.author);
 const reviewer = d.reviewer ? await getEntry(d.reviewer) : undefined;
-const { Content } = await render(resource);
+const isTim = d.author.id === 'tim-berry';
+const { Content, headings } = await render(resource);
 const subject = d.relatedService ? `service=${d.relatedService.id}` : `subject=${d.topic}`;
+const related = all.filter((r) => r.id !== resource.id && r.data.topic === d.topic).slice(0, 3);
+const FORMAT_LABEL = { article: 'Article', video: 'Video', briefing: 'Briefing', guide: 'Guide', lesson: 'Lesson' } as const;
+
+// "On this page" lists the sections this resource actually has.
+const toc = [
+  { id: 'who-this-is-for', text: 'Who this is for' },
+  ...headings.filter((h) => h.depth === 2).map((h) => ({ id: h.slug, text: h.text })),
+  d.transcript && { id: 'transcript', text: 'Transcript' },
+  related.length > 0 && { id: 'related-resources', text: 'Related resources' },
+].filter(Boolean) as { id: string; text: string }[];
 
 const jsonLd = d.video
   ? {
@@ -26,7 +37,7 @@ const jsonLd = d.video
       description: d.description,
       uploadDate: d.publishedDate,
       embedUrl: d.video.embedUrl,
-      thumbnailUrl: new URL('/images/tim/tim-berry-suit-768.webp', Astro.site).href,
+      thumbnailUrl: new URL('/images/tim/tim-berry-shirt-861.webp', Astro.site).href,
     }
   : {
       '@context': 'https://schema.org',
@@ -41,68 +52,244 @@ const jsonLd = d.video
 ---
 
 <Base title={d.title} description={d.description} noindex={d.publication !== 'published'} jsonLd={jsonLd}>
-  <article>
-    <header class="resource-hero theme-dark">
+  <article class="resource">
+    <div class="section resource__head theme-light">
       <div class="container">
-        <div class="reading">
-          <nav aria-label="Breadcrumb" class="crumbs small"><a href="/learn">Advanced Learning</a> <span aria-hidden="true">/</span> {CATEGORIES[d.topic].label}</nav>
-          <DraftFlag state={d.publication} />
-          <p class="eyebrow">{d.format}{d.duration && <> &middot; {d.duration}</>}</p>
-          <h1>{d.title}</h1>
-          <p class="lead">{d.description}</p>
-          <dl class="meta small">
-            <div><dt>For</dt><dd>{d.audience}</dd></div>
-            {author && <div><dt>By</dt><dd>{author.data.name}, {author.data.role}</dd></div>}
-            {reviewer && <div><dt>Reviewed by</dt><dd>{reviewer.data.name}</dd></div>}
-            <div><dt>Published</dt><dd><time datetime={d.publishedDate}>{formatDay(d.publishedDate)}</time></dd></div>
-            {d.reviewedDate && <div><dt>Last reviewed</dt><dd><time datetime={d.reviewedDate}>{formatDay(d.reviewedDate)}</time></dd></div>}
-          </dl>
-        </div>
-      </div>
-    </header>
+        <nav aria-label="Breadcrumb" class="crumbs">
+          <a href="/">Home</a>
+          <span aria-hidden="true">/</span>
+          <a href="/learn">Advanced Learning</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{FORMAT_LABEL[d.format]}</span>
+        </nav>
+        <DraftFlag state={d.publication} />
+        <p class="resource__eyebrow">Advanced Learning Resource</p>
+        <h1>{d.title}</h1>
+        <p class="lead">{d.description}</p>
+        <ul class="chips" role="list">
+          <li><Icon name="book" size={18} /> {CATEGORIES[d.topic].label}</li>
+          <li><Icon name={d.format === 'video' ? 'clock' : 'document'} size={18} /> {FORMAT_LABEL[d.format]}{d.duration && <>, {d.duration}</>}</li>
+        </ul>
+        <dl class="byline">
+          {
+            author && (
+              <div class="byline__author">
+                {isTim && <img src="/images/tim/tim-berry-shirt-400.webp" width="400" height="476" alt="" aria-hidden="true" />}
+                <span>
+                  <dt class="visually-hidden">Author</dt>
+                  <dd>
+                    <strong>{author.data.name}</strong>
+                    <span>{author.data.role}</span>
+                  </dd>
+                </span>
+              </div>
+            )
+          }
+          <div>
+            <dt>Published</dt>
+            <dd><time datetime={d.publishedDate}>{formatDay(d.publishedDate)}</time></dd>
+          </div>
+          {
+            d.reviewedDate && (
+              <div>
+                <dt>Reviewed</dt>
+                <dd>
+                  <time datetime={d.reviewedDate}>{formatDay(d.reviewedDate)}</time>
+                  {reviewer && <> by {reviewer.data.name}</>}
+                </dd>
+              </div>
+            )
+          }
+        </dl>
 
-    <div class="container section">
-      {d.video && (
-        <div class="video reading" data-video={d.video.embedUrl}>
-          <button type="button" class="video__play btn btn--primary">Play video</button>
-          <noscript><a href={d.video.embedUrl}>Watch the video</a></noscript>
+        <div class="layout">
+          <div class="main">
+            {
+              d.video && (
+                <div class="video">
+                  <div class="video__frame" data-video={d.video.embedUrl}>
+                    {isTim && <img class="video__poster" src="/images/tim/tim-berry-shirt-600.webp" width="600" height="714" alt="" aria-hidden="true" />}
+                    <button type="button" class="video__play">
+                      <span class="video__circle" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
+                      </span>
+                      <span>Play video</span>
+                    </button>
+                    <noscript>
+                      <a href={d.video.embedUrl}>Watch the video</a>
+                    </noscript>
+                  </div>
+                  <p class="video__meta">
+                    {d.video.captionsAvailable && <span class="video__badge">CC</span>}
+                    {d.video.captionsAvailable ? 'Captions available.' : 'Captions are being prepared.'}
+                    {d.transcript && <a href="#transcript">Read the transcript</a>}
+                  </p>
+                </div>
+              )
+            }
+
+            <section class="block" id="who-this-is-for">
+              <h2>Who this is for</h2>
+              <p>{d.audience}</p>
+            </section>
+            <div class="prose blocks">
+              <Content />
+            </div>
+          </div>
+
+          <aside class="toc" aria-labelledby="toc-title">
+            <h2 id="toc-title">On this page</h2>
+            <ul role="list">
+              {toc.map((t) => <li><a href={`#${t.id}`}>{t.text}</a></li>)}
+            </ul>
+          </aside>
         </div>
-      )}
-      <div class="prose"><Content /></div>
-      {d.transcript && (
-        <details class="transcript reading">
-          <summary>Read the transcript</summary>
-          <div set:html={d.transcript.split(/\n{2,}/).map((p) => `<p>${p.replace(/</g, '&lt;')}</p>`).join('')} />
-        </details>
-      )}
+
+        {
+          d.transcript && (
+            <details class="transcript" id="transcript">
+              <summary>
+                <Icon name="document" size={30} />
+                <span>Accessible transcript</span>
+                <Icon name="chevron" size={20} class="transcript__chevron" />
+              </summary>
+              <div class="transcript__body" set:html={d.transcript.split(/\n{2,}/).map((p) => `<p>${p.replace(/</g, '&lt;')}</p>`).join('')} />
+            </details>
+          )
+        }
+
+        {
+          related.length > 0 && (
+            <section class="related" id="related-resources">
+              <Icon name="book" size={44} />
+              <div>
+                <h2>Related resources</h2>
+                <ul>
+                  {related.map((r) => (
+                    <li>
+                      <a href={`/learn/${r.id}`}>{r.data.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          )
+        }
+      </div>
     </div>
   </article>
 
-  <CtaBand heading="Working through a situation involving this topic?" copy="Tell our team what you are considering and we will identify the appropriate next step." href={`/start?${subject}`} />
+  <section class="next theme-darker">
+    <div class="container next__grid">
+      <div class="next__media" aria-hidden="true">
+        <img src="/images/tim/tim-berry-shirt-600.webp" width="600" height="714" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="next__copy">
+        <h2>Working through a situation involving this topic?</h2>
+        <p>Tell our team what you are considering and we will identify the appropriate next step.</p>
+        <a class="btn btn--primary" href={`/start?${subject}`}>Discuss My Situation <Icon name="arrow" size={18} /></a>
+      </div>
+    </div>
+  </section>
 </Base>
 
 <script>
   // Load the video player only when requested.
-  document.querySelectorAll<HTMLElement>('[data-video]').forEach((wrap) => {
-    wrap.querySelector('button')?.addEventListener('click', () => {
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((frame) => {
+    frame.querySelector('button')?.addEventListener('click', () => {
       const iframe = document.createElement('iframe');
-      iframe.src = wrap.dataset.video!;
+      iframe.src = frame.dataset.video!;
       iframe.title = 'Video player';
       iframe.allow = 'fullscreen; picture-in-picture';
-      iframe.loading = 'lazy';
-      wrap.replaceChildren(iframe);
+      frame.replaceChildren(iframe);
+      iframe.focus();
     });
   });
 </script>
 
 <style>
-  .resource-hero { padding: clamp(48px, 7vw, 80px) 0; }
-  .crumbs { margin-bottom: 20px; color: var(--mist); }
-  .meta { display: flex; flex-wrap: wrap; gap: 12px 32px; margin: 24px 0 0; }
-  .meta dt { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; color: var(--mist); }
-  .meta dd { margin: 0; }
-  .video { aspect-ratio: 16 / 9; background: var(--teal); display: grid; place-items: center; margin-bottom: 40px; border-radius: var(--radius); overflow: hidden; }
-  .video :global(iframe) { width: 100%; height: 100%; border: 0; }
-  .transcript { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
-  .transcript summary { cursor: pointer; font-weight: 500; }
+  .resource__head { padding-top: 28px; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; color: var(--slate); margin-bottom: 24px; }
+  .crumbs a { color: var(--teal); text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  .resource__eyebrow { display: flex; align-items: center; gap: 16px; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 12px; }
+  .resource__eyebrow::after { content: ''; width: 64px; height: 1px; background: var(--ink); }
+  .resource h1 { font-size: clamp(2.4rem, 5.4vw, 4rem); margin-bottom: 8px; }
+  .chips { list-style: none; margin: 20px 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chips li { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 8px 14px; background: #e3eeec; border-radius: var(--radius); font-weight: 500; font-size: 0.92rem; }
+  .chips :global(svg) { color: var(--teal); }
+
+  .byline { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 0; margin: 0 0 28px; }
+  .byline > div { padding: 0 28px; border-left: 1px solid var(--line); }
+  .byline > div:first-child { padding-left: 0; border-left: 0; }
+  .byline dt { font-weight: 700; font-size: 0.9rem; }
+  .byline dd { margin: 0; color: var(--slate); font-size: 0.9rem; }
+  .byline__author { display: flex; align-items: center; gap: 14px; }
+  .byline__author img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; object-position: 50% 6%; background: #dfe8e6; }
+  .byline__author strong { display: block; color: var(--ink); font-size: 1rem; }
+
+  /* Layout */
+  .layout { display: grid; gap: 32px; align-items: start; }
+  @media (min-width: 1000px) {
+    .layout { grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; }
+    .toc { position: sticky; top: 24px; }
+  }
+  .main { min-width: 0; }
+  .block, .blocks { max-width: 720px; }
+
+  .video { margin-bottom: 40px; }
+  .video__frame { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: linear-gradient(150deg, #145856 0%, var(--teal) 50%, var(--teal-deep) 100%); }
+  .video__frame :global(iframe) { width: 100%; height: 100%; border: 0; }
+  .video__poster { position: absolute; right: 6%; bottom: 0; height: 92%; width: auto; }
+  .video__play { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding-left: 18%; background: transparent; border: 0; color: #fff; font: inherit; font-weight: 500; cursor: pointer; }
+  .video__circle { display: grid; place-items: center; width: 80px; height: 80px; border-radius: 50%; background: #fff; color: var(--teal-deep); padding-left: 4px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); transition: transform 0.15s ease; }
+  .video__play:hover .video__circle { transform: scale(1.05); }
+  .video__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 12px 0 0; color: var(--slate); font-size: 0.92rem; }
+  .video__badge { font-weight: 700; font-size: 0.75rem; border: 1.5px solid currentColor; border-radius: 4px; padding: 0 5px; }
+  .video__meta a { color: var(--teal); font-weight: 500; }
+
+  .block h2, .blocks :global(h2) { font-size: clamp(1.7rem, 3vw, 2.2rem); }
+  .block p { color: var(--slate); }
+  .blocks :global(h2) { margin-top: 0; padding-top: 28px; border-top: 1px solid var(--line); scroll-margin-top: 24px; }
+  .block { padding-bottom: 28px; margin-bottom: 0; scroll-margin-top: 24px; }
+  .blocks :global(p) { color: var(--slate); }
+
+  .toc { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+  .toc h2 { font-size: 1.5rem; margin-bottom: 8px; }
+  .toc ul { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; border-bottom: 1px solid var(--line); }
+  .toc li:last-child { border-bottom: 0; }
+  .toc a { display: block; padding: 11px 0; color: var(--slate); text-decoration: none; }
+  .toc a:hover { color: var(--ink); }
+
+  .transcript { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); margin-top: 32px; scroll-margin-top: 24px; }
+  .transcript summary { display: flex; align-items: center; gap: 16px; padding: 20px 24px; cursor: pointer; list-style: none; font-family: var(--font-heading); font-weight: 700; font-size: 1.35rem; }
+  .transcript summary::-webkit-details-marker { display: none; }
+  .transcript summary > span { flex: 1; }
+  .transcript summary :global(svg) { flex: none; color: var(--teal); }
+  .transcript :global(.transcript__chevron) { transform: rotate(90deg); transition: transform 0.15s ease; }
+  .transcript[open] :global(.transcript__chevron) { transform: rotate(-90deg); }
+  .transcript__body { margin: 0 24px 24px; padding: 16px 18px; background: var(--light); border-radius: var(--radius); color: var(--slate); }
+  .transcript__body :global(p:last-child) { margin-bottom: 0; }
+
+  .related { display: flex; gap: 24px; align-items: flex-start; background: #e3eeec; border-radius: var(--radius); padding: 28px; margin-top: 20px; scroll-margin-top: 24px; }
+  .related > :global(svg) { flex: none; color: var(--teal); }
+  .related h2 { font-size: clamp(1.6rem, 2.8vw, 2rem); }
+  .related ul { margin: 0; }
+
+  /* Next step band */
+  .next { overflow: hidden; }
+  .next__grid { display: grid; gap: 24px; align-items: end; }
+  @media (min-width: 900px) {
+    .next__grid { grid-template-columns: 1fr 1.3fr; gap: 64px; align-items: center; }
+  }
+  .next__media { align-self: end; display: flex; justify-content: center; padding-top: 32px; }
+  .next__media img { width: min(300px, 70%); height: auto; }
+  .next__copy { padding: 48px 0; }
+  .next__copy h2 { color: #fff; font-size: clamp(1.9rem, 3.6vw, 2.8rem); }
+  .next__copy p { color: #d9e3e6; margin-bottom: 24px; max-width: 520px; }
+  @media (max-width: 899px) {
+    .next__media { order: 2; }
+    .next__copy { padding-bottom: 0; }
+  }
 </style>
