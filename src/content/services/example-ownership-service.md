@@ -1,16 +1,14 @@
 ---
-# TEMPLATE EXAMPLE. Stays in draft. Copy this file for each approved service,
-# replace every PLACEHOLDER value with approved wording, then set publication.
-name: "PLACEHOLDER: Retirement & Roth Planning Service Name"
+# TEMPLATE EXAMPLE (Ownership & Complex Transactions). Stays in draft. Replace every PLACEHOLDER
+# value with approved wording before setting publication to published.
+name: "PLACEHOLDER: Ownership & Complex Transactions Service Name"
 subtitle: "PLACEHOLDER: plain-English subtitle"
-category: retirement-roth
+category: ownership-transactions
 summary: "PLACEHOLDER: one sentence describing the situation this service addresses."
 relevance:
   - "PLACEHOLDER: a situation that makes this service worth considering"
-  - "PLACEHOLDER: another approved situation"
 questions:
   - "PLACEHOLDER: a specific question within the approved scope"
-  - "PLACEHOLDER: another specific question"
 includes:
   - "PLACEHOLDER: an actual deliverable, review, document, analysis, or coordination step"
 exclusions:
@@ -21,6 +19,6 @@ faqs:
 fee:
   display: none
 reviewer: "PLACEHOLDER: reviewing professional"
-order: 1
+order: 3
 publication: draft
 ---
