@@ -62,7 +62,7 @@ for (const file of files) {
   for (let i = 1; i < bands.length; i++) {
     if (bands[i] === bands[i - 1]) errors.push(`${file}: sections ${i} and ${i + 1} both have a ${bands[i]} background`);
   }
-  if (/data-pending-legal/.test(text)) warnings.add(`${file.replace(DIST, '')}: approved legal text not yet added`);
+  if (/data-pending-legal/.test(text)) warnings.add(`${file.replace(DIST, '')}: legal text needs professional review before launch`);
 }
 
 const site = JSON.parse(readFileSync('src/data/site.json', 'utf8'));

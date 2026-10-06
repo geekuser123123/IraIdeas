@@ -1,19 +1,282 @@
 ---
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-// LAUNCH BLOCKER: replace with the professionally approved privacy notice.
-// It must match the actual forms, tracking, embedded media, and third-party services in use.
-const approved = false;
+import PhotoHero from '../components/PhotoHero.astro';
+import { site } from '../data/site';
+
+/*
+ * Privacy Policy. Drafted from how this website actually works: its forms,
+ * database, security checks, and connected services. Have the responsible
+ * professional review it before launch, and update it whenever forms,
+ * tracking, embedded media, or third-party services change.
+ */
+const LAST_UPDATED = 'October 6, 2026';
+const LAST_UPDATED_ISO = '2026-10-06';
+
+// Sentences that depend on site settings, so the policy never describes
+// tracking or services that are not actually switched on.
+const turnstileOn = Boolean(import.meta.env.PUBLIC_TURNSTILE_SITE_KEY);
+const analyticsOn = Boolean(import.meta.env.PUBLIC_GA_ID);
+const brand = site.legalEntityName ?? site.brand;
+
+const sections = [
+  { id: 'information-we-collect', title: 'Information we collect' },
+  { id: 'how-information-is-used', title: 'How information is used' },
+  { id: 'service-providers', title: 'Service providers' },
+  { id: 'forms-and-communications', title: 'Forms and communications' },
+  { id: 'cookies-and-analytics', title: 'Cookies and analytics' },
+  { id: 'information-security', title: 'Information security' },
+  { id: 'your-choices', title: 'Your choices' },
+  { id: 'contact', title: 'Contact' },
+];
+const num = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
-<Base title="Privacy Notice" description="How IRA Ideas handles information submitted through this website." noindex={!approved}>
-  <PageHero eyebrow="Legal" title="Privacy Notice" />
-  <section class="section">
-    <div class="container">
-      <div class="prose">
-        <p data-pending-legal>The privacy notice is being finalized and will be published here.</p>
-        <p>Questions can be sent through the <a href="/contact">contact page</a>.</p>
+<Base title="Privacy Policy" description="How IRA Ideas collects, uses, and protects information submitted through this website.">
+  <PhotoHero title="Privacy Policy" lead="How IRA Ideas handles information." photo={false} angled={false}>
+    <Fragment slot="actions">
+      <p class="updated"><strong>Last updated:</strong> <time datetime={LAST_UPDATED_ISO}>{LAST_UPDATED}</time></p>
+    </Fragment>
+  </PhotoHero>
+
+  <section class="section theme-light">
+    <div class="container layout">
+      <nav class="toc" aria-labelledby="toc-title">
+        <h2 id="toc-title">On this page</h2>
+        <ol role="list">
+          {
+            sections.map((s, i) => (
+              <li>
+                <a href={`#${s.id}`} aria-current={i === 0 ? 'true' : undefined}>
+                  <span>{num(i)}</span> {s.title}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="policy">
+        <p class="intro">
+          This policy explains what information {brand} ("IRA Ideas," "we," "us") collects through this website, how it is used, and the
+          choices you have. It applies to this website and the forms on it.
+        </p>
+
+        <section id={sections[0].id}>
+          <h2><span>{num(0)}</span>{sections[0].title}</h2>
+          <div class="body">
+            <p>We collect the information you choose to submit through our forms:</p>
+            <ul>
+              <li>
+                <strong>Service requests</strong> (Discuss My Situation): your name, email address, optional phone number, state or country, who you
+                are contacting us for, the service or subject, a short description of what you are trying to accomplish and what is already in
+                place, your timing and any deadline, an optional approximate amount range, and how you prefer to be contacted.
+              </li>
+              <li>
+                <strong>Event applications and registrations</strong>: your name, email address, optional phone number, state or country, participant
+                role, reason for attending, optional general planning interests, and your acknowledgment of the published price.
+              </li>
+              <li><strong>Priority list</strong>: your name, email address, and optional event format of interest.</li>
+              <li><strong>Learning list</strong>: your email address and optional first name.</li>
+              <li><strong>General inquiries</strong>: your name, email address, optional subject, and message.</li>
+              <li><strong>Optional permissions</strong>: whether you chose to receive educational and event emails or text messages.</li>
+            </ul>
+            <p>We also collect limited information automatically when you use the website:</p>
+            <ul>
+              <li>
+                <strong>Visit details</strong>: the page a form was submitted from, the page you first arrived on, the website that referred you, and
+                any campaign tags in the link you followed (for example, utm_source). These help us understand how people find us.
+              </li>
+              <li>
+                <strong>Security information</strong>: your IP address is used to prevent spam and repeated submissions. It is stored only in a
+                scrambled (hashed) form and is deleted after 24 hours.
+              </li>
+            </ul>
+            <p>
+              Please do not submit Social Security numbers, account numbers, tax returns, or confidential documents through this website. Our forms
+              do not ask for them.
+            </p>
+          </div>
+        </section>
+
+        <section id={sections[1].id}>
+          <h2><span>{num(1)}</span>{sections[1].title}</h2>
+          <div class="body">
+            <p>We use the information we collect to:</p>
+            <ul>
+              <li>review your request and contact you about the appropriate next step;</li>
+              <li>review event applications, process registrations, and confirm participation;</li>
+              <li>send the confirmation emails you would expect after submitting a form;</li>
+              <li>send educational resources, event announcements, and other updates you asked to receive;</li>
+              <li>route your request to the right member of the team through our customer-management system;</li>
+              <li>understand which pages and campaigns lead people to contact us; and</li>
+              <li>protect the website against spam, abuse, and security threats.</li>
+            </ul>
+            <p>We do not sell your personal information, and we do not share it with third parties for their own marketing.</p>
+          </div>
+        </section>
+
+        <section id={sections[2].id}>
+          <h2><span>{num(2)}</span>{sections[2].title}</h2>
+          <div class="body">
+            <p>We rely on a small number of service providers who handle information on our behalf and only for the purposes above:</p>
+            <ul>
+              <li><strong>Cloudflare</strong> hosts this website, stores form submissions, and protects the site against attacks.{turnstileOn && ' Cloudflare Turnstile checks that form submissions come from a person rather than an automated program.'}</li>
+              <li><strong>Email delivery</strong>: a transactional email provider sends confirmation emails and updates.</li>
+              <li><strong>Customer-management system</strong>: submissions are sent to the system our team uses to manage requests and follow-up.</li>
+              <li>
+                <strong>Stripe</strong> processes payments for events that require them. Payment details are entered on Stripe's secure pages and are
+                not received or stored by IRA Ideas. Stripe tells us whether a payment was completed.
+              </li>
+              <li>
+                <strong>Video hosting</strong>: when you choose to play a video, the video player loads from the video provider, which may collect
+                information under its own privacy policy. Videos do not load until you press play.
+              </li>
+            </ul>
+            <p>We may also disclose information when required by law or to protect the rights and safety of IRA Ideas, our clients, or others.</p>
+          </div>
+        </section>
+
+        <section id={sections[3].id}>
+          <h2><span>{num(3)}</span>{sections[3].title}</h2>
+          <div class="body">
+            <p>
+              Submitting a request does not establish an attorney-client relationship. The team will provide instructions if additional information
+              is needed.
+            </p>
+            <div class="callout" role="note">
+              <span class="callout__icon" aria-hidden="true">i</span>
+              <div>
+                <strong>Service requests and marketing permissions are separate.</strong>
+                <p>
+                  Submitting a service request, application, or inquiry does not sign you up for marketing. Email and text-message updates are
+                  sent only if you tick the separate, optional boxes, which are never preselected. Joining the learning list or priority list is
+                  a request to receive those specific updates.
+                </p>
+              </div>
+            </div>
+            <p>Joining the priority list does not reserve a seat or guarantee admission to an event.</p>
+          </div>
+        </section>
+
+        <section id={sections[4].id}>
+          <h2><span>{num(4)}</span>{sections[4].title}</h2>
+          <div class="body">
+            <p>
+              This website does not use advertising cookies. While you browse, your browser temporarily remembers the campaign tags and first page
+              of your visit so they can be included with a form you submit. This information stays in your browser and is cleared when you close
+              the tab. Form entries are never stored in your browser or placed in page addresses.
+            </p>
+            {
+              analyticsOn ? (
+                <p>
+                  We use Google Analytics to understand how the website is used. It receives page addresses and the names of steps such as
+                  "inquiry submitted." We do not send names, email addresses, phone numbers, financial amounts, or anything you type into a form
+                  to analytics. Google Analytics uses cookies; you can block them in your browser settings.
+                </p>
+              ) : (
+                <p>We do not currently use an analytics service. If we add one, we will update this policy before it is turned on.</p>
+              )
+            }
+            {turnstileOn && <p>Cloudflare Turnstile may use cookies or similar technology that is strictly necessary to tell people and automated programs apart.</p>}
+          </div>
+        </section>
+
+        <section id={sections[5].id}>
+          <h2><span>{num(5)}</span>{sections[5].title}</h2>
+          <div class="body">
+            <p>
+              The website uses encrypted connections (HTTPS). Submissions are checked on our server, stored in a database that only authorized
+              accounts can access, and shared only with the service providers described above. Access to submitted information is limited to people
+              who need it to respond to you.
+            </p>
+            <p>We keep information only as long as needed for the purposes in this policy, including responding to you and meeting legal and record-keeping obligations.</p>
+            <p>No method of transmitting or storing information is completely secure, so we cannot guarantee absolute security.</p>
+          </div>
+        </section>
+
+        <section id={sections[6].id}>
+          <h2><span>{num(6)}</span>{sections[6].title}</h2>
+          <div class="body">
+            <ul>
+              <li><strong>Email updates</strong>: use the unsubscribe link in any update email, or contact us.</li>
+              <li><strong>Text messages</strong>: reply STOP to opt out at any time.</li>
+              <li>
+                <strong>Your information</strong>: you may ask to see, correct, or delete the personal information you submitted. Depending on where
+                you live, you may have additional rights under applicable law.
+              </li>
+              <li><strong>Cookies</strong>: you can block or delete cookies in your browser settings.</li>
+            </ul>
+            <p>This website is not directed to children under 18, and we do not knowingly collect their information.</p>
+          </div>
+        </section>
+
+        <section id={sections[7].id}>
+          <h2><span>{num(7)}</span>{sections[7].title}</h2>
+          <div class="body">
+            <p>
+              For privacy questions or requests, please use our <a href="/contact">contact page</a>{site.contact.email && (
+                <>
+                  {' '}or email <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+                </>
+              )}.
+            </p>
+            <p>We may update this policy as our website and services change. The "Last updated" date above shows when it was last revised.</p>
+          </div>
+        </section>
+        <span hidden data-pending-legal></span>
       </div>
     </div>
   </section>
 </Base>
+
+<script>
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (hit) links.forEach((a) => (a.hash === `#${hit.target.id}` ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+    },
+    { rootMargin: '-15% 0px -65% 0px' },
+  );
+  links.forEach((a) => {
+    const el = document.getElementById(a.hash.slice(1));
+    if (el) observer.observe(el);
+  });
+</script>
+
+<style>
+  .updated { color: #fff; margin: 4px 0 0; font-size: 0.95rem; }
+
+  .layout { display: grid; gap: 32px; align-items: start; }
+  @media (min-width: 960px) {
+    .layout { grid-template-columns: 260px 1fr; gap: 56px; }
+    .toc { position: sticky; top: 24px; }
+  }
+  .toc { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 0 12px; }
+  .toc h2 { font-size: 1.3rem; padding: 0 20px; margin-bottom: 8px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .toc a { display: flex; gap: 14px; padding: 10px 20px; color: var(--slate); text-decoration: none; font-size: 0.93rem; border-left: 3px solid transparent; }
+  .toc a span { color: var(--slate); min-width: 20px; }
+  .toc a:hover { color: var(--ink); }
+  .toc a[aria-current='true'] { background: #e3eeec; border-left-color: var(--teal); color: var(--ink); }
+
+  .policy { max-width: 780px; }
+  .intro { font-size: 1.08rem; color: var(--slate); margin-bottom: 32px; }
+  .policy section { padding: 32px 0; border-top: 1px solid var(--line); scroll-margin-top: 24px; }
+  .policy h2 { display: flex; gap: 28px; align-items: baseline; font-size: clamp(1.7rem, 3vw, 2.3rem); margin-bottom: 14px; }
+  .policy h2 span { color: var(--teal); font-size: 0.85em; min-width: 40px; }
+  .body { padding-left: 68px; color: var(--slate); }
+  .body strong { color: var(--ink); font-weight: 500; }
+  .body li + li { margin-top: 8px; }
+  .body p:last-child { margin-bottom: 0; }
+  @media (max-width: 640px) {
+    .policy h2 { gap: 14px; }
+    .body { padding-left: 0; }
+  }
+  .callout { display: flex; gap: 22px; align-items: flex-start; background: #e3eeec; border: 1px solid #c5d6d2; border-radius: var(--radius); padding: 20px 24px; margin: 20px 0; }
+  .callout__icon { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--teal); color: var(--teal); font-family: var(--font-heading); font-weight: 700; }
+  .callout > div { padding-left: 22px; border-left: 1px solid #b9cdc8; }
+  .callout strong { display: block; color: var(--ink); font-weight: 700; margin-bottom: 4px; }
+  .callout p { margin: 0; }
+</style>
