@@ -1,7 +1,10 @@
 ---
+import { getEntry } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import Turnstile from '../../../components/Turnstile.astro';
 import DraftFlag from '../../../components/DraftFlag.astro';
+import Icon from '../../../components/Icon.astro';
+import { CATEGORIES, CATEGORY_SLUGS } from '../../../data/categories';
 import { visible, formatDates, formatPrice, FORMAT_LABELS, STATUS_LABELS } from '../../../lib/content';
 
 export async function getStaticPaths() {
@@ -11,152 +14,252 @@ export async function getStaticPaths() {
 
 const { event } = Astro.props;
 const d = event.data;
-const kind = d.status === 'applications-open' ? 'application' : d.status === 'registration-open' ? 'registration' : null;
+const instructor = await getEntry(d.instructor);
+const isTim = d.instructor.id === 'tim-berry';
 const dates = formatDates(d.startDate, d.endDate, d.timezone);
-const title = kind === 'registration' ? `Register: ${d.title}` : `Apply: ${d.title}`;
+
+// Application and registration are separate flows and never mixed.
+const kind = d.status === 'applications-open' ? 'application' : d.status === 'registration-open' ? 'registration' : null;
+// An announced event shows the form as a disabled preview; other closed states show a message.
+const preview = d.status === 'announced';
+const isRegistration = kind === 'registration' || (preview && Boolean(d.paymentUrl));
+
+const steps = isRegistration
+  ? [
+      { title: 'Registration', text: 'Submit your registration details.' },
+      { title: 'Required payment', text: 'Complete payment through the secure payment page.' },
+      { title: 'Confirmed participation', text: 'Your place is confirmed once payment is verified.' },
+    ]
+  : [
+      { title: 'Application', text: 'Submit your application.' },
+      { title: 'Team review', text: 'Our team reviews each application.' },
+      { title: 'Acceptance', text: 'You will be notified of the decision.' },
+      { title: 'Required payment', text: 'If accepted, you will receive payment instructions.' },
+      { title: 'Confirmed participation', text: 'Your place is confirmed after payment is verified.' },
+    ];
+
+const STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
+  'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
+  'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+  'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+  'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+];
+
+const heading = isRegistration ? 'Register.' : 'Apply to attend.';
+const statusLine = kind
+  ? isRegistration
+    ? 'Registration is open. Your place is confirmed only after payment is verified.'
+    : 'Applications are open. Your place is confirmed only after acceptance and payment.'
+  : preview
+    ? isRegistration
+      ? 'Registration opens after event details are announced.'
+      : 'Applications open after event details are announced.'
+    : `This event is not accepting ${isRegistration ? 'registrations' : 'applications'} right now.`;
 ---
 
-<Base title={title} description={`${kind === 'registration' ? 'Register for' : 'Apply to attend'} ${d.title}, ${dates}.`} noindex>
-  <section class="apply-hero theme-dark">
+<Base title={`${isRegistration ? 'Register' : 'Apply'}: ${d.title}`} description={`${isRegistration ? 'Register for' : 'Apply to attend'} ${d.title}, ${dates}.`} noindex>
+  <section class="section apply theme-light">
     <div class="container">
-      <nav aria-label="Breadcrumb" class="crumbs small">
-        <a href="/conferences">Conferences</a> <span aria-hidden="true">/</span> <a href={`/conferences/${event.id}`}>{d.title}</a>
+      <nav aria-label="Breadcrumb" class="crumbs">
+        <a href="/conferences">Conferences</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/conferences/${event.id}`}>{d.title}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{isRegistration ? 'Registration' : 'Application'}</span>
       </nav>
       <DraftFlag state={d.publication} />
-      <p class="eyebrow">{FORMAT_LABELS[d.format]}</p>
-      <h1>{kind === 'registration' ? 'Register' : 'Apply to attend'}: {d.title}</h1>
-      <dl class="facts">
-        <div><dt>Dates</dt><dd>{dates}</dd></div>
-        <div><dt>Price</dt><dd>{formatPrice(d.price)}</dd></div>
-        <div><dt>Status</dt><dd>{STATUS_LABELS[d.status]}</dd></div>
-      </dl>
-    </div>
-  </section>
+      <h1>{heading}</h1>
+      <p class="lead apply__status">{statusLine}</p>
 
-  <section class="section">
-    <div class="container">
-      {
-        kind ? (
-          <div class="apply-grid">
-            <form id="event-form" class="apply-form" action="/api/event-application" method="post" data-event={event.id}>
-              <input type="hidden" name="event_slug" value={event.id} />
-              <div class="form-alert" role="alert" tabindex="-1" hidden />
-
-              <div class="field-row">
-                <div class="field">
-                  <label for="name">Name</label>
-                  <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
-                  <p class="field-error" data-error-for="name" />
-                </div>
-                <div class="field">
-                  <label for="email">Email</label>
-                  <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
-                  <p class="field-error" data-error-for="email" />
-                </div>
+      <div class="apply__grid">
+        <!-- Event summary -->
+        <aside class="event-panel theme-dark" aria-label="Event summary">
+          <p class="event-panel__label">{FORMAT_LABELS[d.format]}</p>
+          <h2 class="event-panel__title">{d.title}</h2>
+          <span class="event-panel__rule" aria-hidden="true"></span>
+          {
+            isTim && (
+              <div class="event-panel__photo">
+                <img
+                  src="/images/tim/tim-berry-shirt-600.webp"
+                  srcset="/images/tim/tim-berry-shirt-400.webp 400w, /images/tim/tim-berry-shirt-600.webp 600w"
+                  sizes="300px"
+                  width="600"
+                  height="714"
+                  alt="Tim Berry, attorney"
+                  decoding="async"
+                />
               </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="phone">
-                    Phone <span class="optional">(optional)</span>
-                  </label>
-                  <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
-                  <p class="field-error" data-error-for="phone" />
-                </div>
-                <div class="field">
-                  <label for="region">
-                    State or country <span class="optional">(optional)</span>
-                  </label>
-                  <input id="region" name="region" type="text" autocomplete="address-level1" maxlength="80" />
-                </div>
-              </div>
-
-              <div class="field">
-                <label for="participant_role">Your role</label>
-                <select id="participant_role" name="participant_role" required>
-                  <option value="">Select one</option>
-                  <option value="business-owner">Business owner</option>
-                  <option value="investor">Investor</option>
-                  <option value="advisor">Financial professional or advisor</option>
-                  <option value="attorney-cpa">Attorney or CPA</option>
-                  <option value="other">Other</option>
-                </select>
-                <p class="field-error" data-error-for="participant_role" />
-              </div>
-
-              <div class="field">
-                <label for="reason">
-                  Why would you like to attend?{kind === 'registration' && <span class="optional"> (optional)</span>}
-                </label>
-                <textarea id="reason" name="reason" maxlength="600" rows="4" required={kind === 'application'} />
-                <p class="field-error" data-error-for="reason" />
-              </div>
-
-              <div class="field">
-                <label for="interests">
-                  General planning interests <span class="optional">(optional)</span>
-                </label>
-                <span class="hint" id="interests-hint">
-                  Topics only. Please do not include financial records or account details.
-                </span>
-                <textarea id="interests" name="interests" maxlength="400" rows="3" aria-describedby="interests-hint" />
-              </div>
-
-              <fieldset class="field">
-                <legend class="visually-hidden">Acknowledgments</legend>
-                <label class="choice">
-                  <input type="checkbox" name="price_acknowledged" required />I understand the published participation price of{' '}
-                  {formatPrice(d.price)}.
-                </label>
-                <p class="field-error" data-error-for="price_acknowledged" />
-                <label class="choice">
-                  <input type="checkbox" name="marketing_email_optin" />
-                  Send me IRA Ideas educational and event emails. <span class="optional">(optional)</span>
-                </label>
-              </fieldset>
-
-              <Turnstile />
-
-              <p class="notice">
-                {kind === 'application'
-                  ? 'Submitting an application does not confirm a place. Our team will review it, and your place is confirmed only after acceptance and the required payment.'
-                  : 'After you submit, you will continue to secure payment. Your place is confirmed only after payment is verified.'}
+            )
+          }
+          {
+            instructor && (
+              <p class="event-panel__instructor">
+                <strong>{instructor.data.name}</strong>
+                <span>{instructor.data.role}</span>
               </p>
-              <button type="submit" class="btn btn--primary">
-                {kind === 'application' ? 'Submit Application' : 'Continue to Payment'}
-              </button>
-            </form>
+            )
+          }
+          <dl class="event-panel__facts">
+            <div><Icon name="calendar" size={28} /><span><dt>Dates</dt><dd>{dates}</dd></span></div>
+            <div><Icon name="pin" size={28} /><span><dt>Location</dt><dd>{d.location}</dd></span></div>
+            <div><Icon name="tag" size={28} /><span><dt>Price</dt><dd>{formatPrice(d.price)}</dd></span></div>
+            <div><Icon name="people" size={28} /><span><dt>{isRegistration ? 'Registration' : 'Applications'}</dt><dd>{kind ? 'Open' : preview ? 'Not yet open' : STATUS_LABELS[d.status]}</dd></span></div>
+          </dl>
+        </aside>
 
-            <aside class="card apply-aside">
-              <h2 class="h3">How admission works</h2>
-              {kind === 'application' ? (
-                <ol>
-                  <li>Submit your application</li>
-                  <li>Team review</li>
-                  <li>Acceptance</li>
-                  <li>Required payment</li>
-                  <li>Confirmed participation</li>
-                </ol>
-              ) : (
-                <ol>
-                  <li>Registration</li>
-                  <li>Required payment</li>
-                  <li>Confirmed participation</li>
-                </ol>
-              )}
-            </aside>
-          </div>
-        ) : (
-          <div class="reading card">
-            <h2>This event is not accepting {d.status === 'sold-out' ? 'registrations' : 'applications'} right now.</h2>
+        <!-- Form -->
+        <div class="form-card">
+          {
+            kind || preview ? (
+              <form id="event-form" action="/api/event-application" method="post" data-event={event.id}>
+                <h2 class="form-card__title">Your {isRegistration ? 'registration' : 'application'}</h2>
+                <p class="form-card__intro">
+                  {kind
+                    ? isRegistration
+                      ? 'Complete the form below, then continue to the secure payment page.'
+                      : 'Complete the form below. Our team will review your application and contact you about the next step.'
+                    : 'This is a preview of the form. It opens when event details are announced.'}
+                </p>
+                <fieldset disabled={!kind}>
+                  <input type="hidden" name="event_slug" value={event.id} />
+                  <div class="form-alert" role="alert" tabindex="-1" hidden />
+
+                  <div class="field">
+                    <label for="name">Full name</label>
+                    <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
+                    <p class="field-error" data-error-for="name" />
+                  </div>
+                  <div class="field">
+                    <label for="email">Email address</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
+                    <p class="field-error" data-error-for="email" />
+                  </div>
+                  <div class="field">
+                    <label for="phone">
+                      Phone number <span class="optional">(optional)</span>
+                    </label>
+                    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
+                    <p class="field-error" data-error-for="phone" />
+                  </div>
+                  <div class="field">
+                    <label for="region">State or country</label>
+                    <select id="region" name="region" required>
+                      <option value="">Select your state or country</option>
+                      {STATES.map((s) => <option value={s}>{s}</option>)}
+                      <option value="Outside the United States">Outside the United States</option>
+                    </select>
+                    <p class="field-error" data-error-for="region" />
+                  </div>
+                  <div class="field">
+                    <label for="participant_role">Participant role</label>
+                    <select id="participant_role" name="participant_role" required>
+                      <option value="">Select your role</option>
+                      <option value="business-owner">Business owner</option>
+                      <option value="investor">Investor</option>
+                      <option value="advisor">Financial professional or advisor</option>
+                      <option value="attorney-cpa">Attorney or CPA</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <p class="field-error" data-error-for="participant_role" />
+                  </div>
+                  <div class="field">
+                    <label for="reason">
+                      Reason for attending{isRegistration && <span class="optional"> (optional)</span>}
+                    </label>
+                    <textarea id="reason" name="reason" maxlength="600" rows="3" required={!isRegistration} />
+                    <p class="field-error" data-error-for="reason" />
+                  </div>
+                  <fieldset class="field">
+                    <legend>
+                      General planning interests <span class="optional">(optional, topics only)</span>
+                    </legend>
+                    <div class="interests">
+                      {CATEGORY_SLUGS.map((c) => (
+                        <label class="choice">
+                          <input type="checkbox" name="interests" value={CATEGORIES[c].label} />
+                          {CATEGORIES[c].label}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <div class="field">
+                    <label class="choice">
+                      <input type="checkbox" name="price_acknowledged" required />
+                      {d.price != null ? `I acknowledge the published participation price of ${formatPrice(d.price)}.` : 'I acknowledge the published participation price.'}
+                    </label>
+                    <p class="field-error" data-error-for="price_acknowledged" />
+                    <label class="choice">
+                      <input type="checkbox" name="marketing_email_optin" />
+                      Send me email updates about IRA Ideas events and educational opportunities. <span class="optional">(optional)</span>
+                    </label>
+                  </div>
+                  <Turnstile />
+                </fieldset>
+                <p class="notice">Please do not include financial records, account numbers, or confidential documents.</p>
+                {kind ? (
+                  <button type="submit" class="btn btn--primary form-card__submit">
+                    {isRegistration ? 'Continue to Payment' : 'Submit Application'} <Icon name="arrow" size={18} />
+                  </button>
+                ) : (
+                  <>
+                    <button type="button" class="btn btn--primary form-card__submit" disabled>
+                      Opens when {isRegistration ? 'registration' : 'applications'} begin
+                    </button>
+                    <p class="form-card__alt">
+                      <a href={`/conferences/${event.id}#priority-list`}>Join the priority list</a> to hear when it opens.
+                    </p>
+                  </>
+                )}
+              </form>
+            ) : (
+              <div class="closed">
+                <h2 class="form-card__title">{d.status === 'sold-out' ? 'This event is sold out.' : 'Not accepting applications'}</h2>
+                <p>
+                  Current status: <strong>{STATUS_LABELS[d.status]}</strong>.
+                </p>
+                {d.statusNotice && <p>{d.statusNotice}</p>}
+                <a class="btn btn--primary" href={d.status === 'sold-out' ? `/conferences/${event.id}#priority-list` : '/conferences'}>
+                  {d.status === 'sold-out' ? 'Join the Priority List' : 'View Conferences'} <Icon name="arrow" size={18} />
+                </a>
+              </div>
+            )
+          }
+        </div>
+      </div>
+
+      <!-- Process -->
+      <div class="process">
+        <h2>{isRegistration ? 'Registration process' : 'Application process'}</h2>
+        <p class="lead">
+          Your {isRegistration ? 'registration' : 'application'} goes through a few steps before participation is confirmed.
+        </p>
+        <ol class:list={['process__steps', `process__steps--${steps.length}`]} role="list">
+          {
+            steps.map((s, i) => (
+              <li class:list={{ 'is-current': i === 0 }}>
+                <span class="process__num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <strong>{s.title}</strong>
+                <span>{s.text}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="process__notice" role="note">
+          <span class="process__bang" aria-hidden="true">!</span>
+          <div>
+            <strong>{isRegistration ? 'Registration does not confirm your place.' : 'An application does not confirm your place.'}</strong>
             <p>
-              Current status: <strong>{STATUS_LABELS[d.status]}</strong>.
+              {isRegistration
+                ? 'Your place is confirmed only after your payment has been verified and any other admission conditions are met.'
+                : 'Your place is not confirmed until the required acceptance and payment steps are complete.'}
             </p>
-            <a class="btn btn--primary" href={`/conferences/${event.id}#priority-list`}>
-              Join the Priority List
-            </a>
           </div>
-        )
-      }
+        </div>
+      </div>
     </div>
   </section>
 </Base>
@@ -164,26 +267,74 @@ const title = kind === 'registration' ? `Register: ${d.title}` : `Apply: ${d.tit
 <script>
   import { enhanceForm } from '../../../lib/forms';
   const form = document.getElementById('event-form') as HTMLFormElement | null;
-  if (form) {
+  if (form && !form.querySelector('fieldset[disabled]')) {
     enhanceForm(form, { successEvent: 'event_application_submitted', eventProps: () => ({ event_slug: form.dataset.event }) });
   }
 </script>
 
 <style>
-  .apply-hero { padding: clamp(40px, 6vw, 72px) 0; }
-  .crumbs { margin-bottom: 20px; color: var(--mist); }
-  .facts { display: flex; flex-wrap: wrap; gap: 16px 40px; margin: 24px 0 0; }
-  .facts dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mist); }
-  .facts dd { margin: 2px 0 0; font-weight: 500; }
-  .apply-grid { display: grid; gap: 40px; }
-  @media (min-width: 1000px) {
-    .apply-grid { grid-template-columns: minmax(0, 720px) 300px; justify-content: space-between; }
+  .apply { padding-top: 32px; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; color: var(--slate); margin-bottom: 20px; }
+  .crumbs a { color: var(--slate); text-decoration: none; }
+  .crumbs a:hover { color: var(--ink); text-decoration: underline; }
+  .crumbs [aria-current] { color: var(--ink); }
+  .apply h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); margin-bottom: 8px; }
+  .apply__status { margin-bottom: 32px; }
+
+  .apply__grid { display: grid; gap: 20px; align-items: start; }
+  @media (min-width: 960px) {
+    .apply__grid { grid-template-columns: 360px 1fr; }
   }
-  .apply-form { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
-  .field-row { display: grid; gap: 0 20px; }
+
+  /* Event panel */
+  .event-panel { border-radius: var(--radius); padding: 28px; background: linear-gradient(170deg, #145856 0%, var(--teal) 45%, var(--teal-deep) 100%); }
+  .event-panel__label { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; margin-bottom: 10px; }
+  .event-panel__title { color: #fff; font-size: clamp(1.7rem, 2.6vw, 2.1rem); line-height: 1.15; }
+  .event-panel__rule { display: block; width: 48px; height: 2px; background: rgba(255, 255, 255, 0.6); margin: 18px 0 8px; }
+  .event-panel__photo { display: flex; justify-content: center; }
+  .event-panel__photo img { width: 86%; height: auto; }
+  .event-panel__instructor { display: flex; flex-direction: column; margin: 16px 0 0; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+  .event-panel__instructor strong { font-family: var(--font-heading); font-size: 1.25rem; color: #fff; }
+  .event-panel__instructor span { color: var(--mist); }
+  .event-panel__facts { margin: 0; }
+  .event-panel__facts > div { display: flex; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+  .event-panel__facts > div:last-child { border-bottom: 0; padding-bottom: 0; }
+  .event-panel__facts :global(svg) { flex: none; color: #fff; }
+  .event-panel__facts dt { font-weight: 700; color: #fff; font-size: 0.95rem; }
+  .event-panel__facts dd { margin: 0; color: var(--mist); font-size: 0.95rem; }
+
+  /* Form card */
+  .form-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 4vw, 36px); }
+  .form-card__title { font-size: clamp(1.8rem, 3vw, 2.4rem); }
+  .form-card__intro { color: var(--slate); padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+  .form-card fieldset:disabled { opacity: 0.6; }
+  .interests { display: grid; gap: 0 20px; }
   @media (min-width: 640px) {
-    .field-row { grid-template-columns: 1fr 1fr; }
+    .interests { grid-template-columns: 1fr 1fr; }
   }
-  .apply-aside { align-self: start; }
-  .apply-aside .h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.25rem; }
+  .form-card__submit { width: 100%; margin-top: 8px; }
+  .form-card__submit:disabled { background: #fbe6b0; color: #7a6a3f; opacity: 1; }
+  .form-card__alt { text-align: center; margin: 12px 0 0; color: var(--slate); font-size: 0.95rem; }
+  .closed p { color: var(--slate); }
+
+  /* Process */
+  .process { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 4vw, 36px); margin-top: 20px; }
+  .process h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); margin-bottom: 4px; }
+  .process__steps { list-style: none; margin: 24px 0; padding: 0; display: grid; gap: 20px; }
+  @media (min-width: 900px) {
+    .process__steps--5 { grid-template-columns: repeat(5, 1fr); }
+    .process__steps--3 { grid-template-columns: repeat(3, 1fr); }
+  }
+  .process__steps li { position: relative; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .process__steps strong { font-family: var(--font-heading); font-size: 1.1rem; margin-top: 8px; }
+  .process__steps li > span:last-child { color: var(--slate); font-size: 0.92rem; line-height: 1.45; }
+  .process__num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #9fb9b4; color: var(--teal-deep); font-weight: 500; background: #fff; position: relative; z-index: 1; }
+  .is-current .process__num { background: var(--teal-deep); border-color: var(--teal-deep); color: #fff; }
+  @media (min-width: 900px) {
+    .process__steps li:not(:last-child)::after { content: ''; position: absolute; top: 20px; left: 52px; right: 0; height: 1px; background: #c9d6d3; }
+  }
+  .process__notice { display: flex; gap: 20px; align-items: flex-start; background: #fff8e6; border: 1.5px solid #f2c44f; border-radius: var(--radius); padding: 20px 24px; }
+  .process__bang { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--gold); color: var(--ink); font-weight: 700; font-size: 1.2rem; }
+  .process__notice strong { font-family: var(--font-heading); font-size: 1.15rem; }
+  .process__notice p { margin: 4px 0 0; color: var(--slate); }
 </style>
