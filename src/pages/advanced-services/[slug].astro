@@ -7,6 +7,7 @@ import DraftFlag from '../../components/DraftFlag.astro';
 import Icon from '../../components/Icon.astro';
 import { CATEGORIES } from '../../data/categories';
 import { visible, formatPrice, SHOW_DRAFTS } from '../../lib/content';
+import { bands, bandClass } from '../../lib/bands';
 
 export async function getStaticPaths() {
   const services = await visible('services');
@@ -40,6 +41,21 @@ const tabs = [
   { id: 'learning', label: 'Related Learning', show: related.length > 0 },
   { id: 'faqs', label: 'FAQs', show: d.faqs.length > 0 },
 ].filter((t) => t.show);
+
+// Alternate section backgrounds across whichever sections this service has.
+// The tab bar above them is white.
+const bg = bands(
+  [
+    d.relevance.length > 0 && 'relevant',
+    d.questions.length > 0 && 'questions',
+    (d.includes.length > 0 || d.exclusions.length > 0) && 'included',
+    'begin',
+    related.length > 0 && 'learning',
+    d.faqs.length > 0 && 'faqs',
+  ],
+  {},
+  'white',
+);
 
 const jsonLd = [
   {
@@ -106,7 +122,7 @@ const jsonLd = [
 
   {
     d.relevance.length > 0 && (
-      <section class="section theme-light" id="relevant">
+      <section class:list={['section', bandClass(bg.relevant)]} id="relevant">
         <div class="container two-col">
           <div>
             <h2>When this may be relevant.</h2>
@@ -130,7 +146,7 @@ const jsonLd = [
 
   {
     d.questions.length > 0 && (
-      <section class="section" id="questions">
+      <section class:list={['section', bandClass(bg.questions)]} id="questions">
         <div class="container">
           <div class="section-head">
             <h2>Questions the work addresses.</h2>
@@ -150,7 +166,7 @@ const jsonLd = [
 
   {
     (d.includes.length > 0 || d.exclusions.length > 0) && (
-      <section class="section theme-light" id="included">
+      <section class:list={['section', bandClass(bg.included)]} id="included">
         <div class="container">
           {d.includes.length > 0 && (
             <>
@@ -193,7 +209,7 @@ const jsonLd = [
     )
   }
 
-  <section class="section" id="begin">
+  <section class:list={['section', bandClass(bg.begin)]} id="begin">
     <div class="container">
       <div class="section-head">
         <h2>How to begin.</h2>
@@ -218,7 +234,7 @@ const jsonLd = [
 
   {
     related.length > 0 && (
-      <section class="section theme-light" id="learning">
+      <section class:list={['section', bandClass(bg.learning)]} id="learning">
         <div class="container two-col">
           <div>
             <h2>Related learning.</h2>
@@ -242,7 +258,7 @@ const jsonLd = [
 
   {
     d.faqs.length > 0 && (
-      <section class="section" id="faqs">
+      <section class:list={['section', bandClass(bg.faqs)]} id="faqs">
         <div class="container">
           <div class="section-head">
             <h2>Frequently asked questions.</h2>

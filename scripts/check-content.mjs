@@ -19,6 +19,36 @@ const files = [];
   }
 })(DIST);
 
+
+// Background of each top-level section inside <main>, used to catch two
+// neighbouring sections that share a background colour.
+const VOID = new Set(['img', 'br', 'hr', 'input', 'meta', 'link', 'source', 'wbr', 'area', 'col', 'embed', 'track']);
+function sectionBackgrounds(html) {
+  const start = html.indexOf('<main');
+  const end = html.lastIndexOf('</main>');
+  if (start < 0 || end < 0) return [];
+  const body = html.slice(start, end).replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+  const out = [];
+  let depth = 0;
+  for (const m of body.matchAll(/<(\/?)([a-zA-Z0-9-]+)([^>]*?)(\/?)>/g)) {
+    const [, closing, tag, attrs, selfClosing] = m;
+    const name = tag.toLowerCase();
+    if (closing) { depth--; continue; }
+    if (depth === 1 && ['section', 'nav', 'div', 'article', 'header'].includes(name)) {
+      const cls = (attrs.match(/class="([^"]*)"/) || [, ''])[1].split(/\s+/);
+      if (!cls.includes('anchor')) {
+        const bg = cls.includes('theme-darker') || cls.includes('conf-hero') ? 'navy'
+          : cls.includes('theme-dark') || cls.includes('hero') ? 'teal'
+          : cls.includes('theme-light') || cls.includes('priority') ? 'light'
+          : 'white';
+        out.push(bg);
+      }
+    }
+    if (!VOID.has(name) && !selfClosing) depth++;
+  }
+  return out;
+}
+
 const errors = [];
 const warnings = new Set();
 for (const file of files) {
@@ -28,6 +58,10 @@ for (const file of files) {
   if (/[—–]|&mdash;|&ndash;|&#8212;|&#8211;/.test(text)) errors.push(`${file}: contains an em dash or en dash (house style: none on any page)`);
   if (!showDrafts && /PLACEHOLDER/.test(text)) errors.push(`${file}: placeholder content in a production build`);
   if (!showDrafts && /class="draft-flag"/.test(text)) errors.push(`${file}: draft content in a production build`);
+  const bands = sectionBackgrounds(html);
+  for (let i = 1; i < bands.length; i++) {
+    if (bands[i] === bands[i - 1]) errors.push(`${file}: sections ${i} and ${i + 1} both have a ${bands[i]} background`);
+  }
   if (/data-pending-legal/.test(text)) warnings.add(`${file.replace(DIST, '')}: approved legal text not yet added`);
 }
 

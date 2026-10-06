@@ -6,9 +6,13 @@ import PhotoPanel from '../../components/PhotoPanel.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Icon from '../../components/Icon.astro';
 import { visible } from '../../lib/content';
+import { bands, bandClass } from '../../lib/bands';
 
 // Only real, approved team members appear. Nothing is shown until they are added.
 const team = (await visible('people')).filter((p) => p.id !== 'tim-berry').sort((a, b) => a.data.order - b.data.order);
+
+// Alternate section backgrounds, including the optional team section.
+const bg = bands(['offerings', 'experience', team.length > 0 && 'team', 'process', 'how']);
 
 const steps = [
   { title: 'Inquiry', copy: 'Tell us your objective, the general situation, and any deadline.' },
@@ -33,7 +37,7 @@ const steps = [
   </PhotoHero>
 
   <!-- The three offerings -->
-  <section class="section">
+  <section class:list={['section', bandClass(bg.offerings)]}>
     <div class="container">
       <div class="section-head section-head--center">
         <h2>Three ways to move forward.</h2>
@@ -44,7 +48,7 @@ const steps = [
   </section>
 
   <!-- Tim's role -->
-  <section class="section section--flush-top">
+  <section class:list={['section', bandClass(bg.experience)]}>
     <div class="container experience">
       <div class="experience__copy">
         <h2>Experience at the center. A coordinated team around the work.</h2>
@@ -71,7 +75,7 @@ const steps = [
 
   {
     team.length > 0 && (
-      <section class="section section--flush-top">
+      <section class:list={['section', bandClass(bg.team)]}>
         <div class="container">
           <div class="section-head">
             <h2>The team</h2>
@@ -93,7 +97,7 @@ const steps = [
   }
 
   <!-- Process -->
-  <section class="section theme-light">
+  <section class:list={['section', bandClass(bg.process)]}>
     <div class="container">
       <div class="section-head section-head--center">
         <h2>An organized experience.</h2>
@@ -120,7 +124,7 @@ const steps = [
   </section>
 
   <!-- How we work -->
-  <section class="section">
+  <section class:list={['section', bandClass(bg.how)]}>
     <div class="container split">
       <div class="split__media">
         <PhotoPanel name="about-how-we-work" alt="A notebook and pen on a desk" icon="document" tone="navy" />
@@ -143,7 +147,6 @@ const steps = [
 </Base>
 
 <style>
-  .section--flush-top { padding-top: 0; }
 
   /* Tim's role */
   .experience { display: grid; gap: 40px; align-items: center; }

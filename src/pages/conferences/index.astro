@@ -6,6 +6,7 @@ import Icon from '../../components/Icon.astro';
 import formatSettings from '../../data/formats.json';
 import { listedEvents, isUpcoming, FORMAT_LABELS } from '../../lib/content';
 import { siteImage } from '../../lib/images';
+import { bands, bandClass } from '../../lib/bands';
 
 const events = await listedEvents();
 const upcoming = events.filter(isUpcoming);
@@ -21,6 +22,13 @@ const FORMATS = [
   { key: 'private-intensive', icon: 'person', positioning: 'Individually scoped private engagement', copy: 'A private engagement with its scope defined for the individual participant.' },
 ] as const;
 const formats = FORMATS.filter((f) => formatSettings[f.key].offered);
+
+// Alternate backgrounds below the dark hero. The priority section always uses
+// its light background, so its neighbours are kept white.
+const bg = bands(
+  [upcoming.length > 0 && 'events', formats.length > 0 && 'formats', 'priority', past.length > 0 && 'past', 'cantWait'],
+  { priority: 'light' },
+);
 
 const heroImage = siteImage('conferences-hero');
 const priorityImage = siteImage('conferences-priority');
@@ -44,7 +52,7 @@ const priorityImage = siteImage('conferences-priority');
 
   {
     upcoming.length > 0 && (
-      <section class="section" id="events" tabindex="-1">
+      <section class:list={['section', bandClass(bg.events)]} id="events" tabindex="-1">
         <div class="container">
           <div class="section-head">
             <p class="eyebrow-line">Upcoming events</p>
@@ -62,7 +70,7 @@ const priorityImage = siteImage('conferences-priority');
 
   {
     formats.length > 0 && (
-      <section class="section">
+      <section class:list={['section', bandClass(bg.formats)]}>
         <div class="container">
           <div class="section-head formats-head">
             <p class="eyebrow-line">Event formats</p>
@@ -100,7 +108,7 @@ const priorityImage = siteImage('conferences-priority');
 
   {
     past.length > 0 && (
-      <section class="section theme-light">
+      <section class:list={['section', bandClass(bg.past)]}>
         <div class="container">
           <div class="section-head">
             <h2>Past events</h2>
@@ -115,7 +123,7 @@ const priorityImage = siteImage('conferences-priority');
     )
   }
 
-  <section class="cant-wait">
+  <section class:list={['cant-wait', bandClass(bg.cantWait)]}>
     <div class="container cant-wait__grid">
       <div class="cant-wait__media" aria-hidden="true">
         <img
@@ -225,6 +233,8 @@ const priorityImage = siteImage('conferences-priority');
 
   /* Planning need */
   .cant-wait { background: #fff; overflow: hidden; }
+  .cant-wait.theme-light { background: var(--light); }
+  .cant-wait.theme-light .cant-wait__media::before { background: #dde8e5; }
   .cant-wait__grid { display: grid; gap: 32px; align-items: end; }
   @media (min-width: 900px) {
     .cant-wait__grid { grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: center; }
