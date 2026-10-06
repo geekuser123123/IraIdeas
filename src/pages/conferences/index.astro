@@ -11,12 +11,14 @@ const events = await listedEvents();
 const upcoming = events.filter(isUpcoming);
 const past = events.filter((e) => e.data.status === 'completed').reverse();
 
-// Positioning lines come from the approved format definitions. The private
-// strategy intensive is offered only through an unlisted page, so it is not here.
+// Positioning lines come from the approved format definitions. The brief
+// expects the private strategy intensive to be shared through an unlisted page;
+// it is shown here for now and can be switched off in formats.json.
 const FORMATS = [
   { key: 'live', icon: 'people', positioning: 'Broader educational events', copy: 'Educational events on advanced retirement and tax-planning concepts.' },
   { key: 'workshop', icon: 'book', positioning: 'Focused, smaller-group advanced education', copy: 'Smaller groups for focused, advanced education and discussion.' },
   { key: 'private-session', icon: 'dots', positioning: 'Limited-participant experience', copy: 'Limited participation, with preparation and discussion specific to the event.' },
+  { key: 'private-intensive', icon: 'person', positioning: 'Individually scoped private engagement', copy: 'A private engagement with its scope defined for the individual participant.' },
 ] as const;
 const formats = FORMATS.filter((f) => formatSettings[f.key].offered);
 
@@ -64,7 +66,7 @@ const priorityImage = siteImage('conferences-priority');
         <div class="container">
           <div class="section-head formats-head">
             <p class="eyebrow-line">Event formats</p>
-            <h2>{formats.length === 3 ? 'Three ways to participate.' : 'Ways to participate.'}</h2>
+            <h2>{{ 2: 'Two ways to participate.', 3: 'Three ways to participate.', 4: 'Four ways to participate.' }[formats.length] ?? 'Ways to participate.'}</h2>
             <p class="lead">Each format is built around practical discussion and a deeper understanding of advanced retirement and tax strategies.</p>
           </div>
           <div class:list={['formats', `formats--${formats.length}`]}>
@@ -189,7 +191,10 @@ const priorityImage = siteImage('conferences-priority');
   .formats { display: grid; gap: 20px; }
   @media (min-width: 900px) {
     .formats--3 { grid-template-columns: repeat(3, 1fr); }
-    .formats--2 { grid-template-columns: repeat(2, 1fr); }
+    .formats--2, .formats--4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1200px) {
+    .formats--4 { grid-template-columns: repeat(4, 1fr); }
   }
   .format { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
   .format :global(.format__icon) { color: var(--teal); margin-bottom: 18px; }
