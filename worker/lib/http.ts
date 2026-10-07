@@ -46,7 +46,7 @@ export function failure(request: Request, status: number, message: string, error
     .join('');
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>Please check your submission | IRA Ideas</title>
-<style>body{font:18px/1.6 Roboto,system-ui,sans-serif;background:#F5F5F2;color:#0B1B23;max-width:640px;margin:0 auto;padding:48px 16px}
+<style>body{font:17px/1.6 Inter,system-ui,sans-serif;background:#F5F5F2;color:#0B1B23;max-width:640px;margin:0 auto;padding:48px 16px}
 h1{font-family:'Source Serif 4 Variable',Georgia,serif;font-weight:700}a{color:#0C4342}</style></head>
 <body><h1>Please check your submission</h1><p>${escapeHtml(message)}</p>${items ? `<ul>${items}</ul>` : ''}
 <p><a href="javascript:history.back()">Go back to the form</a>. Your entries should still be there.</p></body></html>`;

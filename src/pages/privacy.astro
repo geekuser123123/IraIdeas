@@ -250,7 +250,7 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   .layout { display: grid; gap: 32px; align-items: start; }
   @media (min-width: 960px) {
     .layout { grid-template-columns: 260px 1fr; gap: 56px; }
-    .toc { position: sticky; top: 24px; }
+    .toc { position: sticky; top: var(--sticky-top); }
   }
   .toc { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 0 12px; }
   .toc h2 { font-size: 1.3rem; padding: 0 20px; margin-bottom: 8px; }

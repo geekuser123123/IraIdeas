@@ -216,7 +216,7 @@ const sections = [
   .layout { display: grid; gap: 32px; align-items: start; }
   @media (min-width: 960px) {
     .layout { grid-template-columns: 240px 1fr; gap: 0; }
-    .toc { position: sticky; top: 24px; padding-right: 24px; }
+    .toc { position: sticky; top: var(--sticky-top); padding-right: 24px; }
     .terms { padding-left: 40px; border-left: 1px solid var(--line); }
   }
   .toc h2 { font-size: 1.6rem; margin-bottom: 12px; }

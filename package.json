@@ -12,8 +12,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply iraideas --remote"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/source-serif-4": "^5.3.0",
-    "@fontsource/roboto": "^5.3.0",
     "astro": "^7.3.5"
   },
   "devDependencies": {

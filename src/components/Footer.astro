@@ -1,66 +1,115 @@
 ---
 import Logo from './Logo.astro';
+import Icon from './Icon.astro';
 import { site } from '../data/site';
 
 const year = new Date().getFullYear();
 const ext = site.external;
-const links = [
-  { label: 'How We Work', href: '/how-we-work' },
-  { label: 'Contact', href: '/contact' },
-  { label: 'Privacy', href: '/privacy' },
-  { label: 'Terms', href: '/terms' },
-  { label: 'Disclosures', href: '/disclosures' },
+const columns = [
+  {
+    title: 'Offerings',
+    links: [
+      { label: 'Advanced Services', href: '/advanced-services' },
+      { label: 'Conferences', href: '/conferences' },
+      { label: 'Advanced Learning', href: '/learn' },
+    ],
+  },
+  {
+    title: 'IRA Ideas',
+    links: [
+      { label: 'About', href: '/about' },
+      { label: 'Tim Berry', href: '/about/tim-berry' },
+      { label: 'How We Work', href: '/how-we-work' },
+      { label: 'Contact', href: '/contact' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms & Conditions', href: '/terms' },
+      { label: 'Disclosures', href: '/disclosures' },
+      ...(ext.clientLogin ? [{ label: 'Client Login', href: ext.clientLogin }] : []),
+      ...(ext.taxAcademy ? [{ label: 'Plan Administration', href: ext.taxAcademy }] : []),
+    ],
+  },
 ];
-const external = [
-  ext.clientLogin && { label: 'Client Login', href: ext.clientLogin },
-  ext.taxAcademy && { label: 'Plan Administration', href: ext.taxAcademy },
-].filter(Boolean) as { label: string; href: string }[];
 ---
 
-<footer class="site-footer theme-darker">
+<footer class="site-footer">
   <div class="container">
-    <div class="site-footer__row">
-      <Logo />
-      <nav aria-label="Footer" class="site-footer__nav">
-        <ul>{links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
-      </nav>
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <Logo />
+        <p class="site-footer__tagline">{site.descriptor}</p>
+        <p class="site-footer__authority">{site.authority}</p>
+        <a class="btn btn--primary site-footer__cta" href={site.primaryCta.href}>{site.primaryCta.label} <Icon name="arrow" size={18} /></a>
+      </div>
       {
-        external.length > 0 && (
-          <ul class="site-footer__external">
-            {external.map((l) => (
-              <li>
-                <a href={l.href} rel="noopener">
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )
+        columns.map((col) => (
+          <nav class="site-footer__col" aria-label={col.title}>
+            <h2>{col.title}</h2>
+            <ul>
+              {col.links.map((l) => (
+                <li>
+                  <a href={l.href} rel={l.href.startsWith('http') ? 'noopener' : undefined}>
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
       }
     </div>
+
     {
       (site.contact.email || site.contact.phone || site.contact.address) && (
-        <ul class="site-footer__contact small">
+        <ul class="site-footer__contact">
           {site.contact.address && <li>{site.contact.address}</li>}
-          {site.contact.email && <li><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>}
-          {site.contact.phone && <li><a href={`tel:${site.contact.phone.replace(/[^0-9+]/g, '')}`}>{site.contact.phone}</a></li>}
+          {site.contact.email && (
+            <li>
+              <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+            </li>
+          )}
+          {site.contact.phone && (
+            <li>
+              <a href={`tel:${site.contact.phone.replace(/[^0-9+]/g, '')}`}>{site.contact.phone}</a>
+            </li>
+          )}
         </ul>
       )
     }
-    {site.footerDisclosure && <p class="small muted site-footer__disclosure">{site.footerDisclosure}</p>}
-    <p class="small muted site-footer__copy">&copy; {year} {site.legalEntityName ?? site.brand}. All rights reserved.</p>
+
+    <div class="site-footer__bottom">
+      <p>&copy; {year} {site.legalEntityName ?? site.brand}. All rights reserved.</p>
+      <p class="site-footer__notice">Submitting a request does not establish an attorney-client relationship.</p>
+    </div>
+    {site.footerDisclosure && <p class="site-footer__disclosure">{site.footerDisclosure}</p>}
   </div>
 </footer>
 
 <style>
-  .site-footer { background: var(--teal-deep); border-top: 1px solid rgba(255, 255, 255, 0.12); padding: 28px 0 24px; }
-  .site-footer__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 40px; }
-  .site-footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 28px; }
-  .site-footer li + li { margin-top: 0; }
-  .site-footer a { color: #fff !important; text-decoration: none; font-size: 0.92rem; }
-  .site-footer a:hover { color: var(--gold) !important; text-decoration: underline; }
-  .site-footer__external li + li { border-left: 1px solid rgba(255, 255, 255, 0.3); padding-left: 28px; }
-  .site-footer__contact { margin-top: 20px !important; color: var(--mist); }
-  .site-footer__disclosure { margin: 16px 0 0; }
-  .site-footer__copy { margin: 16px 0 0; font-size: 0.8rem; }
+  .site-footer { position: relative; overflow: hidden; background: radial-gradient(60% 120% at 100% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--teal-deep); color: #fff; padding: clamp(56px, 7vw, 88px) 0 28px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+  .site-footer__top { display: grid; gap: 40px 32px; grid-template-columns: 1fr 1fr; }
+  @media (min-width: 960px) {
+    .site-footer__top { grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 48px; }
+  }
+  .site-footer__brand { grid-column: 1 / -1; max-width: 400px; }
+  @media (min-width: 960px) {
+    .site-footer__brand { grid-column: auto; }
+  }
+  .site-footer__tagline { margin: 18px 0 6px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+  .site-footer__authority { color: var(--mist); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+  .site-footer__col h2 { font-family: var(--font-body); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); margin-bottom: 18px; }
+  .site-footer ul { list-style: none; margin: 0; padding: 0; }
+  .site-footer li { margin: 0; }
+  .site-footer li + li { margin-top: 12px; }
+  .site-footer a:not(.btn) { color: rgba(255, 255, 255, 0.9) !important; text-decoration: none; font-size: 0.95rem; transition: color 0.2s ease; }
+  .site-footer a:not(.btn):hover { color: var(--gold) !important; }
+  .site-footer__contact { display: flex; flex-wrap: wrap; gap: 8px 32px; margin-top: 40px !important; color: var(--mist); font-size: 0.95rem; }
+  .site-footer__contact li + li { margin-top: 0; }
+  .site-footer__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin-top: clamp(40px, 5vw, 64px); padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+  .site-footer__bottom p, .site-footer__disclosure { margin: 0; font-size: 0.84rem; color: rgba(255, 255, 255, 0.6); }
+  .site-footer__disclosure { margin-top: 12px; }
 </style>

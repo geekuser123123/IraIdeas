@@ -1,6 +1,6 @@
 /* IRA Ideas design tokens
    Headings: Source Serif 4 (self-hosted variable font)
-   Subheadings, body, buttons: Roboto (self-hosted) */
+   Subheadings, body, buttons: Inter (self-hosted variable font, set in polish.css) */
 
 :root {
   /* Brand palette */
@@ -23,7 +23,7 @@
   --success: #2f6b3a;
 
   --font-heading: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
-  --font-body: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --content: 1350px;
   --reading: 720px;
@@ -68,7 +68,7 @@ h1, h2 {
 h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); }
 h2 { font-size: clamp(1.85rem, 3.6vw, 2.6rem); }
 
-/* Subheadings use Roboto */
+/* Subheadings use the body font */
 h3, h4 {
   font-family: var(--font-body);
   font-weight: 500;

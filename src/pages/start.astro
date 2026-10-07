@@ -347,7 +347,7 @@ const STATES = [
   .start-grid { display: grid; gap: 24px; align-items: start; margin-top: -64px; }
   @media (min-width: 1000px) {
     .start-grid { grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; }
-    .side { position: sticky; top: 24px; margin-top: 64px; }
+    .side { position: sticky; top: var(--sticky-top); margin-top: 64px; }
   }
 
   .inquiry { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: clamp(22px, 4vw, 44px); box-shadow: 0 18px 48px rgba(11, 27, 35, 0.1); }

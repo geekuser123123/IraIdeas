@@ -56,6 +56,11 @@ const jsonLd = [
   <!-- 2. Three ways to work with IRA Ideas -->
   <section class="section">
     <div class="container">
+      <ul class="trust" role="list">
+        <li><Icon name="clock" size={22} /><span><strong>Nearly 30 years</strong> of retirement-plan experience with attorney Tim Berry</span></li>
+        <li><Icon name="document" size={22} /><span><strong>Defined scope and fee</strong> agreed before any paid work begins</span></li>
+        <li><Icon name="check" size={22} /><span><strong>Every request reviewed</strong> by our team before a next step is recommended</span></li>
+      </ul>
       <div class="section-head section-head--center">
         <h2>Choose your next step.</h2>
         <p class="lead">Three ways to work with IRA Ideas.</p>
@@ -254,6 +259,16 @@ const jsonLd = [
 
 <style>
   /* Situations */
+  .trust { list-style: none; margin: 0 0 clamp(56px, 7vw, 88px); padding: 0; display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow-sm); }
+  .trust li { display: flex; align-items: center; gap: 16px; margin: 0; padding: 20px 24px; color: var(--slate); font-size: 0.95rem; line-height: 1.5; }
+  .trust li + li { border-top: 1px solid var(--line); }
+  .trust strong { color: var(--ink); font-weight: 600; }
+  .trust :global(svg) { flex: none; box-sizing: content-box; padding: 11px; border-radius: 12px; background: var(--teal-tint); color: var(--teal); }
+  @media (min-width: 900px) {
+    .trust { grid-template-columns: repeat(3, 1fr); }
+    .trust li { padding: 24px 28px; }
+    .trust li + li { border-top: 0; border-left: 1px solid var(--line); }
+  }
   .situations { display: grid; gap: 16px; }
   @media (min-width: 800px) {
     .situations { grid-template-columns: 1fr 1fr; gap: 20px; }
