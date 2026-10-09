@@ -174,8 +174,13 @@ const priorityImage = siteImage('conferences-priority');
   }
   .conf-hero__bg--image::before {
     background:
-      linear-gradient(90deg, rgba(11, 27, 35, 0.96) 0%, rgba(11, 27, 35, 0.85) 38%, rgba(11, 27, 35, 0.15) 75%),
-      var(--hero-image) center / cover no-repeat;
+      linear-gradient(90deg, rgba(11, 27, 35, 0.97) 0%, rgba(11, 27, 35, 0.86) 42%, rgba(11, 27, 35, 0.2) 80%, rgba(11, 27, 35, 0.05) 100%),
+      var(--hero-image) right center / cover no-repeat;
+  }
+  @media (max-width: 767px) {
+    .conf-hero__bg--image::before {
+      background: linear-gradient(180deg, rgba(11, 27, 35, 0.68) 0%, rgba(11, 27, 35, 0.88) 100%), var(--hero-image) 70% center / cover no-repeat;
+    }
   }
   .conf-hero__inner { position: relative; }
   .conf-hero__eyebrow {

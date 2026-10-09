@@ -241,3 +241,6 @@ input[type='text'], input[type='search'], input[type='email'], input[type='tel']
 @media print {
   .js .reveal { opacity: 1 !important; transform: none !important; }
 }
+
+/* Heroes with a background image: the image carries the artwork, so drop the arcs. */
+.hero--image:not(#_)::after, .conf-hero:has(.conf-hero__bg--image):not(#_)::after { display: none; }

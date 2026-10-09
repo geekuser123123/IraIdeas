@@ -165,8 +165,16 @@ const showVisual = Boolean(p) || hasPanel;
   /* Background photo behind a text-only hero, faded into the dark side */
   .hero--image {
     background:
-      linear-gradient(90deg, rgba(11, 27, 35, 0.97) 0%, rgba(11, 27, 35, 0.88) 40%, rgba(11, 27, 35, 0.2) 75%),
-      var(--hero-image) center / cover no-repeat;
+      linear-gradient(180deg, rgba(0, 40, 42, 0.35) 0%, transparent 30%, transparent 70%, rgba(0, 40, 42, 0.45) 100%),
+      linear-gradient(90deg, rgba(4, 28, 32, 0.97) 0%, rgba(4, 30, 34, 0.86) 42%, rgba(0, 58, 58, 0.25) 80%, rgba(0, 58, 58, 0.1) 100%),
+      var(--hero-image) right center / cover no-repeat;
+  }
+  @media (max-width: 767px) {
+    .hero--image {
+      background:
+        linear-gradient(180deg, rgba(4, 28, 32, 0.68) 0%, rgba(4, 28, 32, 0.86) 100%),
+        var(--hero-image) 70% center / cover no-repeat;
+    }
   }
 
   /* Straight bottom edge */
